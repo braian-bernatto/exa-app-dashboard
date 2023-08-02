@@ -1,12 +1,9 @@
-import { Button } from '@/components/ui/button'
+import AuthForm from '@/components/AuthForm'
 
 export default function Home() {
   return (
     <div className='flex justify-center flex-col gap-2 items-center'>
-      <h1>Hello</h1>{' '}
-      <Button variant='default' size={'sm'}>
-        Button
-      </Button>
+      <AuthForm />
     </div>
   )
 }
