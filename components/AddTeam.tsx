@@ -1,6 +1,5 @@
 'use client'
-import React, { FormEvent, useState } from 'react'
-import { Label } from './ui/label'
+import React, { useState } from 'react'
 import { Input } from './ui/input'
 import PreviewImage from './PreviewImage'
 import { Shield } from 'lucide-react'
@@ -31,22 +30,20 @@ const formSchema = z.object({
   name: z.string().min(2),
   logo: z
     .any()
+    .refine(files => files?.size <= MAX_FILE_SIZE, `Límite de tamaño es 5MB.`)
     .refine(
-      files => files?.[0]?.size <= MAX_FILE_SIZE,
-      `Límite de tamaño es 5MB.`
-    )
-    .refine(
-      files => ACCEPTED_IMAGE_TYPES.includes(files?.[0]?.type),
+      files => ACCEPTED_IMAGE_TYPES.includes(files?.type),
       'Sólo se aceptan los formatos .jpg .jpeg .png .webp'
     )
 })
 
 const AddTeam = () => {
+  const [image, setImage] = useState<any>('')
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       name: '',
-      logo: ''
+      logo: undefined
     }
   })
 
@@ -75,7 +72,7 @@ const AddTeam = () => {
             <FormItem className='rounded bg-white py-3 space-y-2'>
               <FormLabel>Nombre</FormLabel>
               <FormControl className='flex flex-col items-center gap-2'>
-                <Input placeholder='' {...field} />
+                <Input {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -89,8 +86,19 @@ const AddTeam = () => {
           render={({ field }) => (
             <FormItem className='rounded bg-white py-3 space-y-2'>
               <FormLabel>Logo</FormLabel>
-              <FormControl className='flex flex-col items-center gap-2'>
-                <Input placeholder='' type='file' accept='image/*' {...field} />
+              <FormControl>
+                <div className='flex flex-col items-center gap-2'>
+                  <Input
+                    type='file'
+                    accept='image/*'
+                    value={image}
+                    onChange={e => {
+                      setImage(e.target.value)
+                      field.onChange(e.target.files?.[0])
+                    }}
+                  />
+                  <PreviewImage file={field.value} />
+                </div>
               </FormControl>
               <FormMessage />
             </FormItem>
