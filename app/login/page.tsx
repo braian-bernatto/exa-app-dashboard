@@ -1,7 +1,6 @@
 import LoginForm from '@/app/login/components/LoginForm'
-import React from 'react'
 
-const page = () => {
+const LoginPage = () => {
   return (
     <div className='grid sm:grid-cols-2 w-full h-screen'>
       <LoginForm />
@@ -10,4 +9,4 @@ const page = () => {
   )
 }
 
-export default page
+export default LoginPage

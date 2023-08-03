@@ -11,6 +11,7 @@ import {
 } from '@/components/ui/dropdown-menu'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Github, LifeBuoy, LogOut, User } from 'lucide-react'
+import Link from 'next/link'
 
 const Navbar = () => {
   const { user, signOut } = useAuth()
@@ -19,8 +20,9 @@ const Navbar = () => {
       {/* Container */}
       <div className='flex items-center justify-between w-full py-6 mx-auto max-w-7xl'>
         {/* Logo */}
-        <div className='text-lg font-bold'>EXA APP</div>
-
+        <Link href={'/'}>
+          <div className='text-lg font-bold'>EXA APP</div>
+        </Link>
         {/* Avatar */}
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
@@ -32,7 +34,9 @@ const Navbar = () => {
                     : 'https://github.com/shadcn.png'
                 }
               />
-              <AvatarFallback>{user?.username}</AvatarFallback>
+              <AvatarFallback className='w-full h-full flex justify-center items-center'>
+                <User className='w-6 h-6' />
+              </AvatarFallback>
             </Avatar>
           </DropdownMenuTrigger>
           <DropdownMenuContent>

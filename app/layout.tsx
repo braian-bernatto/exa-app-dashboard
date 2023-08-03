@@ -1,4 +1,3 @@
-import 'server-only'
 import SupabaseProvider from '@/providers/SupabaseProvider'
 import './globals.css'
 import type { Metadata } from 'next'
@@ -13,6 +12,8 @@ export const metadata: Metadata = {
   description:
     'Gestiona tus equipos y resultados para replicarlos en el Exa App!'
 }
+
+export const dynamic = 'force-dynamic'
 
 export default async function RootLayout({
   children

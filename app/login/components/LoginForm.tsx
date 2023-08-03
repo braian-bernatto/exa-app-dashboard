@@ -14,6 +14,7 @@ const LoginForm = () => {
   const [password, setPassword] = useState<string>('')
   const [error, setError] = useState<string | null>(null)
   const { signInWithEmail, user } = useAuth()
+  const [isClient, setIsClient] = useState(false)
   const router = useRouter()
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -31,56 +32,61 @@ const LoginForm = () => {
 
   // Check if there is a user
   useEffect(() => {
+    setIsClient(true)
     if (user) {
       router.push('/')
     }
   }, [user])
 
   return (
-    <div className='flex items-center justify-center w-full h-full px-8 pb-8'>
-      <div className='w-full max-w-lg'>
-        {/* Text */}
-        <div>
-          <h1 className='text-4xl font-bold'>Iniciar Sesión</h1>
-          <p className='mt-2 text-neutral-600'>
-            Bienvenido a{' '}
-            <strong className='font-semibold text-neutral-800'>Exa App</strong>.
-            Ingresa tu dirección de correo y usuario.
-          </p>
-        </div>
-
-        {/* Separator */}
-        <div className='flex justify-center items-center my-8'>
-          <Separator />
-        </div>
-
-        {/* Form */}
-        <form onSubmit={handleSubmit}>
-          {/* Inputs container */}
-          <div className='space-y-6'>
-            <div className='space-y-2'>
-              <Label>Correo</Label>
-              <Input value={email} onChange={e => setEmail(e.target.value)} />
-            </div>
-            <div className='space-y-2'>
-              <Label>Contraseña</Label>
-              <Input
-                value={password}
-                type='password'
-                onChange={e => setPassword(e.target.value)}
-              />
-            </div>
+    isClient && (
+      <div className='flex items-center justify-center w-full h-full px-8 pb-8'>
+        <div className='w-full max-w-lg'>
+          {/* Text */}
+          <div>
+            <h1 className='text-4xl font-bold'>Iniciar Sesión</h1>
+            <p className='mt-2 text-neutral-600'>
+              Bienvenido a{' '}
+              <strong className='font-semibold text-neutral-800'>
+                Exa App
+              </strong>
+              . Ingresa tu dirección de correo y usuario.
+            </p>
           </div>
 
-          {/* Error */}
-          {error && <p className='mt-4 text-red-500'>{error}</p>}
+          {/* Separator */}
+          <div className='flex justify-center items-center my-8'>
+            <Separator />
+          </div>
 
-          <Button className='flex items-center gap-2 mt-6 w-full'>
-            Iniciar Sesión <Mail size={16} />
-          </Button>
-        </form>
+          {/* Form */}
+          <form onSubmit={handleSubmit}>
+            {/* Inputs container */}
+            <div className='space-y-6'>
+              <div className='space-y-2'>
+                <Label>Correo</Label>
+                <Input value={email} onChange={e => setEmail(e.target.value)} />
+              </div>
+              <div className='space-y-2'>
+                <Label>Contraseña</Label>
+                <Input
+                  value={password}
+                  type='password'
+                  onChange={e => setPassword(e.target.value)}
+                />
+              </div>
+            </div>
+
+            {/* Error */}
+            {error && <div className='mt-4 text-red-500'>{error}</div>}
+
+            <Button className='flex items-center gap-2 mt-6 w-full'>
+              Iniciar Sesión <Mail size={16} />
+            </Button>
+          </form>
+        </div>
       </div>
-    </div>
+    )
   )
 }
 
