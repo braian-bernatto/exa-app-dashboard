@@ -10,14 +10,7 @@ import {
   DropdownMenuTrigger
 } from '@/components/ui/dropdown-menu'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
-import {
-  CreditCard,
-  Github,
-  LifeBuoy,
-  LogOut,
-  Settings,
-  User
-} from 'lucide-react'
+import { Github, LifeBuoy, LogOut, User } from 'lucide-react'
 
 const Navbar = () => {
   const { user, signOut } = useAuth()
@@ -26,7 +19,7 @@ const Navbar = () => {
       {/* Container */}
       <div className='flex items-center justify-between w-full py-6 mx-auto max-w-7xl'>
         {/* Logo */}
-        <div className='text-lg font-bold'>LOGO</div>
+        <div className='text-lg font-bold'>EXA APP</div>
 
         {/* Avatar */}
         <DropdownMenu>

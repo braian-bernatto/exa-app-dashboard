@@ -37,7 +37,7 @@ const LoginForm = () => {
   }, [user])
 
   return (
-    <div className='flex items-center justify-center w-full h-full px-8'>
+    <div className='flex items-center justify-center w-full h-full px-8 pb-8'>
       <div className='w-full max-w-lg'>
         {/* Text */}
         <div>
@@ -51,7 +51,7 @@ const LoginForm = () => {
 
         {/* Separator */}
         <div className='flex justify-center items-center my-8'>
-          <Separator /> <span className='mx-6'>OR</span> <Separator />
+          <Separator />
         </div>
 
         {/* Form */}
