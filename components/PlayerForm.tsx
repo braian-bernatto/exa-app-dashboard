@@ -2,7 +2,7 @@
 import React, { useState } from 'react'
 import { Input } from './ui/input'
 import PreviewImage from './PreviewImage'
-import { Shield } from 'lucide-react'
+import { UserPlus } from 'lucide-react'
 import { Button } from './ui/button'
 
 import { useForm } from 'react-hook-form'
@@ -16,6 +16,7 @@ import {
   FormLabel,
   FormMessage
 } from '@/components/ui/form'
+import { Separator } from '@/components/ui/separator'
 
 const MAX_FILE_SIZE = 500000
 const ACCEPTED_IMAGE_TYPES = [
@@ -26,8 +27,9 @@ const ACCEPTED_IMAGE_TYPES = [
 ]
 
 const formSchema = z.object({
-  name: z.string().min(2),
-  logo: z
+  name: z.string().min(1, { message: 'Obligatorio' }),
+  team: z.coerce.number({ invalid_type_error: 'Ingrese un número' }),
+  image: z
     .any()
     .refine(files => files?.size <= MAX_FILE_SIZE, `Límite de tamaño es 5MB.`)
     .refine(
@@ -35,104 +37,55 @@ const formSchema = z.object({
       'Sólo se aceptan los formatos .jpg .jpeg .png .webp'
     )
     .optional(),
-  partidosJugados: z.coerce.number(),
-  ganados: z.coerce.number(),
-  empatados: z.coerce.number(),
-  perdidos: z.coerce.number(),
-  golesFavor: z.coerce.number(),
-  golesContra: z.coerce.number()
-})
-z.object({
-  name: z.string().min(2),
-  image: z
-    .any()
-    .refine(files => files?.size <= MAX_FILE_SIZE, `Límite de tamaño es 5MB.`)
-    .refine(
-      files => ACCEPTED_IMAGE_TYPES.includes(files?.type),
-      'Sólo se aceptan los formatos .jpg .jpeg .png .webp'
-    ),
-  country: z.string(),
+  country: z.string().optional(),
   position: z.string(),
-  team: z.number(),
-  foot: z.string(),
+  rating: z.number().optional(),
+  foot: z.string().optional(),
   attributes: z.object({
-    rit: z.number(),
-    tir: z.number(),
-    pas: z.number(),
-    reg: z.number(),
-    def: z.number(),
-    fís: z.number()
+    rit: z.number().optional(),
+    tir: z.number().optional(),
+    pas: z.number().optional(),
+    reg: z.number().optional(),
+    def: z.number().optional(),
+    fís: z.number().optional()
   }),
   statistics: z.object({
-    goals: z.number(),
-    yellowCards: z.number(),
-    redCards: z.number()
+    goals: z.number({ required_error: 'Obligatorio' }),
+    yellowCards: z.number({ required_error: 'Obligatorio' }),
+    redCards: z.number({ required_error: 'Obligatorio' })
   })
 })
-  .refine(
-    val => {
-      if (val.ganados <= val.partidosJugados) return true
-    },
-    {
-      message: 'Partidos Ganados no puede ser mayor que los Partidos Jugados',
-      path: ['ganados']
-    }
-  )
-  .refine(
-    val => {
-      if (val.empatados <= val.partidosJugados) return true
-    },
-    {
-      message: 'Partidos Empatados no puede ser mayor que los Partidos Jugados',
-      path: ['empatados']
-    }
-  )
-  .refine(
-    val => {
-      if (val.perdidos <= val.partidosJugados) return true
-    },
-    {
-      message: 'Partidos Perdidos no puede ser mayor que los Partidos Jugados',
-      path: ['perdidos']
-    }
-  )
-  .refine(
-    val => {
-      if (val.ganados + val.perdidos + val.empatados === val.partidosJugados)
-        return true
-    },
-    {
-      message:
-        'Partidos Jugados no coincide con la suma de Ganados + Empatados + Perdidos',
-      path: ['partidosJugados']
-    }
-  )
 
 const PlayerForm = () => {
   const [image, setImage] = useState<any>('')
-  const [diferencia, setDiferencia] = useState<number | undefined>(undefined)
-  const [puntos, setPuntos] = useState<number | undefined>(undefined)
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       name: '',
-      logo: undefined,
-      partidosJugados: undefined,
-      ganados: undefined,
-      empatados: undefined,
-      perdidos: undefined,
-      golesFavor: undefined,
-      golesContra: undefined
+      team: undefined,
+      image: undefined,
+      country: undefined,
+      position: undefined,
+      rating: undefined,
+      foot: undefined,
+      attributes: {
+        rit: undefined,
+        tir: undefined,
+        pas: undefined,
+        reg: undefined,
+        def: undefined,
+        fís: undefined
+      },
+      statistics: {
+        goals: 0,
+        yellowCards: 0,
+        redCards: 0
+      }
     }
   })
 
   function onSubmit(values: z.infer<typeof formSchema>) {
     console.log(values)
-  }
-
-  function calculatePoints(values: z.infer<typeof formSchema>) {
-    setDiferencia(values.golesFavor - values.golesContra)
-    setPuntos(values.ganados * 3 + +values.empatados)
   }
 
   return (
@@ -143,10 +96,10 @@ const PlayerForm = () => {
       >
         <div className='flex gap-2'>
           <span className='bg-gradient-to-r from-emerald-300 to-emerald-700 rounded-full p-2 flex items-center justify-center'>
-            <Shield className='text-white' size={30} />
+            <UserPlus className='text-white' size={30} />
           </span>
           <h1 className='text-xl font-semibold flex items-center gap-2'>
-            Agregar Equipo
+            Agregar Jugador
           </h1>
         </div>
         {/* Name */}
@@ -163,13 +116,27 @@ const PlayerForm = () => {
             </FormItem>
           )}
         />
-        {/* Logo */}
+        {/* Team */}
         <FormField
           control={form.control}
-          name='logo'
+          name='team'
           render={({ field }) => (
             <FormItem className='rounded bg-white'>
-              <FormLabel>Logo</FormLabel>
+              <FormLabel>Equipo</FormLabel>
+              <FormControl>
+                <Input {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        {/* Image */}
+        <FormField
+          control={form.control}
+          name='image'
+          render={({ field }) => (
+            <FormItem className='rounded bg-white'>
+              <FormLabel>Imagen</FormLabel>
               <FormControl>
                 <div className='flex flex-col items-center gap-2'>
                   <Input
@@ -188,158 +155,160 @@ const PlayerForm = () => {
             </FormItem>
           )}
         />
+
         <div className='grid grid-cols-2 gap-2'>
-          {/* partidosJugados */}
-          <FormField
-            control={form.control}
-            name='partidosJugados'
-            render={({ field }) => (
-              <FormItem className='rounded bg-white'>
-                <FormLabel>Partidos Jugados</FormLabel>
-                <FormControl>
-                  <Input type='number' {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          {/* ganados */}
-          <FormField
-            control={form.control}
-            name='ganados'
-            render={({ field }) => (
-              <FormItem className='rounded bg-white'>
-                <FormLabel>Ganados</FormLabel>
-                <FormControl>
-                  <Input
-                    type='number'
-                    {...field}
-                    onChange={e => {
-                      field.onChange(e.target.value)
-                      calculatePoints(form.getValues())
-                    }}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          {/* empatados */}
-          <FormField
-            control={form.control}
-            name='empatados'
-            render={({ field }) => (
-              <FormItem className='rounded bg-white'>
-                <FormLabel>Empatados</FormLabel>
-                <FormControl>
-                  <Input
-                    type='number'
-                    {...field}
-                    onChange={e => {
-                      field.onChange(e.target.value)
-                      calculatePoints(form.getValues())
-                    }}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          {/* perdidos */}
-          <FormField
-            control={form.control}
-            name='perdidos'
-            render={({ field }) => (
-              <FormItem className='rounded bg-white'>
-                <FormLabel>Perdidos</FormLabel>
-                <FormControl>
-                  <Input
-                    type='number'
-                    {...field}
-                    onChange={e => {
-                      field.onChange(e.target.value)
-                      calculatePoints(form.getValues())
-                    }}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          {/* golesFavor */}
-          <FormField
-            control={form.control}
-            name='golesFavor'
-            render={({ field }) => (
-              <FormItem className='rounded bg-white'>
-                <FormLabel>Goles a favor</FormLabel>
-                <FormControl>
-                  <Input
-                    type='number'
-                    {...field}
-                    onChange={e => {
-                      field.onChange(e.target.value)
-                      calculatePoints(form.getValues())
-                    }}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          {/* golesContra */}
-          <FormField
-            control={form.control}
-            name='golesContra'
-            render={({ field }) => (
-              <FormItem className='rounded bg-white'>
-                <FormLabel>Goles en contra</FormLabel>
-                <FormControl>
-                  <Input
-                    type='number'
-                    {...field}
-                    onChange={e => {
-                      field.onChange(e.target.value)
-                      calculatePoints(form.getValues())
-                    }}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <div className='mt-2 flex flex-col border rounded overflow-hidden'>
-            <label
-              htmlFor='diferencia'
-              className='bg-neutral-400 text-center text-white'
-            >
-              Diferencia
-            </label>
-            <Input
-              type='number'
-              className={`text-2xl font-semibold border-none text-center appearance-none ${
-                diferencia! < 0 ? 'text-pink-800' : 'text-emerald-800'
-              }`}
-              id='diferencia'
-              value={diferencia}
-              disabled
-            />
+          <div className='col-span-2 flex justify-center items-center gap-2 overflow-hidden text-xs text-neutral-400'>
+            <Separator />
+            Estadísticas
+            <Separator />
           </div>
-          <div className='mt-2 flex flex-col border rounded overflow-hidden'>
-            <label
-              htmlFor='puntos'
-              className='bg-neutral-400 text-center text-white'
-            >
-              Puntos
-            </label>
-            <Input
-              type='number'
-              className={`text-2xl font-semibold border-none text-center appearance-none`}
-              id='puntos'
-              value={puntos}
-              disabled
-            />
+          {/* goals */}
+          <FormField
+            control={form.control}
+            name='statistics.goals'
+            render={({ field }) => (
+              <FormItem className='rounded bg-white'>
+                <FormLabel>Goles</FormLabel>
+                <FormControl>
+                  <Input type='number' min={0} {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          {/* yellowCards */}
+          <FormField
+            control={form.control}
+            name='statistics.yellowCards'
+            render={({ field }) => (
+              <FormItem className='rounded bg-white'>
+                <FormLabel>Tarjetas Amarillas</FormLabel>
+                <FormControl>
+                  <Input type='number' min={0} {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          {/* redCards */}
+          <FormField
+            control={form.control}
+            name='statistics.redCards'
+            render={({ field }) => (
+              <FormItem className='rounded bg-white'>
+                <FormLabel>Tarjetas Rojas</FormLabel>
+                <FormControl>
+                  <Input type='number' min={0} {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          {/* Rating */}
+          <FormField
+            control={form.control}
+            name='rating'
+            render={({ field }) => (
+              <FormItem className='rounded bg-white'>
+                <FormLabel>Rating</FormLabel>
+                <FormControl>
+                  <Input type='number' min={0} {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        </div>
+        <div className='grid grid-cols-2 gap-2'>
+          <div className='col-span-2 flex justify-center items-center gap-2 overflow-hidden text-xs text-neutral-400'>
+            <Separator />
+            Atributos
+            <Separator />
           </div>
+          {/* rit */}
+          <FormField
+            control={form.control}
+            name='attributes.rit'
+            render={({ field }) => (
+              <FormItem className='rounded bg-white'>
+                <FormLabel>Ritmo</FormLabel>
+                <FormControl>
+                  <Input type='number' min={0} {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          {/* tir */}
+          <FormField
+            control={form.control}
+            name='attributes.tir'
+            render={({ field }) => (
+              <FormItem className='rounded bg-white'>
+                <FormLabel>Tiro</FormLabel>
+                <FormControl>
+                  <Input type='number' min={0} {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          {/* pas */}
+          <FormField
+            control={form.control}
+            name='attributes.pas'
+            render={({ field }) => (
+              <FormItem className='rounded bg-white'>
+                <FormLabel>Pase</FormLabel>
+                <FormControl>
+                  <Input type='number' min={0} {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          {/* reg */}
+          <FormField
+            control={form.control}
+            name='attributes.reg'
+            render={({ field }) => (
+              <FormItem className='rounded bg-white'>
+                <FormLabel>Regate</FormLabel>
+                <FormControl>
+                  <Input type='number' min={0} {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          {/* def */}
+          <FormField
+            control={form.control}
+            name='attributes.def'
+            render={({ field }) => (
+              <FormItem className='rounded bg-white'>
+                <FormLabel>Defensa</FormLabel>
+                <FormControl>
+                  <Input type='number' min={0} {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          {/* fís */}
+          <FormField
+            control={form.control}
+            name='attributes.fís'
+            render={({ field }) => (
+              <FormItem className='rounded bg-white'>
+                <FormLabel>Físico</FormLabel>
+                <FormControl>
+                  <Input type='number' min={0} {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
         </div>
         <div className='w-full'>
           <Button type='submit' variant={'default'} className='w-full'>

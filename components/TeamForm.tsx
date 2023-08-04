@@ -27,7 +27,7 @@ const ACCEPTED_IMAGE_TYPES = [
 
 const formSchema = z
   .object({
-    name: z.string().min(1, { message: 'Campo obligatorio' }),
+    name: z.string().min(1, { message: 'Obligatorio' }),
     logo: z
       .any()
       .refine(files => files?.size <= MAX_FILE_SIZE, `Límite de tamaño es 5MB.`)
