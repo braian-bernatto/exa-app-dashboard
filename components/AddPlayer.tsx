@@ -28,22 +28,39 @@ const ACCEPTED_IMAGE_TYPES = [
 
 const formSchema = z.object({
   name: z.string().min(2),
-  logo: z
+  image: z
     .any()
     .refine(files => files?.size <= MAX_FILE_SIZE, `Límite de tamaño es 5MB.`)
     .refine(
       files => ACCEPTED_IMAGE_TYPES.includes(files?.type),
       'Sólo se aceptan los formatos .jpg .jpeg .png .webp'
-    )
+    ),
+  country: z.string(),
+  position: z.string(),
+  team: z.number(),
+  foot: z.string(),
+  attributes: z.object({
+    rit: z.number(),
+    tir: z.number(),
+    pas: z.number(),
+    reg: z.number(),
+    def: z.number(),
+    fís: z.number()
+  }),
+  statistics: z.object({
+    goals: z.number(),
+    yellowCards: z.number(),
+    redCards: z.number()
+  })
 })
 
-const AddTeam = () => {
+const AddPlayer = () => {
   const [image, setImage] = useState<any>('')
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       name: '',
-      logo: undefined
+      image: undefined
     }
   })
 
@@ -79,13 +96,13 @@ const AddTeam = () => {
           )}
         />
         <Separator />
-        {/* Logo */}
+        {/* image */}
         <FormField
           control={form.control}
-          name='logo'
+          name='image'
           render={({ field }) => (
             <FormItem className='rounded bg-white py-3 space-y-2'>
-              <FormLabel>Logo</FormLabel>
+              <FormLabel>image</FormLabel>
               <FormControl>
                 <div className='flex flex-col items-center gap-2'>
                   <Input
@@ -114,4 +131,4 @@ const AddTeam = () => {
   )
 }
 
-export default AddTeam
+export default AddPlayer
