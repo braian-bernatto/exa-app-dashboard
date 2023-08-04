@@ -3,7 +3,6 @@ import React, { useState } from 'react'
 import { Input } from './ui/input'
 import PreviewImage from './PreviewImage'
 import { Shield } from 'lucide-react'
-import { Separator } from './ui/separator'
 import { Button } from './ui/button'
 
 import { useForm } from 'react-hook-form'
@@ -42,8 +41,6 @@ const formSchema = z
     perdidos: z.coerce.number(),
     golesFavor: z.coerce.number(),
     golesContra: z.coerce.number()
-    // diferencia: z.number(),
-    // puntos: z.number()
   })
   .refine(
     val => {
@@ -72,9 +69,22 @@ const formSchema = z
       path: ['perdidos']
     }
   )
+  .refine(
+    val => {
+      if (val.ganados + val.perdidos + val.empatados === val.partidosJugados)
+        return true
+    },
+    {
+      message:
+        'Partidos Jugados no coincide con la suma de Ganados + Empatados + Perdidos',
+      path: ['partidosJugados']
+    }
+  )
 
 const AddTeam = () => {
   const [image, setImage] = useState<any>('')
+  const [diferencia, setDiferencia] = useState<number | undefined>(undefined)
+  const [puntos, setPuntos] = useState<number | undefined>(undefined)
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -90,8 +100,18 @@ const AddTeam = () => {
   })
 
   function onSubmit(values: z.infer<typeof formSchema>) {
-    console.log(values)
+    const diferencia = values.golesFavor - values.golesContra
+    const puntos = values.ganados * 3 + values.empatados
+    const finalValues = { ...values, diferencia, puntos }
+    console.log(finalValues)
   }
+
+  function calculatePoints(values: z.infer<typeof formSchema>) {
+    setDiferencia(values.golesFavor - values.golesContra)
+    setPuntos(values.ganados * 3 + +values.empatados)
+    console.log({ puntos, diferencia })
+  }
+
   return (
     <Form {...form}>
       <form
@@ -168,7 +188,14 @@ const AddTeam = () => {
               <FormItem className='rounded bg-white'>
                 <FormLabel>Ganados</FormLabel>
                 <FormControl>
-                  <Input type='number' {...field} />
+                  <Input
+                    type='number'
+                    {...field}
+                    onChange={e => {
+                      field.onChange(e.target.value)
+                      calculatePoints(form.getValues())
+                    }}
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -182,7 +209,14 @@ const AddTeam = () => {
               <FormItem className='rounded bg-white'>
                 <FormLabel>Empatados</FormLabel>
                 <FormControl>
-                  <Input type='number' {...field} />
+                  <Input
+                    type='number'
+                    {...field}
+                    onChange={e => {
+                      field.onChange(e.target.value)
+                      calculatePoints(form.getValues())
+                    }}
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -196,7 +230,14 @@ const AddTeam = () => {
               <FormItem className='rounded bg-white'>
                 <FormLabel>Perdidos</FormLabel>
                 <FormControl>
-                  <Input type='number' {...field} />
+                  <Input
+                    type='number'
+                    {...field}
+                    onChange={e => {
+                      field.onChange(e.target.value)
+                      calculatePoints(form.getValues())
+                    }}
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -210,7 +251,14 @@ const AddTeam = () => {
               <FormItem className='rounded bg-white'>
                 <FormLabel>Goles a favor</FormLabel>
                 <FormControl>
-                  <Input type='number' {...field} />
+                  <Input
+                    type='number'
+                    {...field}
+                    onChange={e => {
+                      field.onChange(e.target.value)
+                      calculatePoints(form.getValues())
+                    }}
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -224,12 +272,51 @@ const AddTeam = () => {
               <FormItem className='rounded bg-white'>
                 <FormLabel>Goles en contra</FormLabel>
                 <FormControl>
-                  <Input type='number' {...field} />
+                  <Input
+                    type='number'
+                    {...field}
+                    onChange={e => {
+                      field.onChange(e.target.value)
+                      calculatePoints(form.getValues())
+                    }}
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>
             )}
           />
+          <div className='mt-2 flex flex-col border rounded overflow-hidden'>
+            <label
+              htmlFor='diferencia'
+              className='bg-neutral-400 text-center text-white'
+            >
+              Diferencia
+            </label>
+            <Input
+              type='number'
+              className={`text-2xl font-semibold border-none text-center appearance-none ${
+                diferencia! < 0 ? 'text-pink-800' : 'text-emerald-800'
+              }`}
+              id='diferencia'
+              value={diferencia}
+              disabled
+            />
+          </div>
+          <div className='mt-2 flex flex-col border rounded overflow-hidden'>
+            <label
+              htmlFor='puntos'
+              className='bg-neutral-400 text-center text-white'
+            >
+              Puntos
+            </label>
+            <Input
+              type='number'
+              className={`text-2xl font-semibold border-none text-center appearance-none`}
+              id='puntos'
+              value={puntos}
+              disabled
+            />
+          </div>
         </div>
         <div className='w-full'>
           <Button type='submit' variant={'default'} className='w-full'>
