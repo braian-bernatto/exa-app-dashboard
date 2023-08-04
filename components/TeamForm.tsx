@@ -27,7 +27,7 @@ const ACCEPTED_IMAGE_TYPES = [
 
 const formSchema = z
   .object({
-    name: z.string().min(2),
+    name: z.string().min(1, { message: 'Campo obligatorio' }),
     logo: z
       .any()
       .refine(files => files?.size <= MAX_FILE_SIZE, `Límite de tamaño es 5MB.`)
@@ -36,12 +36,24 @@ const formSchema = z
         'Sólo se aceptan los formatos .jpg .jpeg .png .webp'
       )
       .optional(),
-    partidosJugados: z.coerce.number(),
-    ganados: z.coerce.number(),
-    empatados: z.coerce.number(),
-    perdidos: z.coerce.number(),
-    golesFavor: z.coerce.number(),
-    golesContra: z.coerce.number()
+    partidosJugados: z.coerce
+      .number({ invalid_type_error: 'Ingrese un número' })
+      .refine(n => n > -1, { message: 'No debe ser menor a cero' }),
+    ganados: z.coerce
+      .number({ invalid_type_error: 'Ingrese un número' })
+      .refine(n => n > -1, { message: 'No debe ser menor a cero' }),
+    empatados: z.coerce
+      .number({ invalid_type_error: 'Ingrese un número' })
+      .refine(n => n > -1, { message: 'No debe ser menor a cero' }),
+    perdidos: z.coerce
+      .number({ invalid_type_error: 'Ingrese un número' })
+      .refine(n => n > -1, { message: 'No debe ser menor a cero' }),
+    golesFavor: z.coerce
+      .number({ invalid_type_error: 'Ingrese un número' })
+      .refine(n => n > -1, { message: 'No debe ser menor a cero' }),
+    golesContra: z.coerce
+      .number({ invalid_type_error: 'Ingrese un número' })
+      .refine(n => n > -1, { message: 'No debe ser menor a cero' })
   })
   .refine(
     val => {
@@ -82,7 +94,7 @@ const formSchema = z
     }
   )
 
-const AddTeam = () => {
+const TeamForm = () => {
   const [image, setImage] = useState<any>('')
   const [diferencia, setDiferencia] = useState<number | undefined>(undefined)
   const [puntos, setPuntos] = useState<number | undefined>(undefined)
@@ -91,12 +103,12 @@ const AddTeam = () => {
     defaultValues: {
       name: '',
       logo: undefined,
-      partidosJugados: undefined,
-      ganados: undefined,
-      empatados: undefined,
-      perdidos: undefined,
-      golesFavor: undefined,
-      golesContra: undefined
+      partidosJugados: 0,
+      ganados: 0,
+      empatados: 0,
+      perdidos: 0,
+      golesFavor: 0,
+      golesContra: 0
     }
   })
 
@@ -171,7 +183,7 @@ const AddTeam = () => {
               <FormItem className='rounded bg-white'>
                 <FormLabel>Partidos Jugados</FormLabel>
                 <FormControl>
-                  <Input type='number' {...field} />
+                  <Input type='number' min={0} {...field} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -325,4 +337,4 @@ const AddTeam = () => {
   )
 }
 
-export default AddTeam
+export default TeamForm
