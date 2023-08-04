@@ -34,7 +34,8 @@ const formSchema = z
       .refine(
         files => ACCEPTED_IMAGE_TYPES.includes(files?.type),
         'Sólo se aceptan los formatos .jpg .jpeg .png .webp'
-      ),
+      )
+      .optional(),
     partidosJugados: z.coerce.number(),
     ganados: z.coerce.number(),
     empatados: z.coerce.number(),
@@ -100,16 +101,12 @@ const AddTeam = () => {
   })
 
   function onSubmit(values: z.infer<typeof formSchema>) {
-    const diferencia = values.golesFavor - values.golesContra
-    const puntos = values.ganados * 3 + values.empatados
-    const finalValues = { ...values, diferencia, puntos }
-    console.log(finalValues)
+    console.log(values)
   }
 
   function calculatePoints(values: z.infer<typeof formSchema>) {
     setDiferencia(values.golesFavor - values.golesContra)
     setPuntos(values.ganados * 3 + +values.empatados)
-    console.log({ puntos, diferencia })
   }
 
   return (
