@@ -178,7 +178,6 @@ const PlayerForm = ({ countries }: PlayerFormlProps) => {
             </FormItem>
           )}
         />
-
         {/* Country */}
         <FormField
           control={form.control}
@@ -208,12 +207,12 @@ const PlayerForm = ({ countries }: PlayerFormlProps) => {
                 </PopoverTrigger>
                 <PopoverContent className='w-[200px] p-0'>
                   <Command>
-                    <CommandInput placeholder='Search framework...' />
+                    <CommandInput placeholder='Buscador de paises...' />
                     <CommandEmpty>No hay coincidencias.</CommandEmpty>
                     <CommandGroup>
                       {countries.map(country => (
                         <CommandItem
-                          value={country.iso2}
+                          value={country.name!}
                           key={country.id}
                           onSelect={() => {
                             form.setValue('country', country.iso2)
