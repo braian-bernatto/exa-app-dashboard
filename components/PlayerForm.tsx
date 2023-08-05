@@ -16,7 +16,26 @@ import {
   FormLabel,
   FormMessage
 } from '@/components/ui/form'
+import { Label } from '@/components/ui/label'
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
+
 import { Separator } from '@/components/ui/separator'
+import { Countries } from '@/types'
+
+import { Check, ChevronsUpDown } from 'lucide-react'
+import { cn } from '@/lib/utils'
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem
+} from '@/components/ui/command'
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger
+} from '@/components/ui/popover'
 
 const MAX_FILE_SIZE = 500000
 const ACCEPTED_IMAGE_TYPES = [
@@ -56,7 +75,11 @@ const formSchema = z.object({
   })
 })
 
-const PlayerForm = () => {
+interface PlayerFormlProps {
+  countries: Countries[]
+}
+
+const PlayerForm = ({ countries }: PlayerFormlProps) => {
   const [image, setImage] = useState<any>('')
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -155,6 +178,82 @@ const PlayerForm = () => {
             </FormItem>
           )}
         />
+
+        {/* Country */}
+        <FormField
+          control={form.control}
+          name='country'
+          render={({ field }) => (
+            <FormItem className='flex flex-col'>
+              <FormLabel>Nacionalidad</FormLabel>
+              <Popover>
+                <PopoverTrigger asChild>
+                  <FormControl>
+                    <Button
+                      variant='outline'
+                      role='combobox'
+                      className={cn(
+                        'w-[200px] justify-between',
+                        !field.value && 'text-muted-foreground'
+                      )}
+                    >
+                      {field.value
+                        ? countries.find(
+                            country => country.iso2 === field.value
+                          )?.name
+                        : 'Elige un país'}
+                      <ChevronsUpDown className='ml-2 h-4 w-4 shrink-0 opacity-50' />
+                    </Button>
+                  </FormControl>
+                </PopoverTrigger>
+                <PopoverContent className='w-[200px] p-0'>
+                  <Command>
+                    <CommandInput placeholder='Search framework...' />
+                    <CommandEmpty>No hay coincidencias.</CommandEmpty>
+                    <CommandGroup>
+                      {countries.map(country => (
+                        <CommandItem
+                          value={country.iso2}
+                          key={country.id}
+                          onSelect={() => {
+                            form.setValue('country', country.iso2)
+                          }}
+                        >
+                          <Check
+                            className={cn(
+                              'mr-2 h-4 w-4',
+                              country.iso2 === field.value
+                                ? 'opacity-100'
+                                : 'opacity-0'
+                            )}
+                          />
+                          {country.name}
+                        </CommandItem>
+                      ))}
+                    </CommandGroup>
+                  </Command>
+                </PopoverContent>
+              </Popover>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        {/* Foot */}
+        <RadioGroup defaultValue='derecho' className='flex flex-wrap'>
+          <div className='flex items-center space-x-2'>
+            <RadioGroupItem value='derecho' id='derecho' />
+            <Label htmlFor='derecho'>Derecho</Label>
+          </div>
+          <div className='flex items-center space-x-2'>
+            <RadioGroupItem value='izquierdo' id='izquierdo' />
+            <Label htmlFor='izquierdo'>Izquierdo</Label>
+          </div>
+          <div className='flex items-center space-x-2'>
+            <RadioGroupItem value='ambidiestro' id='ambidiestro' />
+            <Label htmlFor='ambidiestro'>Ambidiestro</Label>
+          </div>
+        </RadioGroup>
 
         <div className='grid grid-cols-2 gap-2'>
           <div className='col-span-2 flex justify-center items-center gap-2 overflow-hidden text-xs text-neutral-400'>
