@@ -58,20 +58,20 @@ const formSchema = z.object({
     .optional(),
   country: z.string().optional(),
   position: z.string(),
-  rating: z.number().optional(),
+  rating: z.coerce.number().optional(),
   foot: z.string().optional(),
   attributes: z.object({
-    rit: z.number().optional(),
-    tir: z.number().optional(),
-    pas: z.number().optional(),
-    reg: z.number().optional(),
-    def: z.number().optional(),
-    fís: z.number().optional()
+    rit: z.coerce.number().optional(),
+    tir: z.coerce.number().optional(),
+    pas: z.coerce.number().optional(),
+    reg: z.coerce.number().optional(),
+    def: z.coerce.number().optional(),
+    fís: z.coerce.number().optional()
   }),
   statistics: z.object({
-    goals: z.number({ required_error: 'Obligatorio' }),
-    yellowCards: z.number({ required_error: 'Obligatorio' }),
-    redCards: z.number({ required_error: 'Obligatorio' })
+    goals: z.coerce.number({ required_error: 'Obligatorio' }),
+    yellowCards: z.coerce.number({ required_error: 'Obligatorio' }),
+    redCards: z.coerce.number({ required_error: 'Obligatorio' })
   })
 })
 
@@ -147,7 +147,7 @@ const PlayerForm = ({ countries }: PlayerFormlProps) => {
             <FormItem className='rounded bg-white'>
               <FormLabel>Equipo</FormLabel>
               <FormControl>
-                <Input {...field} />
+                <Input type='number' min={0} {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
