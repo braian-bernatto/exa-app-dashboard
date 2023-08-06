@@ -2,7 +2,7 @@
 import React, { useState } from 'react'
 import { Input } from './ui/input'
 import PreviewImage from './PreviewImage'
-import { UserPlus } from 'lucide-react'
+import { Shield, UserPlus } from 'lucide-react'
 import { Button } from './ui/button'
 
 import { useForm } from 'react-hook-form'
@@ -20,7 +20,7 @@ import { Label } from '@/components/ui/label'
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
 
 import { Separator } from '@/components/ui/separator'
-import { Countries } from '@/types'
+import { Countries, Positions, Teams } from '@/types'
 
 import { Check, ChevronsUpDown } from 'lucide-react'
 import { cn } from '@/lib/utils'
@@ -36,6 +36,8 @@ import {
   PopoverContent,
   PopoverTrigger
 } from '@/components/ui/popover'
+import Image from 'next/image'
+import useLoadImage from '@/hooks/useLoadImage'
 
 const MAX_FILE_SIZE = 500000
 const ACCEPTED_IMAGE_TYPES = [
@@ -57,7 +59,7 @@ const formSchema = z.object({
     )
     .optional(),
   country: z.string().optional(),
-  position: z.string(),
+  position: z.string().optional(),
   rating: z.coerce.number().optional(),
   foot: z.string().optional(),
   attributes: z.object({
@@ -76,10 +78,12 @@ const formSchema = z.object({
 })
 
 interface PlayerFormlProps {
+  teams: Teams[]
+  positions: Positions[]
   countries: Countries[]
 }
 
-const PlayerForm = ({ countries }: PlayerFormlProps) => {
+const PlayerForm = ({ teams, positions, countries }: PlayerFormlProps) => {
   const [image, setImage] = useState<any>('')
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -144,11 +148,67 @@ const PlayerForm = ({ countries }: PlayerFormlProps) => {
           control={form.control}
           name='team'
           render={({ field }) => (
-            <FormItem className='rounded bg-white'>
+            <FormItem className='flex flex-col'>
               <FormLabel>Equipo</FormLabel>
-              <FormControl>
-                <Input type='number' min={0} {...field} />
-              </FormControl>
+              <Popover>
+                <PopoverTrigger asChild>
+                  <FormControl>
+                    <Button
+                      variant='outline'
+                      role='combobox'
+                      className={cn(
+                        'w-[200px] justify-between',
+                        !field.value && 'text-muted-foreground'
+                      )}
+                    >
+                      {field.value
+                        ? teams.find(team => team.id === field.value)?.name
+                        : 'Elige un equipo'}
+                      <ChevronsUpDown className='ml-2 h-4 w-4 shrink-0 opacity-50' />
+                    </Button>
+                  </FormControl>
+                </PopoverTrigger>
+                <PopoverContent className='w-[200px] p-0'>
+                  <Command>
+                    <CommandInput placeholder='Buscador de equipos...' />
+                    <CommandEmpty>No hay coincidencias.</CommandEmpty>
+                    <CommandGroup>
+                      {teams.map(team => (
+                        <CommandItem
+                          value={team.name!}
+                          key={team.id}
+                          onSelect={() => {
+                            form.setValue('team', team.id)
+                          }}
+                        >
+                          <>
+                            <Check
+                              className={cn(
+                                'mr-2 h-4 w-4',
+                                team.id === field.value
+                                  ? 'opacity-100'
+                                  : 'opacity-0'
+                              )}
+                            />
+                            {team.logo_url?.length ? (
+                              <Image
+                                src={useLoadImage(team) || ''}
+                                width={30}
+                                height={30}
+                                alt='team logo'
+                                className='mr-2'
+                              />
+                            ) : (
+                              <Shield className='mr-2' size={30} />
+                            )}
+                            {team.name}
+                          </>
+                        </CommandItem>
+                      ))}
+                    </CommandGroup>
+                  </Command>
+                </PopoverContent>
+              </Popover>
               <FormMessage />
             </FormItem>
           )}
@@ -174,6 +234,65 @@ const PlayerForm = ({ countries }: PlayerFormlProps) => {
                   <PreviewImage file={field.value} />
                 </div>
               </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        {/* Position */}
+        <FormField
+          control={form.control}
+          name='position'
+          render={({ field }) => (
+            <FormItem className='flex flex-col'>
+              <FormLabel>Posición</FormLabel>
+              <Popover>
+                <PopoverTrigger asChild>
+                  <FormControl>
+                    <Button
+                      variant='outline'
+                      role='combobox'
+                      className={cn(
+                        'w-[200px] justify-between',
+                        !field.value && 'text-muted-foreground'
+                      )}
+                    >
+                      {field.value
+                        ? positions.find(
+                            position => position.id === field.value
+                          )?.description
+                        : 'Elige una posición'}
+                      <ChevronsUpDown className='ml-2 h-4 w-4 shrink-0 opacity-50' />
+                    </Button>
+                  </FormControl>
+                </PopoverTrigger>
+                <PopoverContent className='w-[200px] p-0'>
+                  <Command>
+                    <CommandInput placeholder='Buscador de posiciones...' />
+                    <CommandEmpty>No hay coincidencias.</CommandEmpty>
+                    <CommandGroup>
+                      {positions.map(position => (
+                        <CommandItem
+                          value={position.description!}
+                          key={position.id}
+                          onSelect={() => {
+                            form.setValue('position', position.id)
+                          }}
+                        >
+                          <Check
+                            className={cn(
+                              'mr-2 h-4 w-4',
+                              position.id === field.value
+                                ? 'opacity-100'
+                                : 'opacity-0'
+                            )}
+                          />
+                          {position.description}
+                        </CommandItem>
+                      ))}
+                    </CommandGroup>
+                  </Command>
+                </PopoverContent>
+              </Popover>
               <FormMessage />
             </FormItem>
           )}
@@ -237,23 +356,50 @@ const PlayerForm = ({ countries }: PlayerFormlProps) => {
             </FormItem>
           )}
         />
-
         {/* Foot */}
-        <RadioGroup defaultValue='derecho' className='flex flex-wrap'>
-          <div className='flex items-center space-x-2'>
-            <RadioGroupItem value='derecho' id='derecho' />
-            <Label htmlFor='derecho'>Derecho</Label>
-          </div>
-          <div className='flex items-center space-x-2'>
-            <RadioGroupItem value='izquierdo' id='izquierdo' />
-            <Label htmlFor='izquierdo'>Izquierdo</Label>
-          </div>
-          <div className='flex items-center space-x-2'>
-            <RadioGroupItem value='ambidiestro' id='ambidiestro' />
-            <Label htmlFor='ambidiestro'>Ambidiestro</Label>
-          </div>
-        </RadioGroup>
-
+        <FormField
+          control={form.control}
+          name='foot'
+          render={({ field }) => (
+            <FormItem className='space-y-3'>
+              <FormLabel>Pie</FormLabel>
+              <FormControl>
+                <RadioGroup
+                  onValueChange={field.onChange}
+                  defaultValue={field.value}
+                  className='flex flex-col space-y-1'
+                >
+                  <FormItem className='flex items-center space-x-3 space-y-0'>
+                    <FormControl>
+                      <RadioGroupItem value='derecho' />
+                    </FormControl>
+                    <FormLabel className='font-normal capitalize'>
+                      derecho
+                    </FormLabel>
+                  </FormItem>
+                  <FormItem className='flex items-center space-x-3 space-y-0'>
+                    <FormControl>
+                      <RadioGroupItem value='izquierdo' />
+                    </FormControl>
+                    <FormLabel className='font-normal capitalize'>
+                      izquierdo
+                    </FormLabel>
+                  </FormItem>
+                  <FormItem className='flex items-center space-x-3 space-y-0'>
+                    <FormControl>
+                      <RadioGroupItem value='ambidiestro' />
+                    </FormControl>
+                    <FormLabel className='font-normal capitalize'>
+                      ambidiestro
+                    </FormLabel>
+                  </FormItem>
+                </RadioGroup>
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        {/* Statistics */}
         <div className='grid grid-cols-2 gap-2'>
           <div className='col-span-2 flex justify-center items-center gap-2 overflow-hidden text-xs text-neutral-400'>
             <Separator />

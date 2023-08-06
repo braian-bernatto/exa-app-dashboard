@@ -11,7 +11,7 @@ export interface Database {
     Tables: {
       countries: {
         Row: {
-          continent: Database['public']['Enums']['continents'] | null
+          continent: Database["public"]["Enums"]["continents"] | null
           id: number
           iso2: string
           iso3: string | null
@@ -19,7 +19,7 @@ export interface Database {
           name: string | null
         }
         Insert: {
-          continent?: Database['public']['Enums']['continents'] | null
+          continent?: Database["public"]["Enums"]["continents"] | null
           id?: number
           iso2: string
           iso3?: string | null
@@ -27,12 +27,45 @@ export interface Database {
           name?: string | null
         }
         Update: {
-          continent?: Database['public']['Enums']['continents'] | null
+          continent?: Database["public"]["Enums"]["continents"] | null
           id?: number
           iso2?: string
           iso3?: string | null
           local_name?: string | null
           name?: string | null
+        }
+        Relationships: []
+      }
+      exa: {
+        Row: {
+          created_at: string | null
+          id: number
+          name: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          id?: number
+          name?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          id?: number
+          name?: string | null
+        }
+        Relationships: []
+      }
+      positions: {
+        Row: {
+          description: string | null
+          id: string
+        }
+        Insert: {
+          description?: string | null
+          id: string
+        }
+        Update: {
+          description?: string | null
+          id?: string
         }
         Relationships: []
       }
@@ -60,10 +93,41 @@ export interface Database {
         }
         Relationships: [
           {
-            foreignKeyName: 'profiles_id_fkey'
-            columns: ['id']
-            referencedRelation: 'users'
-            referencedColumns: ['id']
+            foreignKeyName: "profiles_id_fkey"
+            columns: ["id"]
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          }
+        ]
+      }
+      teams: {
+        Row: {
+          created_at: string | null
+          exa_id: number | null
+          id: number
+          logo_url: string | null
+          name: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          exa_id?: number | null
+          id?: number
+          logo_url?: string | null
+          name?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          exa_id?: number | null
+          id?: number
+          logo_url?: string | null
+          name?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "teams_exa_id_fkey"
+            columns: ["exa_id"]
+            referencedRelation: "exa"
+            referencedColumns: ["id"]
           }
         ]
       }
@@ -76,13 +140,13 @@ export interface Database {
     }
     Enums: {
       continents:
-        | 'Africa'
-        | 'Antarctica'
-        | 'Asia'
-        | 'Europe'
-        | 'Oceania'
-        | 'North America'
-        | 'South America'
+        | "Africa"
+        | "Antarctica"
+        | "Asia"
+        | "Europe"
+        | "Oceania"
+        | "North America"
+        | "South America"
     }
     CompositeTypes: {
       [_ in never]: never
