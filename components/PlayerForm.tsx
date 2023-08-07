@@ -19,7 +19,7 @@ import {
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
 
 import { Separator } from '@/components/ui/separator'
-import { Countries, Positions, Teams } from '@/types'
+import { Countries, Foot, Positions, Teams } from '@/types'
 
 import { Check, ChevronsUpDown } from 'lucide-react'
 import { cn } from '@/lib/utils'
@@ -37,7 +37,7 @@ import {
 } from '@/components/ui/popover'
 import Image from 'next/image'
 
-const MAX_FILE_SIZE = 500000
+const MAX_FILE_SIZE = 5 * 1024 * 1024
 const ACCEPTED_IMAGE_TYPES = [
   'image/jpeg',
   'image/jpg',
@@ -59,7 +59,7 @@ const formSchema = z.object({
   country: z.string().optional(),
   position: z.string().optional(),
   rating: z.coerce.number().optional(),
-  foot: z.string().optional(),
+  foot_id: z.coerce.number().optional(),
   attributes: z.object({
     rit: z.coerce.number().optional(),
     tir: z.coerce.number().optional(),
@@ -67,11 +67,6 @@ const formSchema = z.object({
     reg: z.coerce.number().optional(),
     def: z.coerce.number().optional(),
     fís: z.coerce.number().optional()
-  }),
-  statistics: z.object({
-    goals: z.coerce.number({ required_error: 'Obligatorio' }),
-    yellowCards: z.coerce.number({ required_error: 'Obligatorio' }),
-    redCards: z.coerce.number({ required_error: 'Obligatorio' })
   })
 })
 
@@ -79,10 +74,16 @@ interface PlayerFormlProps {
   teams: Teams[]
   positions: Positions[]
   countries: Countries[]
+  foot: Foot[]
 }
 
-const PlayerForm = ({ teams, positions, countries }: PlayerFormlProps) => {
-  const [image, setImage] = useState<any>('')
+const PlayerForm = ({
+  teams,
+  positions,
+  countries,
+  foot
+}: PlayerFormlProps) => {
+  const [loading, setLoading] = useState<boolean>(false)
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -92,7 +93,7 @@ const PlayerForm = ({ teams, positions, countries }: PlayerFormlProps) => {
       country: undefined,
       position: undefined,
       rating: undefined,
-      foot: undefined,
+      foot_id: undefined,
       attributes: {
         rit: undefined,
         tir: undefined,
@@ -100,11 +101,6 @@ const PlayerForm = ({ teams, positions, countries }: PlayerFormlProps) => {
         reg: undefined,
         def: undefined,
         fís: undefined
-      },
-      statistics: {
-        goals: 0,
-        yellowCards: 0,
-        redCards: 0
       }
     }
   })
@@ -155,7 +151,7 @@ const PlayerForm = ({ teams, positions, countries }: PlayerFormlProps) => {
                       variant='outline'
                       role='combobox'
                       className={cn(
-                        'w-[200px] justify-between',
+                        'max-w-[300px] justify-between',
                         !field.value && 'text-muted-foreground'
                       )}
                     >
@@ -166,7 +162,7 @@ const PlayerForm = ({ teams, positions, countries }: PlayerFormlProps) => {
                     </Button>
                   </FormControl>
                 </PopoverTrigger>
-                <PopoverContent className='w-[200px] p-0 max-h-[500px] overflow-y-auto'>
+                <PopoverContent className='max-w-[300px] p-0 max-h-[500px] overflow-y-auto'>
                   <Command>
                     <CommandInput placeholder='Buscador de equipos...' />
                     <CommandEmpty>No hay coincidencias.</CommandEmpty>
@@ -223,9 +219,7 @@ const PlayerForm = ({ teams, positions, countries }: PlayerFormlProps) => {
                   <Input
                     type='file'
                     accept='image/*'
-                    value={image}
                     onChange={e => {
-                      setImage(e.target.value)
                       field.onChange(e.target.files?.[0])
                     }}
                   />
@@ -250,7 +244,7 @@ const PlayerForm = ({ teams, positions, countries }: PlayerFormlProps) => {
                       variant='outline'
                       role='combobox'
                       className={cn(
-                        'w-[200px] justify-between',
+                        'max-w-[300px] justify-between',
                         !field.value && 'text-muted-foreground'
                       )}
                     >
@@ -263,7 +257,7 @@ const PlayerForm = ({ teams, positions, countries }: PlayerFormlProps) => {
                     </Button>
                   </FormControl>
                 </PopoverTrigger>
-                <PopoverContent className='w-[200px] p-0 max-h-[500px] overflow-y-auto'>
+                <PopoverContent className='max-w-[300px] p-0 max-h-[500px] overflow-y-auto'>
                   <Command>
                     <CommandInput placeholder='Buscador de posiciones...' />
                     <CommandEmpty>No hay coincidencias.</CommandEmpty>
@@ -309,7 +303,7 @@ const PlayerForm = ({ teams, positions, countries }: PlayerFormlProps) => {
                       variant='outline'
                       role='combobox'
                       className={cn(
-                        'w-[200px] justify-between',
+                        'max-w-[300px] justify-between',
                         !field.value && 'text-muted-foreground'
                       )}
                     >
@@ -322,7 +316,7 @@ const PlayerForm = ({ teams, positions, countries }: PlayerFormlProps) => {
                     </Button>
                   </FormControl>
                 </PopoverTrigger>
-                <PopoverContent className='w-[200px] p-0 max-h-[500px] overflow-y-auto'>
+                <PopoverContent className='max-w-[300px] p-0 max-h-[500px] overflow-y-auto'>
                   <Command>
                     <CommandInput placeholder='Buscador de paises...' />
                     <CommandEmpty>No hay coincidencias.</CommandEmpty>
@@ -366,110 +360,35 @@ const PlayerForm = ({ teams, positions, countries }: PlayerFormlProps) => {
         {/* Foot */}
         <FormField
           control={form.control}
-          name='foot'
+          name='foot_id'
           render={({ field }) => (
             <FormItem className='space-y-3'>
               <FormLabel>Pie</FormLabel>
               <FormControl>
                 <RadioGroup
                   onValueChange={field.onChange}
-                  defaultValue={field.value}
+                  defaultValue={field.value?.toString()}
                   className='flex flex-col space-y-1'
                 >
-                  <FormItem className='flex items-center space-x-3 space-y-0'>
-                    <FormControl>
-                      <RadioGroupItem value='derecho' />
-                    </FormControl>
-                    <FormLabel className='font-normal capitalize'>
-                      derecho
-                    </FormLabel>
-                  </FormItem>
-                  <FormItem className='flex items-center space-x-3 space-y-0'>
-                    <FormControl>
-                      <RadioGroupItem value='izquierdo' />
-                    </FormControl>
-                    <FormLabel className='font-normal capitalize'>
-                      izquierdo
-                    </FormLabel>
-                  </FormItem>
-                  <FormItem className='flex items-center space-x-3 space-y-0'>
-                    <FormControl>
-                      <RadioGroupItem value='ambidiestro' />
-                    </FormControl>
-                    <FormLabel className='font-normal capitalize'>
-                      ambidiestro
-                    </FormLabel>
-                  </FormItem>
+                  {foot.map(f => (
+                    <FormItem
+                      className='flex items-center space-x-3 space-y-0'
+                      key={f.id}
+                    >
+                      <FormControl>
+                        <RadioGroupItem value={f.id.toString()} />
+                      </FormControl>
+                      <FormLabel className='font-normal capitalize'>
+                        {f.name}
+                      </FormLabel>
+                    </FormItem>
+                  ))}
                 </RadioGroup>
               </FormControl>
               <FormMessage />
             </FormItem>
           )}
         />
-        {/* Statistics */}
-        <div className='grid grid-cols-2 gap-2'>
-          <div className='col-span-2 flex justify-center items-center gap-2 overflow-hidden text-xs text-neutral-400'>
-            <Separator />
-            Estadísticas
-            <Separator />
-          </div>
-          {/* goals */}
-          <FormField
-            control={form.control}
-            name='statistics.goals'
-            render={({ field }) => (
-              <FormItem className='rounded bg-white'>
-                <FormLabel>Goles</FormLabel>
-                <FormControl>
-                  <Input type='number' min={0} {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          {/* yellowCards */}
-          <FormField
-            control={form.control}
-            name='statistics.yellowCards'
-            render={({ field }) => (
-              <FormItem className='rounded bg-white'>
-                <FormLabel>Tarjetas Amarillas</FormLabel>
-                <FormControl>
-                  <Input type='number' min={0} {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          {/* redCards */}
-          <FormField
-            control={form.control}
-            name='statistics.redCards'
-            render={({ field }) => (
-              <FormItem className='rounded bg-white'>
-                <FormLabel>Tarjetas Rojas</FormLabel>
-                <FormControl>
-                  <Input type='number' min={0} {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          {/* Rating */}
-          <FormField
-            control={form.control}
-            name='rating'
-            render={({ field }) => (
-              <FormItem className='rounded bg-white'>
-                <FormLabel>Rating</FormLabel>
-                <FormControl>
-                  <Input type='number' min={0} {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-        </div>
         <div className='grid grid-cols-2 gap-2'>
           <div className='col-span-2 flex justify-center items-center gap-2 overflow-hidden text-xs text-neutral-400'>
             <Separator />
@@ -560,9 +479,28 @@ const PlayerForm = ({ teams, positions, countries }: PlayerFormlProps) => {
               </FormItem>
             )}
           />
+          {/* Rating */}
+          <FormField
+            control={form.control}
+            name='rating'
+            render={({ field }) => (
+              <FormItem className='rounded bg-white'>
+                <FormLabel>Rating</FormLabel>
+                <FormControl>
+                  <Input type='number' min={0} {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
         </div>
         <div className='w-full'>
-          <Button type='submit' variant={'default'} className='w-full'>
+          <Button
+            type='submit'
+            variant={'default'}
+            className='w-full'
+            disabled={loading}
+          >
             Guardar
           </Button>
         </div>

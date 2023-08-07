@@ -57,13 +57,28 @@ export interface Database {
         }
         Relationships: []
       }
+      foot: {
+        Row: {
+          id: number
+          name: string
+        }
+        Insert: {
+          id?: number
+          name: string
+        }
+        Update: {
+          id?: number
+          name?: string
+        }
+        Relationships: []
+      }
       players: {
         Row: {
           country_id: number | null
           created_at: string | null
           def: number | null
           fis: number | null
-          foot: string | null
+          foot_id: number | null
           id: number
           image: string | null
           name: string | null
@@ -80,7 +95,7 @@ export interface Database {
           created_at?: string | null
           def?: number | null
           fis?: number | null
-          foot?: string | null
+          foot_id?: number | null
           id?: number
           image?: string | null
           name?: string | null
@@ -97,7 +112,7 @@ export interface Database {
           created_at?: string | null
           def?: number | null
           fis?: number | null
-          foot?: string | null
+          foot_id?: number | null
           id?: number
           image?: string | null
           name?: string | null
@@ -114,6 +129,12 @@ export interface Database {
             foreignKeyName: "players_country_id_fkey"
             columns: ["country_id"]
             referencedRelation: "countries"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "players_foot_id_fkey"
+            columns: ["foot_id"]
+            referencedRelation: "foot"
             referencedColumns: ["id"]
           },
           {

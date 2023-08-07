@@ -32,7 +32,7 @@ import Image from 'next/image'
 import { cn } from '@/lib/utils'
 import { useRouter } from 'next/navigation'
 
-const MAX_FILE_SIZE = 500000
+const MAX_FILE_SIZE = 5 * 1024 * 1024
 const ACCEPTED_IMAGE_TYPES = [
   'image/jpeg',
   'image/jpg',
@@ -60,7 +60,6 @@ interface TeamFormProps {
 const TeamForm = ({ exas }: TeamFormProps) => {
   const router = useRouter()
   const { supabase } = useSupabase()
-  const [image, setImage] = useState<any>('')
   const [loading, setLoading] = useState<boolean>(false)
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -159,7 +158,6 @@ const TeamForm = ({ exas }: TeamFormProps) => {
                     type='file'
                     accept='image/*'
                     onChange={e => {
-                      setImage(e.target.value)
                       field.onChange(e.target.files?.[0])
                     }}
                   />
@@ -195,7 +193,7 @@ const TeamForm = ({ exas }: TeamFormProps) => {
                     </Button>
                   </FormControl>
                 </PopoverTrigger>
-                <PopoverContent className='w-full p-0 max-h-[500px] overflow-y-auto'>
+                <PopoverContent className='max-w-[300px] p-0 max-h-[500px] overflow-y-auto'>
                   <Command>
                     <CommandInput placeholder='Buscador de equipos...' />
                     <CommandEmpty>No hay coincidencias.</CommandEmpty>

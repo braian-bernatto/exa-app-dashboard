@@ -21,7 +21,7 @@ import { toast } from 'react-hot-toast'
 import { useSupabase } from '@/providers/SupabaseProvider'
 import { useRouter } from 'next/navigation'
 
-const MAX_FILE_SIZE = 500000
+const MAX_FILE_SIZE = 5 * 1024 * 1024
 const ACCEPTED_IMAGE_TYPES = [
   'image/jpeg',
   'image/jpg',
@@ -44,9 +44,7 @@ const formSchema = z.object({
 const ExaForm = () => {
   const router = useRouter()
   const { supabase } = useSupabase()
-  const [image, setImage] = useState<any>('')
   const [loading, setLoading] = useState<boolean>(false)
-
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -142,7 +140,6 @@ const ExaForm = () => {
                     type='file'
                     accept='image/*'
                     onChange={e => {
-                      setImage(e.target.value)
                       field.onChange(e.target.files?.[0])
                     }}
                   />

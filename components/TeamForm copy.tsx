@@ -17,7 +17,7 @@ import {
   FormMessage
 } from '@/components/ui/form'
 
-const MAX_FILE_SIZE = 500000
+const MAX_FILE_SIZE = 5 * 1024 * 1024
 const ACCEPTED_IMAGE_TYPES = [
   'image/jpeg',
   'image/jpg',
