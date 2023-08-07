@@ -157,7 +157,7 @@ const ExaForm = () => {
             className='w-full'
             disabled={loading}
           >
-            Guardar
+            Agregar
           </Button>
         </div>
       </form>

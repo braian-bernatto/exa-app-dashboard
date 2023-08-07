@@ -17,7 +17,7 @@ import {
   FormMessage
 } from '@/components/ui/form'
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
-
+import uniqid from 'uniqid'
 import { Separator } from '@/components/ui/separator'
 import { Countries, Foot, Positions, Teams } from '@/types'
 
@@ -36,6 +36,9 @@ import {
   PopoverTrigger
 } from '@/components/ui/popover'
 import Image from 'next/image'
+import { toast } from 'react-hot-toast'
+import { useSupabase } from '@/providers/SupabaseProvider'
+import { useRouter } from 'next/navigation'
 
 const MAX_FILE_SIZE = 5 * 1024 * 1024
 const ACCEPTED_IMAGE_TYPES = [
@@ -47,7 +50,7 @@ const ACCEPTED_IMAGE_TYPES = [
 
 const formSchema = z.object({
   name: z.string().min(1, { message: 'Obligatorio' }),
-  team: z.coerce.number({ invalid_type_error: 'Ingrese un número' }),
+  team_id: z.coerce.number({ invalid_type_error: 'Ingrese un número' }),
   image: z
     .any()
     .refine(files => files?.size <= MAX_FILE_SIZE, `Límite de tamaño es 5MB.`)
@@ -56,8 +59,8 @@ const formSchema = z.object({
       'Sólo se aceptan los formatos .jpg .jpeg .png .webp'
     )
     .optional(),
-  country: z.string().optional(),
-  position: z.string().optional(),
+  country_id: z.string().optional(),
+  position_id: z.string().optional(),
   rating: z.coerce.number().optional(),
   foot_id: z.coerce.number().optional(),
   attributes: z.object({
@@ -83,15 +86,17 @@ const PlayerForm = ({
   countries,
   foot
 }: PlayerFormlProps) => {
+  const router = useRouter()
+  const { supabase } = useSupabase()
   const [loading, setLoading] = useState<boolean>(false)
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       name: '',
-      team: undefined,
+      team_id: undefined,
       image: undefined,
-      country: undefined,
-      position: undefined,
+      country_id: undefined,
+      position_id: undefined,
       rating: undefined,
       foot_id: undefined,
       attributes: {
@@ -105,8 +110,75 @@ const PlayerForm = ({
     }
   })
 
-  function onSubmit(values: z.infer<typeof formSchema>) {
+  async function onSubmit(values: z.infer<typeof formSchema>) {
     console.log(values)
+    const {
+      name,
+      team_id,
+      image,
+      country_id,
+      position_id,
+      rating,
+      foot_id,
+      attributes
+    } = values
+    try {
+      setLoading(true)
+      if (!name || !team_id || !position_id) {
+        return toast.error('Faltan cargar datos')
+      }
+
+      // upload image
+      const uniqueID = uniqid()
+      let imagePath = ''
+      if (image) {
+        const { data: imageData, error: imageError } = await supabase.storage
+          .from('players')
+          .upload(`image-${name}-${uniqueID}`, image, {
+            cacheControl: '3600',
+            upsert: false
+          })
+
+        if (imageError) {
+          setLoading(false)
+          return toast.error('No se pudo agregar la imagen')
+        }
+
+        imagePath = imageData?.path!
+      }
+
+      // upload player
+      const { error: supabaseError } = await supabase.from('teams').insert({
+        name,
+        team_id,
+        image_url: imagePath,
+        country_id,
+        position_id,
+        rating,
+        foot_id,
+        rit: attributes.rit,
+        tir: attributes.tir,
+        pas: attributes.pas,
+        reg: attributes.reg,
+        def: attributes.def,
+        fís: attributes.fís
+      })
+
+      if (supabaseError) {
+        setLoading(false)
+        return toast.error('No se pudo agregar el equipo')
+      }
+
+      router.refresh()
+      setLoading(false)
+      form.reset()
+      toast.success('Jugador agregado con éxito')
+    } catch (error) {
+      console.log(error)
+      toast.error('Hubo un error')
+    } finally {
+      setLoading(false)
+    }
   }
 
   return (
@@ -140,7 +212,7 @@ const PlayerForm = ({
         {/* Team */}
         <FormField
           control={form.control}
-          name='team'
+          name='team_id'
           render={({ field }) => (
             <FormItem className='flex flex-col'>
               <FormLabel>Equipo</FormLabel>
@@ -172,7 +244,7 @@ const PlayerForm = ({
                           value={team.name!}
                           key={team.id}
                           onSelect={() => {
-                            form.setValue('team', team.id)
+                            form.setValue('team_id', team.id)
                           }}
                         >
                           <>
@@ -233,7 +305,7 @@ const PlayerForm = ({
         {/* Position */}
         <FormField
           control={form.control}
-          name='position'
+          name='position_id'
           render={({ field }) => (
             <FormItem className='flex flex-col'>
               <FormLabel>Posición</FormLabel>
@@ -267,7 +339,7 @@ const PlayerForm = ({
                           value={position.description!}
                           key={position.id}
                           onSelect={() => {
-                            form.setValue('position', position.id)
+                            form.setValue('position_id', position.id)
                           }}
                         >
                           <Check
@@ -292,7 +364,7 @@ const PlayerForm = ({
         {/* Country */}
         <FormField
           control={form.control}
-          name='country'
+          name='country_id'
           render={({ field }) => (
             <FormItem className='flex flex-col'>
               <FormLabel>Nacionalidad</FormLabel>
@@ -326,7 +398,7 @@ const PlayerForm = ({
                           value={country.name!}
                           key={country.id}
                           onSelect={() => {
-                            form.setValue('country', country.iso2)
+                            form.setValue('country_id', country.iso2)
                           }}
                         >
                           <>
@@ -501,7 +573,7 @@ const PlayerForm = ({
             className='w-full'
             disabled={loading}
           >
-            Guardar
+            Agregar
           </Button>
         </div>
       </form>

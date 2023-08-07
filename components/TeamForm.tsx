@@ -89,10 +89,12 @@ const TeamForm = ({ exas }: TeamFormProps) => {
             cacheControl: '3600',
             upsert: false
           })
+
         if (imageError) {
           setLoading(false)
-          return toast.error('No se pudo alzar la imagen')
+          return toast.error('No se pudo agregar la imagen')
         }
+
         imagePath = imageData?.path!
       }
 
@@ -101,9 +103,10 @@ const TeamForm = ({ exas }: TeamFormProps) => {
         logo_url: imagePath,
         exa_id
       })
+
       if (supabaseError) {
         setLoading(false)
-        return toast.error('No se pudo guardar el equipo')
+        return toast.error('No se pudo agregar el equipo')
       }
 
       router.refresh()
@@ -111,6 +114,7 @@ const TeamForm = ({ exas }: TeamFormProps) => {
       form.reset()
       toast.success('Equipo creado!')
     } catch (error) {
+      console.log(error)
       toast.error('Hubo un error')
     } finally {
       setLoading(false)
@@ -245,7 +249,7 @@ const TeamForm = ({ exas }: TeamFormProps) => {
             className='w-full'
             disabled={loading}
           >
-            Guardar
+            Agregar
           </Button>
         </div>
       </form>

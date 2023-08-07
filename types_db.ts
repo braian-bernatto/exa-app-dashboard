@@ -80,7 +80,7 @@ export interface Database {
           fis: number | null
           foot_id: number | null
           id: number
-          image: string | null
+          image_url: string | null
           name: string | null
           pas: number | null
           position_id: string | null
@@ -97,7 +97,7 @@ export interface Database {
           fis?: number | null
           foot_id?: number | null
           id?: number
-          image?: string | null
+          image_url?: string | null
           name?: string | null
           pas?: number | null
           position_id?: string | null
@@ -114,7 +114,7 @@ export interface Database {
           fis?: number | null
           foot_id?: number | null
           id?: number
-          image?: string | null
+          image_url?: string | null
           name?: string | null
           pas?: number | null
           position_id?: string | null
