@@ -322,7 +322,7 @@ const PlayerForm = ({ teams, positions, countries }: PlayerFormlProps) => {
                     </Button>
                   </FormControl>
                 </PopoverTrigger>
-                <PopoverContent className='w-[200px] p-0'>
+                <PopoverContent className='w-[200px] p-0 max-h-[500px] overflow-y-auto relative'>
                   <Command>
                     <CommandInput placeholder='Buscador de paises...' />
                     <CommandEmpty>No hay coincidencias.</CommandEmpty>
@@ -335,15 +335,24 @@ const PlayerForm = ({ teams, positions, countries }: PlayerFormlProps) => {
                             form.setValue('country', country.iso2)
                           }}
                         >
-                          <Check
-                            className={cn(
-                              'mr-2 h-4 w-4',
-                              country.iso2 === field.value
-                                ? 'opacity-100'
-                                : 'opacity-0'
-                            )}
-                          />
-                          {country.name}
+                          <>
+                            <Check
+                              className={cn(
+                                'mr-2 h-4 w-4 flex-none',
+                                country.iso2 === field.value
+                                  ? 'opacity-100'
+                                  : 'opacity-0'
+                              )}
+                            />
+                            <Image
+                              src={`https://flagcdn.com/w20/${country.iso2.toLowerCase()}.png`}
+                              width={20}
+                              height={20}
+                              alt='team logo'
+                              className='mr-2 flex-none'
+                            />
+                            {country.name}
+                          </>
                         </CommandItem>
                       ))}
                     </CommandGroup>

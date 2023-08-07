@@ -54,6 +54,79 @@ export interface Database {
         }
         Relationships: []
       }
+      players: {
+        Row: {
+          country_id: number | null
+          created_at: string | null
+          def: number | null
+          fis: number | null
+          foot: string | null
+          id: number
+          image: string | null
+          name: string | null
+          pas: number | null
+          position_id: string | null
+          rating: number | null
+          reg: number | null
+          rit: number | null
+          team_id: number | null
+          tir: number | null
+        }
+        Insert: {
+          country_id?: number | null
+          created_at?: string | null
+          def?: number | null
+          fis?: number | null
+          foot?: string | null
+          id?: number
+          image?: string | null
+          name?: string | null
+          pas?: number | null
+          position_id?: string | null
+          rating?: number | null
+          reg?: number | null
+          rit?: number | null
+          team_id?: number | null
+          tir?: number | null
+        }
+        Update: {
+          country_id?: number | null
+          created_at?: string | null
+          def?: number | null
+          fis?: number | null
+          foot?: string | null
+          id?: number
+          image?: string | null
+          name?: string | null
+          pas?: number | null
+          position_id?: string | null
+          rating?: number | null
+          reg?: number | null
+          rit?: number | null
+          team_id?: number | null
+          tir?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "players_country_id_fkey"
+            columns: ["country_id"]
+            referencedRelation: "countries"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "players_position_id_fkey"
+            columns: ["position_id"]
+            referencedRelation: "positions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "players_team_id_fkey"
+            columns: ["team_id"]
+            referencedRelation: "teams"
+            referencedColumns: ["id"]
+          }
+        ]
+      }
       positions: {
         Row: {
           description: string | null
