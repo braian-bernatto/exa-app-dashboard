@@ -4,11 +4,13 @@ import getTeams from '@/actions/getTeams'
 import Navbar from '@/components/Navbar'
 import PlayerForm from '@/components/PlayerForm'
 import TeamForm from '@/components/TeamForm'
+import useLoadImage from '@/hooks/useLoadImage'
 
 export default async function Home() {
   const teams = await getTeams()
   const positions = await getPositions()
   const countries = await getCountries()
+
   return (
     <div className='px-8 xl:px-0'>
       <Navbar />

@@ -16,7 +16,6 @@ import {
   FormLabel,
   FormMessage
 } from '@/components/ui/form'
-import { Label } from '@/components/ui/label'
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
 
 import { Separator } from '@/components/ui/separator'
@@ -37,7 +36,6 @@ import {
   PopoverTrigger
 } from '@/components/ui/popover'
 import Image from 'next/image'
-import useLoadImage from '@/hooks/useLoadImage'
 
 const MAX_FILE_SIZE = 500000
 const ACCEPTED_IMAGE_TYPES = [
@@ -192,7 +190,7 @@ const PlayerForm = ({ teams, positions, countries }: PlayerFormlProps) => {
                             />
                             {team.logo_url?.length ? (
                               <Image
-                                src={useLoadImage(team) || ''}
+                                src={team.logo_url}
                                 width={30}
                                 height={30}
                                 alt='team logo'

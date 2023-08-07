@@ -9,7 +9,14 @@ const getTeams = async (): Promise<Teams[]> => {
     console.log(error)
   }
 
-  return (data as any) || []
+  const dataWithImage = data?.map(data => {
+    const { data: imageData } = supabase.storage
+      .from('teams')
+      .getPublicUrl(data.logo_url!)
+    return { ...data, logo_url: imageData.publicUrl }
+  })
+
+  return (dataWithImage as any) || []
 }
 
 export default getTeams
