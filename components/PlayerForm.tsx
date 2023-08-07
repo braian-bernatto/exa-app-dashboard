@@ -166,7 +166,7 @@ const PlayerForm = ({ teams, positions, countries }: PlayerFormlProps) => {
                     </Button>
                   </FormControl>
                 </PopoverTrigger>
-                <PopoverContent className='w-[200px] p-0'>
+                <PopoverContent className='w-[200px] p-0 max-h-[500px] overflow-y-auto'>
                   <Command>
                     <CommandInput placeholder='Buscador de equipos...' />
                     <CommandEmpty>No hay coincidencias.</CommandEmpty>
@@ -263,7 +263,7 @@ const PlayerForm = ({ teams, positions, countries }: PlayerFormlProps) => {
                     </Button>
                   </FormControl>
                 </PopoverTrigger>
-                <PopoverContent className='w-[200px] p-0'>
+                <PopoverContent className='w-[200px] p-0 max-h-[500px] overflow-y-auto'>
                   <Command>
                     <CommandInput placeholder='Buscador de posiciones...' />
                     <CommandEmpty>No hay coincidencias.</CommandEmpty>
@@ -322,7 +322,7 @@ const PlayerForm = ({ teams, positions, countries }: PlayerFormlProps) => {
                     </Button>
                   </FormControl>
                 </PopoverTrigger>
-                <PopoverContent className='w-[200px] p-0 max-h-[500px] overflow-y-auto relative'>
+                <PopoverContent className='w-[200px] p-0 max-h-[500px] overflow-y-auto'>
                   <Command>
                     <CommandInput placeholder='Buscador de paises...' />
                     <CommandEmpty>No hay coincidencias.</CommandEmpty>
