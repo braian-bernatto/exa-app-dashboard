@@ -19,8 +19,8 @@ export default async function Home() {
     <div className='px-8 xl:px-0'>
       <Navbar />
       <div className='w-full bg-neutral-100 my-10 rounded-md max-w-7xl min-h-[75vh] overflow-auto p-4 sm:p-10 gap-2 flex flex-wrap justify-center items-start'>
-        {/* <ExaForm /> */}
-        {/* <TeamForm exas={exas} /> */}
+        <ExaForm />
+        <TeamForm exas={exas} />
         <PlayerForm
           teams={teams}
           positions={positions}
