@@ -74,7 +74,7 @@ export interface Database {
       }
       players: {
         Row: {
-          country_id: number | null
+          country_iso2: string | null
           created_at: string | null
           def: number | null
           fis: number | null
@@ -91,7 +91,7 @@ export interface Database {
           tir: number | null
         }
         Insert: {
-          country_id?: number | null
+          country_iso2?: string | null
           created_at?: string | null
           def?: number | null
           fis?: number | null
@@ -108,7 +108,7 @@ export interface Database {
           tir?: number | null
         }
         Update: {
-          country_id?: number | null
+          country_iso2?: string | null
           created_at?: string | null
           def?: number | null
           fis?: number | null
@@ -126,10 +126,10 @@ export interface Database {
         }
         Relationships: [
           {
-            foreignKeyName: "players_country_id_fkey"
-            columns: ["country_id"]
+            foreignKeyName: "players_country_iso2_fkey"
+            columns: ["country_iso2"]
             referencedRelation: "countries"
-            referencedColumns: ["id"]
+            referencedColumns: ["iso2"]
           },
           {
             foreignKeyName: "players_foot_id_fkey"

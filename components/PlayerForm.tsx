@@ -59,7 +59,7 @@ const formSchema = z.object({
       'Sólo se aceptan los formatos .jpg .jpeg .png .webp'
     )
     .optional(),
-  country_id: z.string().optional(),
+  country_iso2: z.string().optional(),
   position_id: z.string().optional(),
   rating: z.coerce.number().optional(),
   foot_id: z.coerce.number().optional(),
@@ -69,7 +69,7 @@ const formSchema = z.object({
     pas: z.coerce.number().optional(),
     reg: z.coerce.number().optional(),
     def: z.coerce.number().optional(),
-    fís: z.coerce.number().optional()
+    fis: z.coerce.number().optional()
   })
 })
 
@@ -95,17 +95,17 @@ const PlayerForm = ({
       name: '',
       team_id: undefined,
       image: undefined,
-      country_id: undefined,
+      country_iso2: undefined,
       position_id: undefined,
-      rating: undefined,
       foot_id: undefined,
+      rating: 0,
       attributes: {
-        rit: undefined,
-        tir: undefined,
-        pas: undefined,
-        reg: undefined,
-        def: undefined,
-        fís: undefined
+        rit: 0,
+        tir: 0,
+        pas: 0,
+        reg: 0,
+        def: 0,
+        fis: 0
       }
     }
   })
@@ -116,7 +116,7 @@ const PlayerForm = ({
       name,
       team_id,
       image,
-      country_id,
+      country_iso2,
       position_id,
       rating,
       foot_id,
@@ -148,11 +148,11 @@ const PlayerForm = ({
       }
 
       // upload player
-      const { error: supabaseError } = await supabase.from('teams').insert({
+      const { error: supabaseError } = await supabase.from('players').insert({
         name,
         team_id,
         image_url: imagePath,
-        country_id,
+        country_iso2,
         position_id,
         rating,
         foot_id,
@@ -161,11 +161,13 @@ const PlayerForm = ({
         pas: attributes.pas,
         reg: attributes.reg,
         def: attributes.def,
-        fís: attributes.fís
+        fis: attributes.fis
       })
 
       if (supabaseError) {
         setLoading(false)
+        console.log(supabaseError)
+
         return toast.error('No se pudo agregar el equipo')
       }
 
@@ -364,7 +366,7 @@ const PlayerForm = ({
         {/* Country */}
         <FormField
           control={form.control}
-          name='country_id'
+          name='country_iso2'
           render={({ field }) => (
             <FormItem className='flex flex-col'>
               <FormLabel>Nacionalidad</FormLabel>
@@ -398,7 +400,7 @@ const PlayerForm = ({
                           value={country.name!}
                           key={country.id}
                           onSelect={() => {
-                            form.setValue('country_id', country.iso2)
+                            form.setValue('country_iso2', country.iso2)
                           }}
                         >
                           <>
@@ -540,7 +542,7 @@ const PlayerForm = ({
           {/* fís */}
           <FormField
             control={form.control}
-            name='attributes.fís'
+            name='attributes.fis'
             render={({ field }) => (
               <FormItem className='rounded bg-white'>
                 <FormLabel>Físico</FormLabel>
