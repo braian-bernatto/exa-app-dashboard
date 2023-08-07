@@ -2,7 +2,7 @@
 import React, { useState } from 'react'
 import { Input } from './ui/input'
 import PreviewImage from './PreviewImage'
-import { Check, ChevronsUpDown, Shield } from 'lucide-react'
+import { Trophy } from 'lucide-react'
 import { Button } from './ui/button'
 
 import { useForm } from 'react-hook-form'
@@ -19,17 +19,6 @@ import {
 import uniqid from 'uniqid'
 import { toast } from 'react-hot-toast'
 import { useSupabase } from '@/providers/SupabaseProvider'
-import { Exas } from '@/types'
-import { Popover, PopoverContent, PopoverTrigger } from './ui/popover'
-import {
-  Command,
-  CommandEmpty,
-  CommandGroup,
-  CommandInput,
-  CommandItem
-} from './ui/command'
-import Image from 'next/image'
-import { cn } from '@/lib/utils'
 import { useRouter } from 'next/navigation'
 
 const MAX_FILE_SIZE = 500000
@@ -49,33 +38,28 @@ const formSchema = z.object({
       files => ACCEPTED_IMAGE_TYPES.includes(files?.type),
       'Sólo se aceptan los formatos .jpg .jpeg .png .webp'
     )
-    .optional(),
-  exa_id: z.coerce.number({ invalid_type_error: 'Obligatorio' })
+    .optional()
 })
 
-interface TeamFormProps {
-  exas: Exas[]
-}
-
-const TeamForm = ({ exas }: TeamFormProps) => {
+const ExaForm = () => {
   const router = useRouter()
   const { supabase } = useSupabase()
   const [image, setImage] = useState<any>('')
   const [loading, setLoading] = useState<boolean>(false)
+
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       name: '',
-      logo: undefined,
-      exa_id: undefined
+      logo: undefined
     }
   })
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     try {
       setLoading(true)
-      const { name, logo, exa_id } = values
-      if (!name || !exa_id) {
+      const { name, logo } = values
+      if (!name) {
         return toast.error('Faltan datos')
       }
 
@@ -85,7 +69,7 @@ const TeamForm = ({ exas }: TeamFormProps) => {
       // upload image
       if (logo) {
         const { data: imageData, error: imageError } = await supabase.storage
-          .from('teams')
+          .from('exas')
           .upload(`image-${name}-${uniqueID}`, logo, {
             cacheControl: '3600',
             upsert: false
@@ -97,20 +81,19 @@ const TeamForm = ({ exas }: TeamFormProps) => {
         imagePath = imageData?.path!
       }
 
-      const { error: supabaseError } = await supabase.from('teams').insert({
+      const { error: supabaseError } = await supabase.from('exas').insert({
         name,
-        logo_url: imagePath,
-        exa_id
+        logo_url: imagePath
       })
       if (supabaseError) {
         setLoading(false)
-        return toast.error('No se pudo guardar el equipo')
+        return toast.error('No se pudo grabar')
       }
 
       router.refresh()
       setLoading(false)
       form.reset()
-      toast.success('Equipo creado!')
+      toast.success('Exa creado!')
     } catch (error) {
       toast.error('Hubo un error')
     } finally {
@@ -126,10 +109,10 @@ const TeamForm = ({ exas }: TeamFormProps) => {
       >
         <div className='flex gap-2'>
           <span className='bg-gradient-to-r from-emerald-300 to-emerald-700 rounded-full p-2 flex items-center justify-center'>
-            <Shield className='text-white' size={30} />
+            <Trophy className='text-white' size={30} />
           </span>
           <h1 className='text-xl font-semibold flex items-center gap-2'>
-            Agregar Equipo
+            Agregar Exa
           </h1>
         </div>
         {/* Name */}
@@ -170,76 +153,6 @@ const TeamForm = ({ exas }: TeamFormProps) => {
             </FormItem>
           )}
         />
-        {/* Exa */}
-        <FormField
-          control={form.control}
-          name='exa_id'
-          render={({ field }) => (
-            <FormItem className='rounded bg-white'>
-              <FormLabel>Exa</FormLabel>
-              <Popover>
-                <PopoverTrigger asChild>
-                  <FormControl>
-                    <Button
-                      variant='outline'
-                      role='combobox'
-                      className={cn(
-                        'w-full justify-between',
-                        !field.value && 'text-muted-foreground'
-                      )}
-                    >
-                      {field.value
-                        ? exas.find(exa => exa.id === field.value)?.name
-                        : 'Elige un exa'}
-                      <ChevronsUpDown className='ml-2 h-4 w-4 shrink-0 opacity-50' />
-                    </Button>
-                  </FormControl>
-                </PopoverTrigger>
-                <PopoverContent className='w-full p-0 max-h-[500px] overflow-y-auto'>
-                  <Command>
-                    <CommandInput placeholder='Buscador de equipos...' />
-                    <CommandEmpty>No hay coincidencias.</CommandEmpty>
-                    <CommandGroup>
-                      {exas.map(exa => (
-                        <CommandItem
-                          value={exa.name!}
-                          key={exa.id}
-                          onSelect={() => {
-                            form.setValue('exa_id', exa.id)
-                          }}
-                        >
-                          <>
-                            <Check
-                              className={cn(
-                                'mr-2 h-4 w-4',
-                                exa.id === field.value
-                                  ? 'opacity-100'
-                                  : 'opacity-0'
-                              )}
-                            />
-                            {exa.logo_url?.length ? (
-                              <Image
-                                src={exa.logo_url}
-                                width={30}
-                                height={30}
-                                alt='exa logo'
-                                className='mr-2'
-                              />
-                            ) : (
-                              <Shield className='mr-2' size={30} />
-                            )}
-                            {exa.name}
-                          </>
-                        </CommandItem>
-                      ))}
-                    </CommandGroup>
-                  </Command>
-                </PopoverContent>
-              </Popover>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
         <div className='w-full'>
           <Button
             type='submit'
@@ -255,4 +168,4 @@ const TeamForm = ({ exas }: TeamFormProps) => {
   )
 }
 
-export default TeamForm
+export default ExaForm

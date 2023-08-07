@@ -4,6 +4,7 @@ import type { Metadata } from 'next'
 import { Inter } from 'next/font/google'
 import { createClient } from '@/utils/supabaseServer'
 import SupabaseAuthProvider from '@/providers/SupabaseAuthProvider'
+import ToasterProvider from '@/providers/ToasterProvider'
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -28,6 +29,7 @@ export default async function RootLayout({
   return (
     <html lang='en'>
       <body className={inter.className}>
+        <ToasterProvider />
         <SupabaseProvider>
           <SupabaseAuthProvider serverSession={session}>
             {children}

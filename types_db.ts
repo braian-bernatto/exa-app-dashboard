@@ -36,20 +36,23 @@ export interface Database {
         }
         Relationships: []
       }
-      exa: {
+      exas: {
         Row: {
           created_at: string | null
           id: number
+          logo_url: string | null
           name: string | null
         }
         Insert: {
           created_at?: string | null
           id?: number
+          logo_url?: string | null
           name?: string | null
         }
         Update: {
           created_at?: string | null
           id?: number
+          logo_url?: string | null
           name?: string | null
         }
         Relationships: []
@@ -199,7 +202,7 @@ export interface Database {
           {
             foreignKeyName: "teams_exa_id_fkey"
             columns: ["exa_id"]
-            referencedRelation: "exa"
+            referencedRelation: "exas"
             referencedColumns: ["id"]
           }
         ]
