@@ -17,9 +17,10 @@ import { useRouter } from 'next/navigation'
 import {
   CalendarIcon,
   Check,
+  ChevronsUpDown,
   ChevronsUpDownIcon,
-  LocateIcon,
   MapPin,
+  Shield,
   Swords
 } from 'lucide-react'
 import { Input } from './ui/input'
@@ -27,7 +28,7 @@ import { Button } from './ui/button'
 import { Popover, PopoverContent, PopoverTrigger } from './ui/popover'
 import { cn } from '@/lib/utils'
 import { Calendar } from './ui/calendar'
-import { format, isDate, set, subDays } from 'date-fns'
+import { format, set, subDays } from 'date-fns'
 import { es } from 'date-fns/esm/locale'
 import {
   Command,
@@ -36,11 +37,16 @@ import {
   CommandInput,
   CommandItem
 } from './ui/command'
+import Image from 'next/image'
+import { Separator } from './ui/separator'
 
 const formSchema = z.object({
   name: z.string().min(1, { message: 'Obligatorio' }),
-  date: z.date().optional(),
-  location_id: z.number().optional()
+  team_1: z.number(),
+  team_2: z.number(),
+  date: z.date({ required_error: 'Obligatorio' }),
+  location_id: z.number().optional(),
+  cancha_nro: z.number().optional()
 })
 
 interface FixtureFormProps {
@@ -58,8 +64,11 @@ const FixtureForm = ({ teams, players, locations }: FixtureFormProps) => {
     resolver: zodResolver(formSchema),
     defaultValues: {
       name: '',
+      team_1: undefined,
+      team_2: undefined,
       date: undefined,
-      location_id: undefined
+      location_id: undefined,
+      cancha_nro: undefined
     }
   })
 
@@ -135,6 +144,156 @@ const FixtureForm = ({ teams, players, locations }: FixtureFormProps) => {
             </FormItem>
           )}
         />
+
+        <div className='grid grid-cols-2 gap-1'>
+          <div className='grid grid-cols-3 col-span-2'>
+            <Separator>
+              vs
+              <Separator />
+            </Separator>
+          </div>
+          {/* team 1 */}
+          <FormField
+            control={form.control}
+            name='team_1'
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Equipo 1</FormLabel>
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <FormControl>
+                      <Button
+                        variant='outline'
+                        role='combobox'
+                        className={cn(
+                          'w-full justify-between',
+                          !field.value && 'text-muted-foreground'
+                        )}
+                      >
+                        {field.value
+                          ? teams.find(team => team.id === field.value)?.name
+                          : 'Elige un equipo'}
+                        <ChevronsUpDown className='ml-2 h-4 w-4 shrink-0 opacity-50' />
+                      </Button>
+                    </FormControl>
+                  </PopoverTrigger>
+                  <PopoverContent className='max-w-[300px] p-0 max-h-[500px] overflow-y-auto'>
+                    <Command>
+                      <CommandInput placeholder='Buscador de equipos...' />
+                      <CommandEmpty>No hay coincidencias.</CommandEmpty>
+                      <CommandGroup>
+                        {teams.map(team => (
+                          <CommandItem
+                            value={team.name!}
+                            key={team.id}
+                            onSelect={() => {
+                              form.setValue('team_1', team.id)
+                            }}
+                          >
+                            <>
+                              <Check
+                                className={cn(
+                                  'mr-2 h-4 w-4',
+                                  team.id === field.value
+                                    ? 'opacity-100'
+                                    : 'opacity-0'
+                                )}
+                              />
+                              {team.logo_url?.length ? (
+                                <Image
+                                  src={team.logo_url}
+                                  width={30}
+                                  height={30}
+                                  alt='team logo'
+                                  className='mr-2'
+                                />
+                              ) : (
+                                <Shield className='mr-2' size={30} />
+                              )}
+                              {team.name}
+                            </>
+                          </CommandItem>
+                        ))}
+                      </CommandGroup>
+                    </Command>
+                  </PopoverContent>
+                </Popover>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          {/* team 2 */}
+          <FormField
+            control={form.control}
+            name='team_2'
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Equipo 2</FormLabel>
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <FormControl>
+                      <Button
+                        variant='outline'
+                        role='combobox'
+                        className={cn(
+                          'w-full justify-between',
+                          !field.value && 'text-muted-foreground'
+                        )}
+                      >
+                        {field.value
+                          ? teams.find(team => team.id === field.value)?.name
+                          : 'Elige un equipo'}
+                        <ChevronsUpDown className='ml-2 h-4 w-4 shrink-0 opacity-50' />
+                      </Button>
+                    </FormControl>
+                  </PopoverTrigger>
+                  <PopoverContent className='max-w-[300px] p-0 max-h-[500px] overflow-y-auto'>
+                    <Command>
+                      <CommandInput placeholder='Buscador de equipos...' />
+                      <CommandEmpty>No hay coincidencias.</CommandEmpty>
+                      <CommandGroup>
+                        {teams.map(team => (
+                          <CommandItem
+                            value={team.name!}
+                            key={team.id}
+                            onSelect={() => {
+                              form.setValue('team_2', team.id)
+                            }}
+                          >
+                            <>
+                              <Check
+                                className={cn(
+                                  'mr-2 h-4 w-4',
+                                  team.id === field.value
+                                    ? 'opacity-100'
+                                    : 'opacity-0'
+                                )}
+                              />
+                              {team.logo_url?.length ? (
+                                <Image
+                                  src={team.logo_url}
+                                  width={30}
+                                  height={30}
+                                  alt='team logo'
+                                  className='mr-2'
+                                />
+                              ) : (
+                                <Shield className='mr-2' size={30} />
+                              )}
+                              {team.name}
+                            </>
+                          </CommandItem>
+                        ))}
+                      </CommandGroup>
+                    </Command>
+                  </PopoverContent>
+                </Popover>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        </div>
+
         {/* Date */}
         <FormField
           control={form.control}
@@ -203,66 +362,89 @@ const FixtureForm = ({ teams, players, locations }: FixtureFormProps) => {
             </FormItem>
           )}
         />
-        {/* Location */}
-        <FormField
-          control={form.control}
-          name='location_id'
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Local</FormLabel>
-              <Popover>
-                <PopoverTrigger asChild>
-                  <FormControl>
-                    <Button
-                      variant='outline'
-                      role='combobox'
-                      className={cn(
-                        'w-full justify-between',
-                        !field.value && 'text-muted-foreground'
-                      )}
-                    >
-                      <MapPin />
-                      {field.value
-                        ? locations.find(
-                            location => location.id === field.value
-                          )?.name
-                        : 'Elige un local'}
-                      <ChevronsUpDownIcon className='ml-2 h-4 w-4 shrink-0 opacity-50' />
-                    </Button>
-                  </FormControl>
-                </PopoverTrigger>
-                <PopoverContent className='max-w-[300px] p-0 max-h-[500px] overflow-y-auto'>
-                  <Command>
-                    <CommandInput placeholder='Buscador de posiciones...' />
-                    <CommandEmpty>No hay coincidencias.</CommandEmpty>
-                    <CommandGroup>
-                      {locations.map(location => (
-                        <CommandItem
-                          value={location.name!}
-                          key={location.id}
-                          onSelect={() => {
-                            form.setValue('location_id', location.id)
-                          }}
-                        >
-                          <Check
-                            className={cn(
-                              'mr-2 h-4 w-4',
-                              location.id === field.value
-                                ? 'opacity-100'
-                                : 'opacity-0'
-                            )}
-                          />
-                          {location.name}
-                        </CommandItem>
-                      ))}
-                    </CommandGroup>
-                  </Command>
-                </PopoverContent>
-              </Popover>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+
+        <div className='flex gap-1 w-full'>
+          {/* Location */}
+          <FormField
+            control={form.control}
+            name='location_id'
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Local</FormLabel>
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <FormControl>
+                      <Button
+                        variant='outline'
+                        role='combobox'
+                        className={cn(
+                          'w-full justify-between',
+                          !field.value && 'text-muted-foreground'
+                        )}
+                      >
+                        <MapPin className='mr-2 shrink-0 opacity-50' />
+                        {field.value
+                          ? locations.find(
+                              location => location.id === field.value
+                            )?.name
+                          : 'Elige un local'}
+                        <ChevronsUpDownIcon className='ml-2 h-4 w-4 shrink-0 opacity-50' />
+                      </Button>
+                    </FormControl>
+                  </PopoverTrigger>
+                  <PopoverContent className='max-w-[220px] p-0 max-h-[500px] overflow-y-auto'>
+                    <Command>
+                      <CommandInput placeholder='Buscador de posiciones...' />
+                      <CommandEmpty>No hay coincidencias.</CommandEmpty>
+                      <CommandGroup>
+                        {locations.map(location => (
+                          <CommandItem
+                            value={location.name!}
+                            key={location.id}
+                            onSelect={() => {
+                              form.setValue('location_id', location.id)
+                            }}
+                          >
+                            <Check
+                              className={cn(
+                                'mr-2 h-4 w-4',
+                                location.id === field.value
+                                  ? 'opacity-100'
+                                  : 'opacity-0'
+                              )}
+                            />
+                            {location.name}
+                          </CommandItem>
+                        ))}
+                      </CommandGroup>
+                    </Command>
+                  </PopoverContent>
+                </Popover>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          {/* Cancha nro */}
+          <FormField
+            control={form.control}
+            name='cancha_nro'
+            render={({ field }) => (
+              <FormItem className='rounded bg-white flex-none w-[75px]'>
+                <FormLabel>Cancha N°</FormLabel>
+                <FormControl>
+                  <Input
+                    className='font-semibold text-center'
+                    type='number'
+                    min={1}
+                    {...field}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        </div>
 
         <div className='w-full'>
           <Button
