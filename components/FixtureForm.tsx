@@ -1,6 +1,6 @@
 'use client'
 import { useSupabase } from '@/providers/SupabaseProvider'
-import { Players, Teams } from '@/types'
+import { Locations, Players, Teams } from '@/types'
 import { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import * as z from 'zod'
@@ -14,43 +14,52 @@ import {
   FormMessage
 } from '@/components/ui/form'
 import { useRouter } from 'next/navigation'
-import { CalendarIcon, Swords } from 'lucide-react'
+import {
+  CalendarIcon,
+  Check,
+  ChevronsUpDownIcon,
+  LocateIcon,
+  MapPin,
+  Swords
+} from 'lucide-react'
 import { Input } from './ui/input'
 import { Button } from './ui/button'
 import { Popover, PopoverContent, PopoverTrigger } from './ui/popover'
 import { cn } from '@/lib/utils'
 import { Calendar } from './ui/calendar'
-import { format, getHours, getMinutes, parseISO, set, subDays } from 'date-fns'
+import { format, isDate, set, subDays } from 'date-fns'
 import { es } from 'date-fns/esm/locale'
-
-const MAX_FILE_SIZE = 5 * 1024 * 1024
-const ACCEPTED_IMAGE_TYPES = [
-  'image/jpeg',
-  'image/jpg',
-  'image/png',
-  'image/webp'
-]
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem
+} from './ui/command'
 
 const formSchema = z.object({
   name: z.string().min(1, { message: 'Obligatorio' }),
-  date: z.date().optional()
+  date: z.date().optional(),
+  location_id: z.number().optional()
 })
 
 interface FixtureFormProps {
   teams: Teams[]
   players: Players[]
+  locations: Locations[]
 }
 
-const FixtureForm = ({ teams, players }: FixtureFormProps) => {
+const FixtureForm = ({ teams, players, locations }: FixtureFormProps) => {
   const router = useRouter()
   const supabase = useSupabase()
   const [loading, setLoading] = useState<boolean>(false)
-  const [hour, setHour] = useState<string>('--:--')
+  const [hour, setHour] = useState<string>('')
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       name: '',
-      date: undefined
+      date: undefined,
+      location_id: undefined
     }
   })
 
@@ -131,7 +140,7 @@ const FixtureForm = ({ teams, players }: FixtureFormProps) => {
           control={form.control}
           name='date'
           render={({ field }) => (
-            <FormItem className='flex flex-col'>
+            <FormItem>
               <FormLabel>Fecha y Hora</FormLabel>
               <Popover>
                 <PopoverTrigger asChild>
@@ -139,12 +148,12 @@ const FixtureForm = ({ teams, players }: FixtureFormProps) => {
                     <Button
                       variant={'outline'}
                       className={cn(
-                        'w-[240px] pl-3 text-left font-normal',
+                        'w-full pl-3 text-left font-normal',
                         !field.value && 'text-muted-foreground'
                       )}
                     >
                       {field.value ? (
-                        format(field.value, 'PP | HH:mm', {
+                        format(field.value!, 'PP | HH:mm', {
                           locale: es
                         })
                       ) : (
@@ -161,8 +170,8 @@ const FixtureForm = ({ teams, players }: FixtureFormProps) => {
                     onSelect={e => {
                       field.onChange(
                         set(e!, {
-                          hours: +hour.split(':')[0],
-                          minutes: +hour.split(':')[1]
+                          hours: hour.length ? +hour.split(':')[0] : 0,
+                          minutes: hour.length ? +hour.split(':')[1] : 0
                         })
                       )
                     }}
@@ -170,15 +179,15 @@ const FixtureForm = ({ teams, players }: FixtureFormProps) => {
                     initialFocus
                     locale={es}
                   />
-                  <div className='flex justify-center pb-4 px-20'>
+                  <div className='flex justify-center items-center pb-4 px-20'>
                     <Input
                       className='shadow-md text-xl font-semibold'
                       type='time'
                       defaultValue={
-                        field.value ? format(field.value, 'HH:mm') : hour
+                        field.value ? format(field.value, 'HH:mm') : undefined
                       }
                       onChange={e => {
-                        setHour(e.target.value)
+                        setHour(e.target.value) // keeps the time when date changes
                         field.onChange(
                           set(field.value ? field.value : new Date(), {
                             hours: +e.target.value.split(':')[0],
@@ -194,29 +203,67 @@ const FixtureForm = ({ teams, players }: FixtureFormProps) => {
             </FormItem>
           )}
         />
-        {/* Logo */}
-        {/* <FormField
+        {/* Location */}
+        <FormField
           control={form.control}
-          name='logo'
+          name='location_id'
           render={({ field }) => (
-            <FormItem className='rounded bg-white'>
-              <FormLabel>Logo</FormLabel>
-              <FormControl>
-                <div className='flex flex-col items-center gap-2'>
-                  <Input
-                    type='file'
-                    accept='image/*'
-                    onChange={e => {
-                      field.onChange(e.target.files?.[0])
-                    }}
-                  />
-                  <PreviewImage file={field.value} />
-                </div>
-              </FormControl>
+            <FormItem>
+              <FormLabel>Local</FormLabel>
+              <Popover>
+                <PopoverTrigger asChild>
+                  <FormControl>
+                    <Button
+                      variant='outline'
+                      role='combobox'
+                      className={cn(
+                        'w-full justify-between',
+                        !field.value && 'text-muted-foreground'
+                      )}
+                    >
+                      <MapPin />
+                      {field.value
+                        ? locations.find(
+                            location => location.id === field.value
+                          )?.name
+                        : 'Elige un local'}
+                      <ChevronsUpDownIcon className='ml-2 h-4 w-4 shrink-0 opacity-50' />
+                    </Button>
+                  </FormControl>
+                </PopoverTrigger>
+                <PopoverContent className='max-w-[300px] p-0 max-h-[500px] overflow-y-auto'>
+                  <Command>
+                    <CommandInput placeholder='Buscador de posiciones...' />
+                    <CommandEmpty>No hay coincidencias.</CommandEmpty>
+                    <CommandGroup>
+                      {locations.map(location => (
+                        <CommandItem
+                          value={location.name!}
+                          key={location.id}
+                          onSelect={() => {
+                            form.setValue('location_id', location.id)
+                          }}
+                        >
+                          <Check
+                            className={cn(
+                              'mr-2 h-4 w-4',
+                              location.id === field.value
+                                ? 'opacity-100'
+                                : 'opacity-0'
+                            )}
+                          />
+                          {location.name}
+                        </CommandItem>
+                      ))}
+                    </CommandGroup>
+                  </Command>
+                </PopoverContent>
+              </Popover>
               <FormMessage />
             </FormItem>
           )}
-        /> */}
+        />
+
         <div className='w-full'>
           <Button
             type='submit'

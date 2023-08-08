@@ -57,6 +57,77 @@ export interface Database {
         }
         Relationships: []
       }
+      fixture_details: {
+        Row: {
+          cancha_nro: number | null
+          fixture_id: number
+          team_1: number
+          team_2: number
+        }
+        Insert: {
+          cancha_nro?: number | null
+          fixture_id: number
+          team_1: number
+          team_2: number
+        }
+        Update: {
+          cancha_nro?: number | null
+          fixture_id?: number
+          team_1?: number
+          team_2?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "fixture_details_fixture_id_fkey"
+            columns: ["fixture_id"]
+            referencedRelation: "fixtures"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fixture_details_team_1_fkey"
+            columns: ["team_1"]
+            referencedRelation: "teams"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fixture_details_team_2_fkey"
+            columns: ["team_2"]
+            referencedRelation: "teams"
+            referencedColumns: ["id"]
+          }
+        ]
+      }
+      fixtures: {
+        Row: {
+          created_at: string
+          date: string
+          id: number
+          location_id: number | null
+          name: string
+        }
+        Insert: {
+          created_at?: string
+          date: string
+          id?: number
+          location_id?: number | null
+          name: string
+        }
+        Update: {
+          created_at?: string
+          date?: string
+          id?: number
+          location_id?: number | null
+          name?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "fixtures_location_id_fkey"
+            columns: ["location_id"]
+            referencedRelation: "locations"
+            referencedColumns: ["id"]
+          }
+        ]
+      }
       foot: {
         Row: {
           id: number
@@ -68,6 +139,24 @@ export interface Database {
         }
         Update: {
           id?: number
+          name?: string
+        }
+        Relationships: []
+      }
+      locations: {
+        Row: {
+          id: number
+          map_url: string | null
+          name: string
+        }
+        Insert: {
+          id?: number
+          map_url?: string | null
+          name: string
+        }
+        Update: {
+          id?: number
+          map_url?: string | null
           name?: string
         }
         Relationships: []
@@ -227,6 +316,27 @@ export interface Database {
             referencedColumns: ["id"]
           }
         ]
+      }
+      torneos: {
+        Row: {
+          created_at: string | null
+          id: number
+          logo_url: string | null
+          name: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          id?: number
+          logo_url?: string | null
+          name?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          id?: number
+          logo_url?: string | null
+          name?: string | null
+        }
+        Relationships: []
       }
     }
     Views: {

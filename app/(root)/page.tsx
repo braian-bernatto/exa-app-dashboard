@@ -1,6 +1,7 @@
 import getCountries from '@/actions/getCountries'
 import getExas from '@/actions/getExas'
 import getFoot from '@/actions/getFoot'
+import getLocations from '@/actions/getLocations'
 import getPlayers from '@/actions/getPlayers'
 import getPositions from '@/actions/getPositions'
 import getTeams from '@/actions/getTeams'
@@ -18,12 +19,13 @@ export default async function Home() {
   const exas = await getExas()
   const foot = await getFoot()
   const players = await getPlayers()
+  const locations = await getLocations()
 
   return (
     <div className='px-8 xl:px-0'>
       <Navbar />
       <div className='w-full bg-neutral-100 my-10 rounded-md max-w-7xl min-h-[75vh] overflow-auto p-4 sm:p-10 gap-10 flex flex-wrap justify-center items-start'>
-        <FixtureForm teams={teams} players={players} />
+        <FixtureForm teams={teams} players={players} locations={locations} />
         <TorneoForm />
         <PlayerForm
           teams={teams}

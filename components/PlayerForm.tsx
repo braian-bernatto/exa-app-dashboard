@@ -216,7 +216,7 @@ const PlayerForm = ({
           control={form.control}
           name='team_id'
           render={({ field }) => (
-            <FormItem className='flex flex-col'>
+            <FormItem>
               <FormLabel>Equipo</FormLabel>
               <Popover>
                 <PopoverTrigger asChild>
@@ -225,7 +225,7 @@ const PlayerForm = ({
                       variant='outline'
                       role='combobox'
                       className={cn(
-                        'max-w-[300px] justify-between',
+                        'w-full justify-between',
                         !field.value && 'text-muted-foreground'
                       )}
                     >
@@ -309,7 +309,7 @@ const PlayerForm = ({
           control={form.control}
           name='position_id'
           render={({ field }) => (
-            <FormItem className='flex flex-col'>
+            <FormItem>
               <FormLabel>Posición</FormLabel>
               <Popover>
                 <PopoverTrigger asChild>
@@ -318,7 +318,7 @@ const PlayerForm = ({
                       variant='outline'
                       role='combobox'
                       className={cn(
-                        'max-w-[300px] justify-between',
+                        'w-full justify-between',
                         !field.value && 'text-muted-foreground'
                       )}
                     >
@@ -368,7 +368,7 @@ const PlayerForm = ({
           control={form.control}
           name='country_iso2'
           render={({ field }) => (
-            <FormItem className='flex flex-col'>
+            <FormItem>
               <FormLabel>Nacionalidad</FormLabel>
               <Popover>
                 <PopoverTrigger asChild>
@@ -377,7 +377,7 @@ const PlayerForm = ({
                       variant='outline'
                       role='combobox'
                       className={cn(
-                        'max-w-[300px] justify-between',
+                        'w-full justify-between',
                         !field.value && 'text-muted-foreground'
                       )}
                     >
