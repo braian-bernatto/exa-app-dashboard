@@ -38,15 +38,17 @@ import {
   CommandItem
 } from './ui/command'
 import Image from 'next/image'
+import { DataTable } from '@/app/(table)/DataTable'
+import { columns } from '@/app/(table)/columns'
 import { Separator } from './ui/separator'
 
 const formSchema = z.object({
   name: z.string().min(1, { message: 'Obligatorio' }),
-  team_1: z.number(),
-  team_2: z.number(),
+  team_1: z.coerce.number(),
+  team_2: z.coerce.number(),
   date: z.date({ required_error: 'Obligatorio' }),
-  location_id: z.number().optional(),
-  cancha_nro: z.number().optional()
+  location_id: z.coerce.number().optional(),
+  cancha_nro: z.coerce.number().optional()
 })
 
 interface FixtureFormProps {
@@ -68,7 +70,7 @@ const FixtureForm = ({ teams, players, locations }: FixtureFormProps) => {
       team_2: undefined,
       date: undefined,
       location_id: undefined,
-      cancha_nro: undefined
+      cancha_nro: 0
     }
   })
 
@@ -145,13 +147,7 @@ const FixtureForm = ({ teams, players, locations }: FixtureFormProps) => {
           )}
         />
 
-        <div className='grid grid-cols-2 gap-1'>
-          <div className='grid grid-cols-3 col-span-2'>
-            <Separator>
-              vs
-              <Separator />
-            </Separator>
-          </div>
+        <div className='grid grid-cols-2 gap-1 overflow-hidden'>
           {/* team 1 */}
           <FormField
             control={form.control}
@@ -166,7 +162,7 @@ const FixtureForm = ({ teams, players, locations }: FixtureFormProps) => {
                         variant='outline'
                         role='combobox'
                         className={cn(
-                          'w-full justify-between',
+                          'w-full justify-between text-xs',
                           !field.value && 'text-muted-foreground'
                         )}
                       >
@@ -236,7 +232,7 @@ const FixtureForm = ({ teams, players, locations }: FixtureFormProps) => {
                         variant='outline'
                         role='combobox'
                         className={cn(
-                          'w-full justify-between',
+                          'w-full justify-between text-xs',
                           !field.value && 'text-muted-foreground'
                         )}
                       >
@@ -363,13 +359,13 @@ const FixtureForm = ({ teams, players, locations }: FixtureFormProps) => {
           )}
         />
 
-        <div className='flex gap-1 w-full'>
+        <div className='flex w-full gap-1'>
           {/* Location */}
           <FormField
             control={form.control}
             name='location_id'
             render={({ field }) => (
-              <FormItem>
+              <FormItem className='w-full'>
                 <FormLabel>Local</FormLabel>
                 <Popover>
                   <PopoverTrigger asChild>
@@ -424,13 +420,12 @@ const FixtureForm = ({ teams, players, locations }: FixtureFormProps) => {
               </FormItem>
             )}
           />
-
           {/* Cancha nro */}
           <FormField
             control={form.control}
             name='cancha_nro'
             render={({ field }) => (
-              <FormItem className='rounded bg-white flex-none w-[75px]'>
+              <FormItem className='rounded bg-white w-[75px] shrink-0'>
                 <FormLabel>Cancha N°</FormLabel>
                 <FormControl>
                   <Input
@@ -444,6 +439,24 @@ const FixtureForm = ({ teams, players, locations }: FixtureFormProps) => {
               </FormItem>
             )}
           />
+        </div>
+
+        {/* Table */}
+        <div className='w-full relative overflow-hidden'>
+          <div className='w-full flex justify-center items-center gap-2 h-6 text-xs relative'>
+            <Separator />
+            <p className='flex-none'>Equipo 1</p>
+            <Separator />
+          </div>
+          <DataTable columns={columns} data={players} />
+        </div>
+        <div className='w-full relative overflow-hidden'>
+          <div className='w-full flex justify-center items-center gap-2 h-6 text-xs relative'>
+            <Separator />
+            <p className='flex-none'>Equipo 2</p>
+            <Separator />
+          </div>
+          <DataTable columns={columns} data={players} />
         </div>
 
         <div className='w-full'>
