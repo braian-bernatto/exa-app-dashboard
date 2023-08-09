@@ -39,7 +39,7 @@ import {
 } from './ui/command'
 import Image from 'next/image'
 import { DataTable } from '@/app/(table)/DataTable'
-import { columns } from '@/app/(table)/columns'
+import { Columns } from '@/app/(table)/Columns'
 import { Separator } from './ui/separator'
 
 const formSchema = z
@@ -67,13 +67,22 @@ interface FixtureFormProps {
   locations: Locations[]
 }
 
+interface PlayersFixture extends Players {
+  yellow_cards: number
+  red_cards: boolean
+  motivo: string
+}
+
 const FixtureForm = ({ teams, players, locations }: FixtureFormProps) => {
   const router = useRouter()
   const supabase = useSupabase()
   const [loading, setLoading] = useState<boolean>(false)
   const [hour, setHour] = useState<string>('')
-  const [team_1, setTeam_1] = useState<Players[] | undefined>(undefined)
-  const [team_2, setTeam_2] = useState<Players[] | undefined>(undefined)
+  const [playersTeam_1, setPlayersTeam_1] = useState<any[] | undefined>(
+    undefined
+  )
+  const [playersTeam_2, setTeam_2] = useState<any[] | undefined>(undefined)
+  const [modifiedRows, setModifiedRows] = useState<any[] | undefined>(undefined)
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -147,7 +156,11 @@ const FixtureForm = ({ teams, players, locations }: FixtureFormProps) => {
       >
         <div className='flex gap-2'>
           <span className='bg-gradient-to-r from-emerald-300 to-emerald-700 rounded-full p-2 flex items-center justify-center'>
-            <Swords className='text-white' size={30} />
+            <Swords
+              className='text-white'
+              size={30}
+              onClick={() => console.log(modifiedRows)}
+            />
           </span>
           <h1 className='text-xl font-semibold flex items-center gap-2'>
             Agregar Fixture
@@ -214,10 +227,15 @@ const FixtureForm = ({ teams, players, locations }: FixtureFormProps) => {
                             key={team.id}
                             onSelect={() => {
                               form.setValue('team_1', team.id)
-                              setTeam_1(
-                                players.filter(
-                                  player => player.team_id === team.id
-                                )
+                              setPlayersTeam_1(
+                                players
+                                  .filter(player => player.team_id === team.id)
+                                  .map(players => ({
+                                    ...players,
+                                    yellow_cards: 0,
+                                    red_cards: false,
+                                    motivo: 'tembolos'
+                                  }))
                               )
                             }}
                           >
@@ -299,9 +317,14 @@ const FixtureForm = ({ teams, players, locations }: FixtureFormProps) => {
                             onSelect={() => {
                               form.setValue('team_2', team.id)
                               setTeam_2(
-                                players.filter(
-                                  player => player.team_id === team.id
-                                )
+                                players
+                                  .filter(player => player.team_id === team.id)
+                                  .map(players => ({
+                                    ...players,
+                                    yellow_cards: 0,
+                                    red_cards: false,
+                                    motivo: ''
+                                  }))
                               )
                             }}
                           >
@@ -496,28 +519,73 @@ const FixtureForm = ({ teams, players, locations }: FixtureFormProps) => {
 
         {/* Table */}
         <div className='w-full relative overflow-hidden'>
-          <div className='w-full flex justify-center items-center gap-2 text-xs relative'>
+          <div
+            className={`w-full flex justify-center items-center gap-2 text-xs relative ${
+              playersTeam_1?.length ? 'top-3' : ''
+            }`}
+          >
             <Separator />
-            {team_1?.length ? (
-              getTeamLogo(team_1)
+            {playersTeam_1?.length ? (
+              getTeamLogo(playersTeam_1)
             ) : (
               <p className='flex-none'>Equipo 1</p>
             )}
             <Separator />
           </div>
-          <DataTable columns={columns} data={team_1 || []} />
+          {playersTeam_1 && (
+            <DataTable
+              columns={Columns}
+              intialValues={playersTeam_1}
+              setModifiedRows={setModifiedRows}
+            />
+          )}
         </div>
         <div className='w-full relative overflow-hidden'>
-          <div className='w-full flex justify-center items-center gap-2 text-xs relative'>
+          <div
+            className={`w-full flex justify-center items-center gap-2 text-xs relative ${
+              playersTeam_2?.length ? 'top-3' : ''
+            }`}
+          >
             <Separator />
-            {team_2?.length ? (
-              getTeamLogo(team_2)
+            {playersTeam_2?.length ? (
+              getTeamLogo(playersTeam_2)
             ) : (
               <p className='flex-none'>Equipo 2</p>
             )}
             <Separator />
           </div>
-          <DataTable columns={columns} data={team_2 || []} />
+          {playersTeam_2 && (
+            <DataTable
+              columns={Columns}
+              intialValues={playersTeam_2}
+              setModifiedRows={setModifiedRows}
+            />
+          )}
+        </div>
+
+        {/* Resultado */}
+        <div className='flex justify-center items-center overflow-hidden w-full'>
+          <div
+            className={`w-full flex justify-center items-center gap-2 text-xs relative`}
+          >
+            {playersTeam_1?.length ? (
+              getTeamLogo(playersTeam_1)
+            ) : (
+              <p className='flex-none'>Equipo 1</p>
+            )}
+          </div>
+          <h2 className='text-4xl text-muted-foreground text-center flex-none'>
+            {form.getValues('cancha_nro')}-{form.getValues('cancha_nro')}
+          </h2>
+          <div
+            className={`w-full flex justify-center items-center gap-2 text-xs relative `}
+          >
+            {playersTeam_2?.length ? (
+              getTeamLogo(playersTeam_2)
+            ) : (
+              <p className='flex-none'>Equipo 2</p>
+            )}
+          </div>
         </div>
 
         <div className='w-full'>

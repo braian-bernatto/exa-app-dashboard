@@ -1,13 +1,15 @@
 'use client'
 
 import { Button } from '@/components/ui/button'
-import { Checkbox } from '@/components/ui/checkbox'
-import { Input } from '@/components/ui/input'
 import { Players } from '@/types'
 import { ColumnDef } from '@tanstack/react-table'
 import { ArrowUpDown } from 'lucide-react'
+import TableCellYellowCard from './TableCellYellowCard'
+import TableCellGoals from './TableCellGoals'
+import TableCellRedCard from './TableCellRedCard'
+import TableCellMotivo from './TableCellMotivo'
 
-export const columns: ColumnDef<Players>[] = [
+export const Columns: ColumnDef<Players>[] = [
   {
     accessorKey: 'name',
     header: ({ column }) => {
@@ -29,7 +31,7 @@ export const columns: ColumnDef<Players>[] = [
     header: 'Posición'
   },
   {
-    id: 'goals',
+    accessorKey: 'goals',
     header: ({ column }) => {
       return (
         <Button
@@ -43,42 +45,21 @@ export const columns: ColumnDef<Players>[] = [
         </Button>
       )
     },
-    cell: ({ row }) => {
-      return (
-        <Input
-          type='number'
-          min={0}
-          className='min-w-[60px] w-full text-center text-xs h-[30px]'
-        />
-      )
-    }
+    cell: TableCellGoals
   },
   {
-    id: 'yellow_cards',
+    accessorKey: 'yellow_cards',
     header: 'T.A.',
-    cell: ({ row }) => {
-      return (
-        <Input
-          type='number'
-          min={0}
-          max={2}
-          className='min-w-[60px] w-full text-center text-xs h-[30px]'
-        />
-      )
-    }
+    cell: TableCellYellowCard
   },
   {
-    id: 'red_cards',
+    accessorKey: 'red_cards',
     header: 'T.R.',
-    cell: ({ row }) => {
-      return <Checkbox />
-    }
+    cell: TableCellRedCard
   },
   {
-    id: 'motivo',
+    accessorKey: 'motivo',
     header: 'Motivo',
-    cell: ({ row }) => {
-      return <Input className='min-w-[150px] text-xs h-[30px]' />
-    }
+    cell: TableCellMotivo
   }
 ]

@@ -60,18 +60,21 @@ export interface Database {
       fixture_details: {
         Row: {
           cancha_nro: number | null
+          date: string | null
           fixture_id: number
           team_1: number
           team_2: number
         }
         Insert: {
           cancha_nro?: number | null
+          date?: string | null
           fixture_id: number
           team_1: number
           team_2: number
         }
         Update: {
           cancha_nro?: number | null
+          date?: string | null
           fixture_id?: number
           team_1?: number
           team_2?: number
@@ -100,21 +103,18 @@ export interface Database {
       fixtures: {
         Row: {
           created_at: string
-          date: string
           id: number
           location_id: number | null
           name: string
         }
         Insert: {
           created_at?: string
-          date: string
           id?: number
           location_id?: number | null
           name: string
         }
         Update: {
           created_at?: string
-          date?: string
           id?: number
           location_id?: number | null
           name?: string
@@ -142,6 +142,37 @@ export interface Database {
           name?: string
         }
         Relationships: []
+      }
+      goals: {
+        Row: {
+          fixture_id: number
+          player_id: number
+          quantity: number
+        }
+        Insert: {
+          fixture_id?: number
+          player_id: number
+          quantity: number
+        }
+        Update: {
+          fixture_id?: number
+          player_id?: number
+          quantity?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "goals_fixture_id_fkey"
+            columns: ["fixture_id"]
+            referencedRelation: "fixtures"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "goals_player_id_fkey"
+            columns: ["player_id"]
+            referencedRelation: "players"
+            referencedColumns: ["id"]
+          }
+        ]
       }
       locations: {
         Row: {
@@ -286,6 +317,37 @@ export interface Database {
           }
         ]
       }
+      red_cards: {
+        Row: {
+          fixture_id: number
+          motivo: string | null
+          player_id: number
+        }
+        Insert: {
+          fixture_id?: number
+          motivo?: string | null
+          player_id: number
+        }
+        Update: {
+          fixture_id?: number
+          motivo?: string | null
+          player_id?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "red_cards_fixture_id_fkey"
+            columns: ["fixture_id"]
+            referencedRelation: "fixtures"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "red_cards_player_id_fkey"
+            columns: ["player_id"]
+            referencedRelation: "players"
+            referencedColumns: ["id"]
+          }
+        ]
+      }
       teams: {
         Row: {
           created_at: string | null
@@ -337,6 +399,65 @@ export interface Database {
           name?: string | null
         }
         Relationships: []
+      }
+      walkover: {
+        Row: {
+          fixture_id: number
+          team_id: number
+        }
+        Insert: {
+          fixture_id?: number
+          team_id: number
+        }
+        Update: {
+          fixture_id?: number
+          team_id?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "walkover_fixture_id_fkey"
+            columns: ["fixture_id"]
+            referencedRelation: "fixtures"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "walkover_team_id_fkey"
+            columns: ["team_id"]
+            referencedRelation: "teams"
+            referencedColumns: ["id"]
+          }
+        ]
+      }
+      yellow_cards: {
+        Row: {
+          fixture_id: number
+          player_id: number
+          quantity: number
+        }
+        Insert: {
+          fixture_id?: number
+          player_id: number
+          quantity: number
+        }
+        Update: {
+          fixture_id?: number
+          player_id?: number
+          quantity?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "yellow_cards_fixture_id_fkey"
+            columns: ["fixture_id"]
+            referencedRelation: "fixtures"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "yellow_cards_player_id_fkey"
+            columns: ["player_id"]
+            referencedRelation: "players"
+            referencedColumns: ["id"]
+          }
+        ]
       }
     }
     Views: {
