@@ -135,7 +135,7 @@ const FixtureForm = ({ teams, players, locations }: FixtureFormProps) => {
       .logo_url
 
     if (url) {
-      return <Image src={url} width={40} height={40} alt='team logo' />
+      return <Image src={url} width={50} height={50} alt='team logo' />
     }
   }
 
@@ -194,18 +194,21 @@ const FixtureForm = ({ teams, players, locations }: FixtureFormProps) => {
                       </Button>
                     </FormControl>
                   </PopoverTrigger>
-                  <PopoverContent className='max-w-[300px] p-0 max-h-[500px] overflow-y-auto'>
+                  <PopoverContent className='max-w-[200px] p-0 sm:max-h-[500px] max-h-[300px] overflow-y-auto text-xs'>
                     <Command>
-                      <CommandInput placeholder='Buscador de equipos...' />
+                      <CommandInput
+                        className='text-xs'
+                        placeholder='Buscador de equipos...'
+                      />
                       <CommandEmpty>No hay coincidencias.</CommandEmpty>
                       <CommandGroup>
                         {teams.map(team => (
                           <CommandItem
-                            className={
+                            className={`text-xs ${
                               form.getValues('team_2') === team.id
                                 ? 'opacity-50 bg-slate-50'
                                 : ''
-                            }
+                            }`}
                             disabled={form.getValues('team_2') === team.id}
                             value={team.name!}
                             key={team.id}
@@ -275,18 +278,21 @@ const FixtureForm = ({ teams, players, locations }: FixtureFormProps) => {
                       </Button>
                     </FormControl>
                   </PopoverTrigger>
-                  <PopoverContent className='max-w-[300px] p-0 max-h-[500px] overflow-y-auto'>
+                  <PopoverContent className='max-w-[200px] p-0 sm:max-h-[500px] max-h-[300px] overflow-y-auto'>
                     <Command>
-                      <CommandInput placeholder='Buscador de equipos...' />
+                      <CommandInput
+                        className='text-xs'
+                        placeholder='Buscador de equipos...'
+                      />
                       <CommandEmpty>No hay coincidencias.</CommandEmpty>
                       <CommandGroup>
                         {teams.map(team => (
                           <CommandItem
-                            className={
+                            className={`text-xs ${
                               form.getValues('team_1') === team.id
                                 ? 'opacity-50 bg-slate-50'
                                 : ''
-                            }
+                            }`}
                             disabled={form.getValues('team_1') === team.id}
                             value={team.name!}
                             key={team.id}
@@ -431,7 +437,7 @@ const FixtureForm = ({ teams, players, locations }: FixtureFormProps) => {
                       </Button>
                     </FormControl>
                   </PopoverTrigger>
-                  <PopoverContent className='max-w-[220px] p-0 max-h-[500px] overflow-y-auto'>
+                  <PopoverContent className='max-w-[220px] p-0 sm:max-h-[500px] max-h-[300px] overflow-y-auto'>
                     <Command>
                       <CommandInput placeholder='Buscador de posiciones...' />
                       <CommandEmpty>No hay coincidencias.</CommandEmpty>
@@ -472,7 +478,11 @@ const FixtureForm = ({ teams, players, locations }: FixtureFormProps) => {
                 <FormLabel>Cancha N°</FormLabel>
                 <FormControl>
                   <Input
-                    className='font-semibold text-center'
+                    className={`font-semibold text-center ${
+                      field.value !== undefined && field.value > 0
+                        ? ''
+                        : 'text-muted-foreground'
+                    }`}
                     type='number'
                     min={1}
                     {...field}
