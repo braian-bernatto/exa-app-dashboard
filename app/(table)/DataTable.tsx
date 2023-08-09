@@ -22,13 +22,13 @@ import React, { useEffect, useState } from 'react'
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[]
   intialValues: TData[]
-  setModifiedRows: (data: any) => void
+  addModifiedRows: (data: any) => void
 }
 
 export function DataTable<TData, TValue>({
   columns,
   intialValues,
-  setModifiedRows
+  addModifiedRows
 }: DataTableProps<TData, TValue>) {
   const [sorting, setSorting] = React.useState<SortingState>([])
   const [data, setData] = useState(() => [...intialValues])
@@ -56,7 +56,7 @@ export function DataTable<TData, TValue>({
           })
         )
       },
-      setModifiedRows
+      addModifiedRows
     }
   })
 

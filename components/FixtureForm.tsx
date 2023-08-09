@@ -82,7 +82,7 @@ const FixtureForm = ({ teams, players, locations }: FixtureFormProps) => {
     undefined
   )
   const [playersTeam_2, setTeam_2] = useState<any[] | undefined>(undefined)
-  const [modifiedRows, setModifiedRows] = useState<any[] | undefined>(undefined)
+  const [modifiedRows, setModifiedRows] = useState<any[]>([])
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -94,6 +94,26 @@ const FixtureForm = ({ teams, players, locations }: FixtureFormProps) => {
       cancha_nro: 0
     }
   })
+
+  const addModifiedRows = (data: any) => {
+    let exists = false
+
+    const newData = modifiedRows?.map(item => {
+      if (item.id === data.id) {
+        exists = true
+        return {
+          ...data
+        }
+      }
+      return item
+    })
+
+    if (exists) {
+      setModifiedRows(newData)
+    } else {
+      setModifiedRows([...newData, data])
+    }
+  }
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     console.log(values)
@@ -536,7 +556,7 @@ const FixtureForm = ({ teams, players, locations }: FixtureFormProps) => {
             <DataTable
               columns={Columns}
               intialValues={playersTeam_1}
-              setModifiedRows={setModifiedRows}
+              addModifiedRows={addModifiedRows}
             />
           )}
         </div>
@@ -558,7 +578,7 @@ const FixtureForm = ({ teams, players, locations }: FixtureFormProps) => {
             <DataTable
               columns={Columns}
               intialValues={playersTeam_2}
-              setModifiedRows={setModifiedRows}
+              addModifiedRows={addModifiedRows}
             />
           )}
         </div>

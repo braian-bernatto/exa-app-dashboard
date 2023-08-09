@@ -11,7 +11,7 @@ const TableCellYellowCard = ({ getValue, row, column, table }: any) => {
 
   const onBlur = () => {
     table.options.meta?.updateData(row.index, column.id, value)
-    table.options.meta?.setModifiedRows({
+    table.options.meta?.addModifiedRows({
       ...row.original,
       yellow_cards: parseInt(value)
     })
