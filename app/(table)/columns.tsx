@@ -3,16 +3,11 @@
 import { Button } from '@/components/ui/button'
 import { Checkbox } from '@/components/ui/checkbox'
 import { Input } from '@/components/ui/input'
-import { Textarea } from '@/components/ui/textarea'
 import { Players } from '@/types'
 import { ColumnDef } from '@tanstack/react-table'
 import { ArrowUpDown } from 'lucide-react'
 
 export const columns: ColumnDef<Players>[] = [
-  {
-    accessorKey: 'position_id',
-    header: 'Posición'
-  },
   {
     accessorKey: 'name',
     header: ({ column }) => {
@@ -28,6 +23,10 @@ export const columns: ColumnDef<Players>[] = [
         </Button>
       )
     }
+  },
+  {
+    accessorKey: 'position_id',
+    header: 'Posición'
   },
   {
     id: 'goals',

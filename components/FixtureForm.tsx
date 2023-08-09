@@ -42,14 +42,24 @@ import { DataTable } from '@/app/(table)/DataTable'
 import { columns } from '@/app/(table)/columns'
 import { Separator } from './ui/separator'
 
-const formSchema = z.object({
-  name: z.string().min(1, { message: 'Obligatorio' }),
-  team_1: z.coerce.number(),
-  team_2: z.coerce.number(),
-  date: z.date({ required_error: 'Obligatorio' }),
-  location_id: z.coerce.number().optional(),
-  cancha_nro: z.coerce.number().optional()
-})
+const formSchema = z
+  .object({
+    name: z.string().min(1, { message: 'Obligatorio' }),
+    team_1: z.coerce.number(),
+    team_2: z.coerce.number(),
+    date: z.date({ required_error: 'Obligatorio' }),
+    location_id: z.coerce.number().optional(),
+    cancha_nro: z.coerce.number().optional()
+  })
+  .refine(
+    val => {
+      if (val.team_1 !== val.team_2) return true
+    },
+    {
+      message: 'No pueden ser el mismo equipo',
+      path: ['team_2']
+    }
+  )
 
 interface FixtureFormProps {
   teams: Teams[]
@@ -62,6 +72,8 @@ const FixtureForm = ({ teams, players, locations }: FixtureFormProps) => {
   const supabase = useSupabase()
   const [loading, setLoading] = useState<boolean>(false)
   const [hour, setHour] = useState<string>('')
+  const [team_1, setTeam_1] = useState<Players[] | undefined>(undefined)
+  const [team_2, setTeam_2] = useState<Players[] | undefined>(undefined)
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -116,6 +128,15 @@ const FixtureForm = ({ teams, players, locations }: FixtureFormProps) => {
     // } finally {
     //   setLoading(false)
     // }
+  }
+
+  const getTeamLogo = (filteredPlayers: Players[]) => {
+    const url = teams.filter(team => team.id === filteredPlayers[0].team_id)[0]
+      .logo_url
+
+    if (url) {
+      return <Image src={url} width={40} height={40} alt='team logo' />
+    }
   }
 
   return (
@@ -180,10 +201,21 @@ const FixtureForm = ({ teams, players, locations }: FixtureFormProps) => {
                       <CommandGroup>
                         {teams.map(team => (
                           <CommandItem
+                            className={
+                              form.getValues('team_2') === team.id
+                                ? 'opacity-50 bg-slate-50'
+                                : ''
+                            }
+                            disabled={form.getValues('team_2') === team.id}
                             value={team.name!}
                             key={team.id}
                             onSelect={() => {
                               form.setValue('team_1', team.id)
+                              setTeam_1(
+                                players.filter(
+                                  player => player.team_id === team.id
+                                )
+                              )
                             }}
                           >
                             <>
@@ -250,10 +282,21 @@ const FixtureForm = ({ teams, players, locations }: FixtureFormProps) => {
                       <CommandGroup>
                         {teams.map(team => (
                           <CommandItem
+                            className={
+                              form.getValues('team_1') === team.id
+                                ? 'opacity-50 bg-slate-50'
+                                : ''
+                            }
+                            disabled={form.getValues('team_1') === team.id}
                             value={team.name!}
                             key={team.id}
                             onSelect={() => {
                               form.setValue('team_2', team.id)
+                              setTeam_2(
+                                players.filter(
+                                  player => player.team_id === team.id
+                                )
+                              )
                             }}
                           >
                             <>
@@ -443,20 +486,28 @@ const FixtureForm = ({ teams, players, locations }: FixtureFormProps) => {
 
         {/* Table */}
         <div className='w-full relative overflow-hidden'>
-          <div className='w-full flex justify-center items-center gap-2 h-6 text-xs relative'>
+          <div className='w-full flex justify-center items-center gap-2 text-xs relative'>
             <Separator />
-            <p className='flex-none'>Equipo 1</p>
+            {team_1?.length ? (
+              getTeamLogo(team_1)
+            ) : (
+              <p className='flex-none'>Equipo 1</p>
+            )}
             <Separator />
           </div>
-          <DataTable columns={columns} data={players} />
+          <DataTable columns={columns} data={team_1 || []} />
         </div>
         <div className='w-full relative overflow-hidden'>
-          <div className='w-full flex justify-center items-center gap-2 h-6 text-xs relative'>
+          <div className='w-full flex justify-center items-center gap-2 text-xs relative'>
             <Separator />
-            <p className='flex-none'>Equipo 2</p>
+            {team_2?.length ? (
+              getTeamLogo(team_2)
+            ) : (
+              <p className='flex-none'>Equipo 2</p>
+            )}
             <Separator />
           </div>
-          <DataTable columns={columns} data={players} />
+          <DataTable columns={columns} data={team_2 || []} />
         </div>
 
         <div className='w-full'>
