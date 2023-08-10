@@ -41,6 +41,7 @@ import Image from 'next/image'
 import { DataTable } from '@/components/Fixture/DataTable'
 import { Columns } from '@/components/Fixture/Columns'
 import { Separator } from './ui/separator'
+import { Toggle } from './ui/toggle'
 
 const formSchema = z
   .object({
@@ -80,6 +81,7 @@ const FixtureForm = ({ teams, players, locations }: FixtureFormProps) => {
   const [loading, setLoading] = useState<boolean>(false)
   const [hour, setHour] = useState<string>('')
   const [goals, setGoals] = useState()
+  const [walkover, setWalkover] = useState<number[]>([])
   const [playersTeam_1, setPlayersTeam_1] = useState<
     PlayersFixture[] | undefined
   >(undefined)
@@ -146,7 +148,7 @@ const FixtureForm = ({ teams, players, locations }: FixtureFormProps) => {
   }, [modifiedRows])
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
-    console.log(values)
+    console.log(values, modifiedRows)
     form.reset()
     // try {
     //   setLoading(true)
@@ -198,6 +200,17 @@ const FixtureForm = ({ teams, players, locations }: FixtureFormProps) => {
     }
   }
 
+  const handleToggle = (toggled: boolean, listado: PlayersFixture[]) => {
+    if (toggled) {
+      setWalkover([...walkover, listado[0].team_id!])
+      return
+    }
+
+    const filtered = walkover.filter(id => id !== listado[0].team_id!)
+
+    setWalkover(filtered)
+  }
+
   return (
     <Form {...form}>
       <form
@@ -210,7 +223,7 @@ const FixtureForm = ({ teams, players, locations }: FixtureFormProps) => {
               className='text-white'
               size={30}
               onClick={() => {
-                console.log(modifiedRows)
+                console.log({ modifiedRows, walkover })
               }}
             />
           </span>
@@ -580,7 +593,19 @@ const FixtureForm = ({ teams, players, locations }: FixtureFormProps) => {
           >
             <Separator />
             {playersTeam_1?.length ? (
-              getTeamLogo(playersTeam_1)
+              <span className='flex flex-col items-center'>
+                <Toggle
+                  variant={'outline'}
+                  size={'sm'}
+                  className='left-0 top-0 h-5'
+                  onPressedChange={e => {
+                    handleToggle(e, playersTeam_1)
+                  }}
+                >
+                  Walkover
+                </Toggle>
+                {getTeamLogo(playersTeam_1)}
+              </span>
             ) : (
               <p className='flex-none'>Equipo 1</p>
             )}
@@ -602,7 +627,19 @@ const FixtureForm = ({ teams, players, locations }: FixtureFormProps) => {
           >
             <Separator />
             {playersTeam_2?.length ? (
-              getTeamLogo(playersTeam_2)
+              <span className='flex flex-col items-center'>
+                <Toggle
+                  variant={'outline'}
+                  size={'sm'}
+                  className='left-0 top-0 h-5'
+                  onPressedChange={e => {
+                    handleToggle(e, playersTeam_2)
+                  }}
+                >
+                  Walkover
+                </Toggle>
+                {getTeamLogo(playersTeam_2)}
+              </span>
             ) : (
               <p className='flex-none'>Equipo 2</p>
             )}
