@@ -38,8 +38,8 @@ import {
   CommandItem
 } from './ui/command'
 import Image from 'next/image'
-import { DataTable } from '@/app/(table)/DataTable'
-import { Columns } from '@/app/(table)/Columns'
+import { DataTable } from '@/components/Fixture/DataTable'
+import { Columns } from '@/components/Fixture/Columns'
 import { Separator } from './ui/separator'
 
 const formSchema = z
