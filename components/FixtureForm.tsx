@@ -85,10 +85,17 @@ const FixtureForm = ({ teams, players, locations }: FixtureFormProps) => {
   const [playersTeam_1, setPlayersTeam_1] = useState<
     PlayersFixture[] | undefined
   >(undefined)
-  const [playersTeam_2, setTeam_2] = useState<PlayersFixture[] | undefined>(
-    undefined
-  )
+  const [playersTeam_2, setPlayersTeam_2] = useState<
+    PlayersFixture[] | undefined
+  >(undefined)
+  const [filteredPlayersTeam_1, setFilteredPlayersTeam_1] = useState<
+    PlayersFixture[] | undefined
+  >(undefined)
+  const [filteredPlayersTeam_2, setFilteredPlayersTeam_2] = useState<
+    PlayersFixture[] | undefined
+  >(undefined)
   const [modifiedRows, setModifiedRows] = useState<any[]>([])
+
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -209,6 +216,23 @@ const FixtureForm = ({ teams, players, locations }: FixtureFormProps) => {
     const filtered = walkover.filter(id => id !== listado[0].team_id!)
 
     setWalkover(filtered)
+  }
+
+  const updatePlayersList = (
+    bool: boolean,
+    setPlayers: (list: PlayersFixture[]) => void,
+    initialList: PlayersFixture[]
+  ) => {
+    bool
+      ? setPlayers(initialList.filter(player => player.position_id === 'POR'))
+      : setPlayers(initialList)
+  }
+
+  const checkWalkoverId = (id: number) => {
+    const exists = walkover.indexOf(id)
+    if (exists === -1) return false
+
+    return true
   }
 
   return (
@@ -382,7 +406,7 @@ const FixtureForm = ({ teams, players, locations }: FixtureFormProps) => {
                             key={team.id}
                             onSelect={() => {
                               form.setValue('team_2', team.id)
-                              setTeam_2(
+                              setPlayersTeam_2(
                                 players
                                   .filter(player => player.team_id === team.id)
                                   .map(players => ({
@@ -586,71 +610,90 @@ const FixtureForm = ({ teams, players, locations }: FixtureFormProps) => {
 
         {/* Table */}
         <div className='w-full relative overflow-hidden'>
-          <div
-            className={`w-full flex justify-center items-center gap-2 text-xs relative ${
-              playersTeam_1?.length ? 'top-3' : ''
-            }`}
-          >
-            <Separator />
-            {playersTeam_1?.length ? (
-              <span className='flex flex-col items-center'>
-                <Toggle
-                  variant={'outline'}
-                  size={'sm'}
-                  className='left-0 top-0 h-5'
-                  onPressedChange={e => {
-                    handleToggle(e, playersTeam_1)
-                  }}
-                >
-                  Walkover
-                </Toggle>
-                {getTeamLogo(playersTeam_1)}
-              </span>
-            ) : (
-              <p className='flex-none'>Equipo 1</p>
-            )}
-            <Separator />
-          </div>
           {playersTeam_1 && (
-            <DataTable
-              columns={Columns}
-              intialValues={playersTeam_1}
-              addModifiedRows={addModifiedRows}
-            />
+            <>
+              <div
+                className={`w-full flex justify-center items-center gap-2 text-xs relative z-10`}
+              >
+                <Separator />
+                {playersTeam_1?.length ? (
+                  <span className='flex flex-col items-center'>
+                    <Toggle
+                      variant={'outline'}
+                      size={'sm'}
+                      className='left-0 top-0 h-5'
+                      onPressedChange={e => {
+                        handleToggle(e, playersTeam_1)
+                        updatePlayersList(
+                          e,
+                          setFilteredPlayersTeam_2,
+                          playersTeam_2!
+                        )
+                      }}
+                    >
+                      Walkover
+                    </Toggle>
+                    {getTeamLogo(playersTeam_1)}
+                  </span>
+                ) : (
+                  <p className='flex-none'>Equipo 1</p>
+                )}
+                <Separator />
+              </div>
+              {/* {!checkWalkoverId(playersTeam_1[0].team_id!) && ( */}
+              <div className={`relative -top-5`}>
+                <DataTable
+                  columns={Columns}
+                  intialValues={filteredPlayersTeam_1 || playersTeam_1}
+                  addModifiedRows={addModifiedRows}
+                />
+              </div>
+              {/* )} */}
+            </>
           )}
         </div>
+
         <div className='w-full relative overflow-hidden'>
-          <div
-            className={`w-full flex justify-center items-center gap-2 text-xs relative ${
-              playersTeam_2?.length ? 'top-3' : ''
-            }`}
-          >
-            <Separator />
-            {playersTeam_2?.length ? (
-              <span className='flex flex-col items-center'>
-                <Toggle
-                  variant={'outline'}
-                  size={'sm'}
-                  className='left-0 top-0 h-5'
-                  onPressedChange={e => {
-                    handleToggle(e, playersTeam_2)
-                  }}
-                >
-                  Walkover
-                </Toggle>
-                {getTeamLogo(playersTeam_2)}
-              </span>
-            ) : (
-              <p className='flex-none'>Equipo 2</p>
-            )}
-            <Separator />
-          </div>
           {playersTeam_2 && (
-            <DataTable
-              columns={Columns}
-              intialValues={playersTeam_2}
-              addModifiedRows={addModifiedRows}
-            />
+            <>
+              <div
+                className={`w-full flex justify-center items-center gap-2 text-xs relative z-10`}
+              >
+                <Separator />
+                {playersTeam_2?.length ? (
+                  <span className='flex flex-col items-center'>
+                    <Toggle
+                      variant={'outline'}
+                      size={'sm'}
+                      className='left-0 top-0 h-5'
+                      onPressedChange={e => {
+                        handleToggle(e, playersTeam_2)
+                        updatePlayersList(
+                          e,
+                          setFilteredPlayersTeam_1,
+                          playersTeam_1!
+                        )
+                      }}
+                    >
+                      Walkover
+                    </Toggle>
+                    {getTeamLogo(playersTeam_2)}
+                  </span>
+                ) : (
+                  <p className='flex-none'>Equipo 2</p>
+                )}
+                <Separator />
+              </div>
+              {/* {!checkWalkoverId(playersTeam_2[0].team_id!) && ( */}
+              <div className={`relative -top-5`}>
+                <DataTable
+                  columns={Columns}
+                  intialValues={filteredPlayersTeam_2 || playersTeam_2}
+                  addModifiedRows={addModifiedRows}
+                />
+              </div>
+              {/* )} */}
+            </>
           )}
         </div>
 
