@@ -1,7 +1,7 @@
 'use client'
 import { useSupabase } from '@/providers/SupabaseProvider'
 import { Locations, Players, Teams } from '@/types'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useForm } from 'react-hook-form'
 import * as z from 'zod'
 import { zodResolver } from '@hookform/resolvers/zod'
@@ -68,6 +68,7 @@ interface FixtureFormProps {
 }
 
 interface PlayersFixture extends Players {
+  goals: number
   yellow_cards: number
   red_cards: boolean
   motivo: string
@@ -78,10 +79,13 @@ const FixtureForm = ({ teams, players, locations }: FixtureFormProps) => {
   const supabase = useSupabase()
   const [loading, setLoading] = useState<boolean>(false)
   const [hour, setHour] = useState<string>('')
-  const [playersTeam_1, setPlayersTeam_1] = useState<any[] | undefined>(
+  const [goals, setGoals] = useState()
+  const [playersTeam_1, setPlayersTeam_1] = useState<
+    PlayersFixture[] | undefined
+  >(undefined)
+  const [playersTeam_2, setTeam_2] = useState<PlayersFixture[] | undefined>(
     undefined
   )
-  const [playersTeam_2, setTeam_2] = useState<any[] | undefined>(undefined)
   const [modifiedRows, setModifiedRows] = useState<any[]>([])
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -114,6 +118,32 @@ const FixtureForm = ({ teams, players, locations }: FixtureFormProps) => {
       setModifiedRows([...newData, data])
     }
   }
+
+  const countGoals = () => {
+    const totalCount = modifiedRows.reduce((prev, curr) => {
+      // Inicia el array con el primer item
+      if (!prev.length) {
+        prev.push({ [curr.team_id]: curr.goals })
+        return prev
+      }
+
+      // Busca si existe el item en el array y suma los goles
+      if (prev[0].hasOwnProperty([curr.team_id])) {
+        prev[0][curr.team_id] = prev[0][curr.team_id] + curr.goals
+      } else {
+        // Si no encontro el dato en el array entonces se agrega como nuevo
+        prev = [{ ...prev[0], [curr.team_id]: curr.goals }]
+      }
+
+      return prev
+    }, [])
+
+    setGoals(totalCount[0])
+  }
+
+  useEffect(() => {
+    countGoals()
+  }, [modifiedRows])
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     console.log(values)
@@ -179,7 +209,9 @@ const FixtureForm = ({ teams, players, locations }: FixtureFormProps) => {
             <Swords
               className='text-white'
               size={30}
-              onClick={() => console.log(modifiedRows)}
+              onClick={() => {
+                console.log(modifiedRows)
+              }}
             />
           </span>
           <h1 className='text-xl font-semibold flex items-center gap-2'>
@@ -252,6 +284,7 @@ const FixtureForm = ({ teams, players, locations }: FixtureFormProps) => {
                                   .filter(player => player.team_id === team.id)
                                   .map(players => ({
                                     ...players,
+                                    goals: 0,
                                     yellow_cards: 0,
                                     red_cards: false,
                                     motivo: 'tembolos'
@@ -341,6 +374,7 @@ const FixtureForm = ({ teams, players, locations }: FixtureFormProps) => {
                                   .filter(player => player.team_id === team.id)
                                   .map(players => ({
                                     ...players,
+                                    goals: 0,
                                     yellow_cards: 0,
                                     red_cards: false,
                                     motivo: ''
@@ -595,7 +629,13 @@ const FixtureForm = ({ teams, players, locations }: FixtureFormProps) => {
             )}
           </div>
           <h2 className='text-4xl text-muted-foreground text-center flex-none'>
-            {form.getValues('cancha_nro')}-{form.getValues('cancha_nro')}
+            {goals && playersTeam_1?.length
+              ? goals[playersTeam_1[0].team_id!] || 0
+              : 0}
+            -
+            {goals && playersTeam_2?.length
+              ? goals[playersTeam_2[0].team_id!] || 0
+              : 0}
           </h2>
           <div
             className={`w-full flex justify-center items-center gap-2 text-xs relative `}
