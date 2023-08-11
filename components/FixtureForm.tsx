@@ -154,6 +154,14 @@ const FixtureForm = ({ teams, players, locations }: FixtureFormProps) => {
     countGoals()
   }, [modifiedRows])
 
+  useEffect(() => {
+    setFilteredPlayersTeam_1(playersTeam_1)
+  }, [playersTeam_1])
+
+  useEffect(() => {
+    setFilteredPlayersTeam_2(playersTeam_2)
+  }, [playersTeam_2])
+
   async function onSubmit(values: z.infer<typeof formSchema>) {
     // TODO: Quitamos datos modificados de tabla del equipo sancionado
     // dejar el dato solo del portero si el otro equipo tuvo sancion
@@ -211,6 +219,7 @@ const FixtureForm = ({ teams, players, locations }: FixtureFormProps) => {
   }
 
   const handleToggle = (toggled: boolean, listado: PlayersFixture[]) => {
+    // Agregamos o quitamos el TeamID del array de walkovers
     if (toggled) {
       setWalkover([...walkover, listado[0].team_id!])
       return
@@ -225,12 +234,10 @@ const FixtureForm = ({ teams, players, locations }: FixtureFormProps) => {
     bool: boolean,
     setPlayers: (list: PlayersFixture[] | undefined) => void,
     initialList: PlayersFixture[],
-    targetWalkover: boolean
+    teamWalkover: boolean
   ) => {
-    bool
+    bool || teamWalkover
       ? setPlayers(initialList.filter(player => player.position_id === 'POR'))
-      : targetWalkover
-      ? setPlayers(undefined)
       : setPlayers(initialList)
   }
 
@@ -629,15 +636,43 @@ const FixtureForm = ({ teams, players, locations }: FixtureFormProps) => {
                       size={'sm'}
                       className='left-0 top-0 h-5 text-muted-foreground'
                       onPressedChange={e => {
-                        handleToggle(e, playersTeam_1) // agregamos el id del equipo en el array de walkover
+                        // agregamos el id del equipo en el array de walkover
+                        handleToggle(e, playersTeam_1)
+
+                        // revisamos si el equipo contrario esta en walkover
+                        const vsTeamWalkover =
+                          playersTeam_2?.length &&
+                          checkWalkoverId(playersTeam_2[0].team_id!)
+
+                        // filtramos el listado del otro equipo a solo porteros
                         updatePlayersList(
                           e,
                           setFilteredPlayersTeam_2,
                           playersTeam_2!,
-                          playersTeam_2?.length
-                            ? checkWalkoverId(playersTeam_2[0].team_id!)
-                            : false
-                        ) // filtramos solo porteros
+                          vsTeamWalkover || false
+                        )
+
+                        // revisamos si el otro equipo tambien figura en walkover para filtrar nuestro listado a solo porteros
+                        if ((e && vsTeamWalkover) || (!e && vsTeamWalkover)) {
+                          updatePlayersList(
+                            true,
+                            setFilteredPlayersTeam_1,
+                            playersTeam_1,
+                            vsTeamWalkover
+                          )
+                          if (vsTeamWalkover) {
+                            updatePlayersList(
+                              false,
+                              setFilteredPlayersTeam_2,
+                              playersTeam_2,
+                              true
+                            )
+                          }
+                        } else if (e && !vsTeamWalkover) {
+                          setFilteredPlayersTeam_1(undefined)
+                        } else {
+                          setFilteredPlayersTeam_1(playersTeam_1)
+                        }
                       }}
                     >
                       Walkover
@@ -649,16 +684,13 @@ const FixtureForm = ({ teams, players, locations }: FixtureFormProps) => {
                 )}
                 <Separator />
               </div>
-              {(filteredPlayersTeam_1 ||
-                !checkWalkoverId(playersTeam_1[0].team_id!)) && (
-                <div className={`relative -top-5`}>
-                  <DataTable
-                    columns={Columns}
-                    intialValues={filteredPlayersTeam_1 || playersTeam_1}
-                    addModifiedRows={addModifiedRows}
-                  />
-                </div>
-              )}
+              <div className={`relative -top-5`}>
+                <DataTable
+                  columns={Columns}
+                  intialValues={filteredPlayersTeam_1 || []}
+                  addModifiedRows={addModifiedRows}
+                />
+              </div>
             </>
           )}
         </div>
@@ -677,15 +709,35 @@ const FixtureForm = ({ teams, players, locations }: FixtureFormProps) => {
                       size={'sm'}
                       className='left-0 top-0 h-5 text-muted-foreground'
                       onPressedChange={e => {
-                        handleToggle(e, playersTeam_2) // agregamos el id del equipo en el array de walkover
+                        // agregamos el id del equipo en el array de walkover
+                        handleToggle(e, playersTeam_2)
+
+                        // revisamos si el equipo contrario esta en walkover
+                        const vsTeamWalkover =
+                          playersTeam_1?.length &&
+                          checkWalkoverId(playersTeam_1[0].team_id!)
+
+                        // filtramos el listado del otro equipo a solo porteros
                         updatePlayersList(
                           e,
                           setFilteredPlayersTeam_1,
                           playersTeam_1!,
-                          playersTeam_1?.length
-                            ? checkWalkoverId(playersTeam_1[0].team_id!)
-                            : false
-                        ) // filtramos solo porteros
+                          vsTeamWalkover || false
+                        )
+
+                        // revisamos si el otro equipo tambien figura en walkover para filtrar nuestro listado a solo porteros
+                        if ((e && vsTeamWalkover) || (!e && vsTeamWalkover)) {
+                          updatePlayersList(
+                            true,
+                            setFilteredPlayersTeam_2,
+                            playersTeam_2,
+                            vsTeamWalkover
+                          )
+                        } else if (e && !vsTeamWalkover) {
+                          setFilteredPlayersTeam_2(undefined)
+                        } else {
+                          setFilteredPlayersTeam_2(playersTeam_1)
+                        }
                       }}
                     >
                       Walkover
@@ -697,16 +749,13 @@ const FixtureForm = ({ teams, players, locations }: FixtureFormProps) => {
                 )}
                 <Separator />
               </div>
-              {(filteredPlayersTeam_2 ||
-                !checkWalkoverId(playersTeam_2[0].team_id!)) && (
-                <div className={`relative -top-5`}>
-                  <DataTable
-                    columns={Columns}
-                    intialValues={filteredPlayersTeam_2 || playersTeam_2}
-                    addModifiedRows={addModifiedRows}
-                  />
-                </div>
-              )}
+              <div className={`relative -top-5`}>
+                <DataTable
+                  columns={Columns}
+                  intialValues={filteredPlayersTeam_2 || []}
+                  addModifiedRows={addModifiedRows}
+                />
+              </div>
             </>
           )}
         </div>
