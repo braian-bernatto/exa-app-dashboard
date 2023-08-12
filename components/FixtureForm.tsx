@@ -231,14 +231,32 @@ const FixtureForm = ({ teams, players, locations }: FixtureFormProps) => {
   }
 
   const updatePlayersList = (
-    bool: boolean,
-    setPlayers: (list: PlayersFixture[] | undefined) => void,
-    initialList: PlayersFixture[],
-    teamWalkover: boolean
+    targetTeamWalkover: boolean,
+    targetTeamPlayers: PlayersFixture[],
+    setTargetTeamPlayers: (list: PlayersFixture[] | undefined) => void,
+    vsTeamPlayers: PlayersFixture[],
+    setVsTeamPlayers: (list: PlayersFixture[] | undefined) => void
   ) => {
-    bool || teamWalkover
-      ? setPlayers(initialList.filter(player => player.position_id === 'POR'))
-      : setPlayers(initialList)
+    // revisamos si el equipo contrario esta en walkover
+    const vsTeamWalkover = checkWalkoverId(vsTeamPlayers[0].team_id!)
+
+    // filtramos los equipos contrarios
+    targetTeamWalkover
+      ? setVsTeamPlayers(
+          vsTeamPlayers.filter(player => player.position_id === 'POR')
+        )
+      : vsTeamWalkover
+      ? setVsTeamPlayers(undefined)
+      : setVsTeamPlayers(vsTeamPlayers)
+
+    // filtramos equipo en walkover si el otro equipo tambien esta sancionado
+    vsTeamWalkover
+      ? setTargetTeamPlayers(
+          targetTeamPlayers.filter(player => player.position_id === 'POR')
+        )
+      : targetTeamWalkover
+      ? setTargetTeamPlayers(undefined)
+      : setTargetTeamPlayers(targetTeamPlayers)
   }
 
   const checkWalkoverId = (id: number) => {
@@ -639,40 +657,14 @@ const FixtureForm = ({ teams, players, locations }: FixtureFormProps) => {
                         // agregamos el id del equipo en el array de walkover
                         handleToggle(e, playersTeam_1)
 
-                        // revisamos si el equipo contrario esta en walkover
-                        const vsTeamWalkover =
-                          playersTeam_2?.length &&
-                          checkWalkoverId(playersTeam_2[0].team_id!)
-
                         // filtramos el listado del otro equipo a solo porteros
                         updatePlayersList(
                           e,
-                          setFilteredPlayersTeam_2,
+                          playersTeam_1,
+                          setFilteredPlayersTeam_1,
                           playersTeam_2!,
-                          vsTeamWalkover || false
+                          setFilteredPlayersTeam_2
                         )
-
-                        // revisamos si el otro equipo tambien figura en walkover para filtrar nuestro listado a solo porteros
-                        if ((e && vsTeamWalkover) || (!e && vsTeamWalkover)) {
-                          updatePlayersList(
-                            true,
-                            setFilteredPlayersTeam_1,
-                            playersTeam_1,
-                            vsTeamWalkover
-                          )
-                          if (vsTeamWalkover) {
-                            updatePlayersList(
-                              false,
-                              setFilteredPlayersTeam_2,
-                              playersTeam_2,
-                              true
-                            )
-                          }
-                        } else if (e && !vsTeamWalkover) {
-                          setFilteredPlayersTeam_1(undefined)
-                        } else {
-                          setFilteredPlayersTeam_1(playersTeam_1)
-                        }
                       }}
                     >
                       Walkover
@@ -712,32 +704,14 @@ const FixtureForm = ({ teams, players, locations }: FixtureFormProps) => {
                         // agregamos el id del equipo en el array de walkover
                         handleToggle(e, playersTeam_2)
 
-                        // revisamos si el equipo contrario esta en walkover
-                        const vsTeamWalkover =
-                          playersTeam_1?.length &&
-                          checkWalkoverId(playersTeam_1[0].team_id!)
-
                         // filtramos el listado del otro equipo a solo porteros
                         updatePlayersList(
                           e,
-                          setFilteredPlayersTeam_1,
+                          playersTeam_2,
+                          setFilteredPlayersTeam_2,
                           playersTeam_1!,
-                          vsTeamWalkover || false
+                          setFilteredPlayersTeam_1
                         )
-
-                        // revisamos si el otro equipo tambien figura en walkover para filtrar nuestro listado a solo porteros
-                        if ((e && vsTeamWalkover) || (!e && vsTeamWalkover)) {
-                          updatePlayersList(
-                            true,
-                            setFilteredPlayersTeam_2,
-                            playersTeam_2,
-                            vsTeamWalkover
-                          )
-                        } else if (e && !vsTeamWalkover) {
-                          setFilteredPlayersTeam_2(undefined)
-                        } else {
-                          setFilteredPlayersTeam_2(playersTeam_1)
-                        }
                       }}
                     >
                       Walkover
