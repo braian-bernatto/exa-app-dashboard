@@ -132,16 +132,16 @@ const FixtureForm = ({ teams, players, locations }: FixtureFormProps) => {
     const totalCount = modifiedRows.reduce((prev, curr) => {
       // Inicia el array con el primer item
       if (!prev.length) {
-        prev.push({ [curr.team_id]: curr.goals })
+        prev.push({ [curr.team_id]: +curr.goals })
         return prev
       }
 
       // Busca si existe el item en el array y suma los goles
       if (prev[0].hasOwnProperty([curr.team_id])) {
-        prev[0][curr.team_id] = prev[0][curr.team_id] + curr.goals
+        prev[0][curr.team_id] = +prev[0][curr.team_id] + +curr.goals
       } else {
         // Si no encontro el dato en el array entonces se agrega como nuevo
-        prev = [{ ...prev[0], [curr.team_id]: curr.goals }]
+        prev = [{ ...prev[0], [curr.team_id]: +curr.goals }]
       }
 
       return prev
@@ -278,7 +278,12 @@ const FixtureForm = ({ teams, players, locations }: FixtureFormProps) => {
               className='text-white'
               size={30}
               onClick={() => {
-                console.log({ modifiedRows, walkover, filteredPlayersTeam_1 })
+                console.log({
+                  goals,
+                  modifiedRows,
+                  walkover,
+                  filteredPlayersTeam_1
+                })
               }}
             />
           </span>
@@ -665,6 +670,9 @@ const FixtureForm = ({ teams, players, locations }: FixtureFormProps) => {
                           playersTeam_2!,
                           setFilteredPlayersTeam_2
                         )
+
+                        // limpiamos los datos modificados
+                        setModifiedRows([])
                       }}
                     >
                       Walkover
