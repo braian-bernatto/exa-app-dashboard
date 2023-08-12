@@ -10,10 +10,13 @@ const getPlayers = async (): Promise<Players[]> => {
   }
 
   const dataWithImage = data?.map(data => {
-    const { data: imageData } = supabase.storage
-      .from('players')
-      .getPublicUrl(data.image_url!)
-    return { ...data, image_url: imageData.publicUrl }
+    if (data.image_url?.length) {
+      const { data: imageData } = supabase.storage
+        .from('players')
+        .getPublicUrl(data.image_url!)
+      return { ...data, image_url: imageData.publicUrl }
+    }
+    return data
   })
 
   return (dataWithImage as any) || []

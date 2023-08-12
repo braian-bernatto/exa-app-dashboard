@@ -166,7 +166,9 @@ const FixtureForm = ({ teams, players, locations }: FixtureFormProps) => {
     // TODO: Quitamos datos modificados de tabla del equipo sancionado
     // dejar el dato solo del portero si el otro equipo tuvo sancion
 
-    console.log(values, modifiedRows)
+    console.log({ values, modifiedRows, walkover })
+    // limpiamos los datos modificados
+    setModifiedRows([])
     form.reset()
     // try {
     //   setLoading(true)
@@ -209,13 +211,24 @@ const FixtureForm = ({ teams, players, locations }: FixtureFormProps) => {
     // }
   }
 
-  const getTeamLogo = (filteredPlayers: Players[]) => {
-    const url = teams.filter(team => team.id === filteredPlayers[0].team_id)[0]
-      .logo_url
+  const getTeamLogo = (filteredPlayers?: Players[], teamNumber?: number) => {
+    if (filteredPlayers && filteredPlayers.length > 0) {
+      const url = teams.filter(
+        team => team.id === filteredPlayers[0].team_id
+      )[0].logo_url
 
-    if (url) {
-      return <Image src={url} width={50} height={50} alt='team logo' />
+      if (url) {
+        return <Image src={url} width={50} height={50} alt='team logo' />
+      }
     }
+    return (
+      <div className='flex items-center justify-center relative'>
+        <Shield strokeWidth={1} size={50} className='bg-white' />
+        <h2 className='text-xl font-semibold absolute text-emerald-700'>
+          {teamNumber}
+        </h2>
+      </div>
+    )
   }
 
   const handleToggle = (toggled: boolean, listado: PlayersFixture[]) => {
@@ -360,7 +373,7 @@ const FixtureForm = ({ teams, players, locations }: FixtureFormProps) => {
                                     goals: 0,
                                     yellow_cards: 0,
                                     red_cards: false,
-                                    motivo: 'tembolos'
+                                    motivo: ''
                                   }))
                               )
                             }}
@@ -651,46 +664,44 @@ const FixtureForm = ({ teams, players, locations }: FixtureFormProps) => {
               <div
                 className={`w-full flex justify-center items-center gap-2 text-xs relative z-10`}
               >
-                <Separator />
-                {playersTeam_1?.length ? (
-                  <span className='flex flex-col items-center'>
-                    <Toggle
-                      variant={'outline'}
-                      size={'sm'}
-                      className='left-0 top-0 h-5 text-muted-foreground'
-                      onPressedChange={e => {
-                        // agregamos el id del equipo en el array de walkover
-                        handleToggle(e, playersTeam_1)
+                {playersTeam_1?.length > 0 && (
+                  <>
+                    <Separator />
+                    <span className='flex flex-col items-center relative top-5'>
+                      <Toggle
+                        variant={'outline'}
+                        size={'sm'}
+                        className='left-0 top-0 h-5 text-muted-foreground'
+                        onPressedChange={e => {
+                          // agregamos el id del equipo en el array de walkover
+                          handleToggle(e, playersTeam_1)
 
-                        // filtramos el listado del otro equipo a solo porteros
-                        updatePlayersList(
-                          e,
-                          playersTeam_1,
-                          setFilteredPlayersTeam_1,
-                          playersTeam_2!,
-                          setFilteredPlayersTeam_2
-                        )
+                          // filtramos el listado del otro equipo a solo porteros
+                          updatePlayersList(
+                            e,
+                            playersTeam_1,
+                            setFilteredPlayersTeam_1,
+                            playersTeam_2!,
+                            setFilteredPlayersTeam_2
+                          )
 
-                        // limpiamos los datos modificados
-                        setModifiedRows([])
-                      }}
-                    >
-                      Walkover
-                    </Toggle>
-                    {getTeamLogo(playersTeam_1)}
-                  </span>
-                ) : (
-                  <p className='flex-none'>Equipo 1</p>
+                          // limpiamos los datos modificados
+                          setModifiedRows([])
+                        }}
+                      >
+                        Walkover
+                      </Toggle>
+                      {getTeamLogo(playersTeam_1, 1)}
+                    </span>
+                    <Separator />
+                  </>
                 )}
-                <Separator />
               </div>
-              <div className={`relative -top-5`}>
-                <DataTable
-                  columns={Columns}
-                  intialValues={filteredPlayersTeam_1 || []}
-                  addModifiedRows={addModifiedRows}
-                />
-              </div>
+              <DataTable
+                columns={Columns}
+                intialValues={filteredPlayersTeam_1 || []}
+                addModifiedRows={addModifiedRows}
+              />
             </>
           )}
         </div>
@@ -699,45 +710,46 @@ const FixtureForm = ({ teams, players, locations }: FixtureFormProps) => {
           {playersTeam_2 && (
             <>
               <div
-                className={`w-full flex justify-center items-center gap-2 text-xs relative z-10`}
+                className={`w-full flex justify-center items-center gap-2 text-xs relative z-10 bg-transparent`}
               >
-                <Separator />
-                {playersTeam_2?.length ? (
-                  <span className='flex flex-col items-center'>
-                    <Toggle
-                      variant={'outline'}
-                      size={'sm'}
-                      className='left-0 top-0 h-5 text-muted-foreground'
-                      onPressedChange={e => {
-                        // agregamos el id del equipo en el array de walkover
-                        handleToggle(e, playersTeam_2)
+                {playersTeam_2?.length > 0 && (
+                  <>
+                    <Separator />
+                    <span className='flex flex-col items-center relative top-5'>
+                      <Toggle
+                        variant={'outline'}
+                        size={'sm'}
+                        className='left-0 top-0 h-5 text-muted-foreground'
+                        onPressedChange={e => {
+                          // agregamos el id del equipo en el array de walkover
+                          handleToggle(e, playersTeam_2)
 
-                        // filtramos el listado del otro equipo a solo porteros
-                        updatePlayersList(
-                          e,
-                          playersTeam_2,
-                          setFilteredPlayersTeam_2,
-                          playersTeam_1!,
-                          setFilteredPlayersTeam_1
-                        )
-                      }}
-                    >
-                      Walkover
-                    </Toggle>
-                    {getTeamLogo(playersTeam_2)}
-                  </span>
-                ) : (
-                  <p className='flex-none'>Equipo 2</p>
+                          // filtramos el listado del otro equipo a solo porteros
+                          updatePlayersList(
+                            e,
+                            playersTeam_2,
+                            setFilteredPlayersTeam_2,
+                            playersTeam_1!,
+                            setFilteredPlayersTeam_1
+                          )
+
+                          // limpiamos los datos modificados
+                          setModifiedRows([])
+                        }}
+                      >
+                        Walkover
+                      </Toggle>
+                      {getTeamLogo(playersTeam_2, 2)}
+                    </span>
+                    <Separator />
+                  </>
                 )}
-                <Separator />
               </div>
-              <div className={`relative -top-5`}>
-                <DataTable
-                  columns={Columns}
-                  intialValues={filteredPlayersTeam_2 || []}
-                  addModifiedRows={addModifiedRows}
-                />
-              </div>
+              <DataTable
+                columns={Columns}
+                intialValues={filteredPlayersTeam_2 || []}
+                addModifiedRows={addModifiedRows}
+              />
             </>
           )}
         </div>
@@ -747,11 +759,7 @@ const FixtureForm = ({ teams, players, locations }: FixtureFormProps) => {
           <div
             className={`w-full flex justify-center items-center gap-2 text-xs relative`}
           >
-            {playersTeam_1?.length ? (
-              getTeamLogo(playersTeam_1)
-            ) : (
-              <p className='flex-none'>Equipo 1</p>
-            )}
+            {getTeamLogo(playersTeam_1 ?? playersTeam_1, 1)}
           </div>
           <h2 className='text-4xl text-muted-foreground text-center flex-none'>
             {goals && playersTeam_1?.length
@@ -765,11 +773,7 @@ const FixtureForm = ({ teams, players, locations }: FixtureFormProps) => {
           <div
             className={`w-full flex justify-center items-center gap-2 text-xs relative `}
           >
-            {playersTeam_2?.length ? (
-              getTeamLogo(playersTeam_2)
-            ) : (
-              <p className='flex-none'>Equipo 2</p>
-            )}
+            {getTeamLogo(playersTeam_2 ?? playersTeam_2, 2)}
           </div>
         </div>
 
