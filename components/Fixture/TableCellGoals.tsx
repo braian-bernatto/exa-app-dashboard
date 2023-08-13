@@ -24,8 +24,9 @@ const TableCellGoals = ({ getValue, row, column, table }: any) => {
       value={value}
       onChange={e => setValue(parseInt(e.target.value))}
       onBlur={onBlur}
+      onClick={e => e.currentTarget.select()}
       className={`min-w-[60px] w-full text-center text-xs h-[30px] ${
-        value === 0 ? 'text-white' : ''
+        value === 0 ? 'text-muted-foreground' : ''
       }`}
     />
   )
