@@ -766,12 +766,16 @@ const FixtureForm = ({ teams, players, locations }: FixtureFormProps) => {
           {playersTeam_1 && (
             <>
               <div
-                className={`w-full flex justify-center items-center gap-2 text-xs relative z-10 pb-5`}
+                className={`w-full flex justify-center items-center gap-2 text-xs relative z-10`}
               >
                 {playersTeam_1?.length > 0 ? (
                   <>
                     <Separator />
-                    <span className='flex flex-col items-center relative top-5'>
+                    <span
+                      className={`flex flex-col items-center relative ${
+                        filteredPlayersTeam_1 && 'top-5'
+                      }`}
+                    >
                       <Toggle
                         variant={'outline'}
                         size={'sm'}
@@ -820,12 +824,16 @@ const FixtureForm = ({ teams, players, locations }: FixtureFormProps) => {
           {playersTeam_2 && (
             <>
               <div
-                className={`w-full flex justify-center items-center gap-2 text-xs relative z-10 pb-5`}
+                className={`w-full flex justify-center items-center gap-2 text-xs relative z-10`}
               >
                 {playersTeam_2?.length > 0 ? (
                   <>
                     <Separator />
-                    <span className='flex flex-col items-center relative top-5'>
+                    <span
+                      className={`flex flex-col items-center relative ${
+                        filteredPlayersTeam_2 && 'top-5'
+                      }`}
+                    >
                       <Toggle
                         variant={'outline'}
                         size={'sm'}
