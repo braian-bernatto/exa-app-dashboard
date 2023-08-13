@@ -1,7 +1,7 @@
 'use client'
 import { useSupabase } from '@/providers/SupabaseProvider'
 import { Locations, Players, Teams } from '@/types'
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useForm } from 'react-hook-form'
 import * as z from 'zod'
 import { zodResolver } from '@hookform/resolvers/zod'
@@ -148,6 +148,8 @@ interface PlayersFixture extends Players {
 const FixtureForm = ({ teams, players, locations }: FixtureFormProps) => {
   const router = useRouter()
   const supabase = useSupabase()
+  const [toggle1, setToggle1] = useState<boolean>(false)
+  const [toggle2, setToggle2] = useState<boolean>(false)
   const [loading, setLoading] = useState<boolean>(false)
   const [hour, setHour] = useState<string>('')
   const [goals, setGoals] = useState<
@@ -252,10 +254,12 @@ const FixtureForm = ({ teams, players, locations }: FixtureFormProps) => {
 
   useEffect(() => {
     setFilteredPlayersTeam_1(playersTeam_1)
+    setFilteredPlayersTeam_2(playersTeam_2) // si estaba en walkover reinicia el listado automaticamente
   }, [playersTeam_1])
 
   useEffect(() => {
     setFilteredPlayersTeam_2(playersTeam_2)
+    setFilteredPlayersTeam_1(playersTeam_1) // si estaba en walkover reinicia el listado automaticamente
   }, [playersTeam_2])
 
   useEffect(() => {
@@ -334,18 +338,6 @@ const FixtureForm = ({ teams, players, locations }: FixtureFormProps) => {
         </h2>
       </div>
     )
-  }
-
-  const handleToggle = (toggled: boolean, listado: PlayersFixture[]) => {
-    // Agregamos o quitamos el TeamID del array de walkovers
-    if (toggled) {
-      setWalkover([...walkover, listado[0].team_id!])
-      return
-    }
-
-    const filtered = walkover.filter(id => id !== listado[0].team_id!)
-
-    setWalkover(filtered)
   }
 
   const updatePlayersList = (
@@ -468,6 +460,11 @@ const FixtureForm = ({ teams, players, locations }: FixtureFormProps) => {
                             value={team.name!}
                             key={team.id}
                             onSelect={() => {
+                              // reseteo walkovers
+                              setToggle1(false)
+                              setToggle2(false)
+                              setWalkover([])
+
                               form.setValue('team_1', team.id)
                               setPlayersTeam_1(
                                 players
@@ -558,6 +555,11 @@ const FixtureForm = ({ teams, players, locations }: FixtureFormProps) => {
                             value={team.name!}
                             key={team.id}
                             onSelect={() => {
+                              // reseteo walkovers
+                              setToggle1(false)
+                              setToggle2(false)
+                              setWalkover([])
+
                               form.setValue('team_2', team.id)
                               setPlayersTeam_2(
                                 players
@@ -779,10 +781,22 @@ const FixtureForm = ({ teams, players, locations }: FixtureFormProps) => {
                       <Toggle
                         variant={'outline'}
                         size={'sm'}
+                        pressed={toggle1}
                         className='left-0 top-0 h-5 text-muted-foreground'
                         onPressedChange={e => {
+                          setToggle1(!toggle1)
+
                           // agregamos el id del equipo en el array de walkover
-                          handleToggle(e, playersTeam_1)
+                          e
+                            ? setWalkover([
+                                ...walkover,
+                                playersTeam_1[0].team_id!
+                              ])
+                            : setWalkover([
+                                ...walkover.filter(
+                                  id => id !== playersTeam_1[0].team_id
+                                )
+                              ])
 
                           // filtramos el listado del otro equipo a solo porteros
                           updatePlayersList(
@@ -837,10 +851,22 @@ const FixtureForm = ({ teams, players, locations }: FixtureFormProps) => {
                       <Toggle
                         variant={'outline'}
                         size={'sm'}
+                        pressed={toggle2}
                         className='left-0 top-0 h-5 text-muted-foreground'
                         onPressedChange={e => {
+                          setToggle2(!toggle2)
+
                           // agregamos el id del equipo en el array de walkover
-                          handleToggle(e, playersTeam_2)
+                          e
+                            ? setWalkover([
+                                ...walkover,
+                                playersTeam_2[0].team_id!
+                              ])
+                            : setWalkover([
+                                ...walkover.filter(
+                                  id => id !== playersTeam_2[0].team_id
+                                )
+                              ])
 
                           // filtramos el listado del otro equipo a solo porteros
                           updatePlayersList(
