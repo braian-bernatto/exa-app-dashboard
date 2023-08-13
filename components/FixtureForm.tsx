@@ -50,7 +50,28 @@ const formSchema = z
     team_2: z.coerce.number(),
     date: z.date({ required_error: 'Obligatorio' }),
     location_id: z.coerce.number().optional(),
-    cancha_nro: z.coerce.number().optional()
+    cancha_nro: z.coerce.number().optional(),
+    goals: z
+      .object(
+        {
+          id: z.number(),
+          goals: z.number().min(0)
+        },
+        {
+          required_error: 'Faltan cargar los goles',
+          invalid_type_error: 'Faltan cargar los goles'
+        }
+      )
+      .array()
+      .max(2),
+    walkover: z.coerce
+      .number({
+        required_error: 'Falta cargar walkover',
+        invalid_type_error: 'Falta cargar walkover'
+      })
+      .array()
+      .max(2)
+      .optional()
   })
   .refine(
     val => {
@@ -61,6 +82,55 @@ const formSchema = z
       path: ['team_2']
     }
   )
+  .refine(
+    val => {
+      if (val.walkover?.length === 0) return true
+      if (val.walkover?.length === 2) return true
+
+      const vsTeamMinGoals =
+        val.walkover?.length &&
+        val.goals.length &&
+        val.walkover[0] !== val.goals[0].id &&
+        val.goals[0].goals > 0
+
+      if (val.walkover?.length === 1 && vsTeamMinGoals) return true
+    },
+    {
+      message: 'Goles por walkover deben ser mayores que cero',
+      path: ['walkover']
+    }
+  )
+  .refine(
+    val => {
+      if (val.walkover?.length === 0 || val.walkover?.length === 1) return true
+
+      const bothTeamsWalkover = val.walkover!.length === 2
+      const bothTeamsGoals = val.goals.length === 2
+
+      if (bothTeamsWalkover && bothTeamsGoals) return true
+    },
+    {
+      message:
+        'Goles por walkover deben ser mayores que cero para ambos equipos',
+      path: ['walkover']
+    }
+  )
+  .refine(
+    val => {
+      if (val.walkover?.length === 0 || val.walkover?.length === 1) return true
+      if (val.goals.length < 1) return false
+
+      const bothTeamsWalkover = val.walkover!.length === 2
+      const bothTeamsMinGoals =
+        +val.goals[0].goals > 0 && +val.goals[1]?.goals > 0
+
+      if (bothTeamsWalkover && bothTeamsMinGoals) return true
+    },
+    {
+      message: 'Goles por walkover deben ser mayores que cero',
+      path: ['walkover']
+    }
+  )
 
 interface FixtureFormProps {
   teams: Teams[]
@@ -69,8 +139,8 @@ interface FixtureFormProps {
 }
 
 interface PlayersFixture extends Players {
-  goals: number
-  yellow_cards: number
+  goals: number | undefined
+  yellow_cards: number | undefined
   red_cards: boolean
   motivo: string
 }
@@ -80,7 +150,9 @@ const FixtureForm = ({ teams, players, locations }: FixtureFormProps) => {
   const supabase = useSupabase()
   const [loading, setLoading] = useState<boolean>(false)
   const [hour, setHour] = useState<string>('')
-  const [goals, setGoals] = useState()
+  const [goals, setGoals] = useState<
+    { id: number; goals: number }[] | undefined
+  >(undefined)
   const [walkover, setWalkover] = useState<number[]>([])
   const [playersTeam_1, setPlayersTeam_1] = useState<
     PlayersFixture[] | undefined
@@ -104,7 +176,9 @@ const FixtureForm = ({ teams, players, locations }: FixtureFormProps) => {
       team_2: undefined,
       date: undefined,
       location_id: undefined,
-      cancha_nro: 0
+      cancha_nro: 0,
+      goals: undefined,
+      walkover: []
     }
   })
 
@@ -132,27 +206,49 @@ const FixtureForm = ({ teams, players, locations }: FixtureFormProps) => {
     const totalCount = modifiedRows.reduce((prev, curr) => {
       // Inicia el array con el primer item
       if (!prev.length) {
-        prev.push({ [curr.team_id]: +curr.goals })
+        prev.push({
+          id: curr.team_id,
+          goals: +curr.goals
+        })
         return prev
       }
 
       // Busca si existe el item en el array y suma los goles
-      if (prev[0].hasOwnProperty([curr.team_id])) {
-        prev[0][curr.team_id] = +prev[0][curr.team_id] + +curr.goals
+      const teamIndex = prev.indexOf((team: any) => team.id === curr.team_id)
+      if (teamIndex !== -1) {
+        const filteredList = prev.filter(
+          (team: any) => team.id !== curr.team_id
+        )
+        const foundItem = prev.filter((team: any) => team.id === curr.team_id)
+        prev = [
+          ...filteredList,
+          { ...foundItem, goals: +foundItem.goals + +curr.goals }
+        ]
+        return prev
       } else {
         // Si no encontro el dato en el array entonces se agrega como nuevo
-        prev = [{ ...prev[0], [curr.team_id]: +curr.goals }]
+        prev = [
+          ...prev,
+          {
+            id: curr.team_id,
+            goals: +curr.goals
+          }
+        ]
       }
 
       return prev
     }, [])
 
-    setGoals(totalCount[0])
+    setGoals(totalCount)
   }
 
   useEffect(() => {
     countGoals()
   }, [modifiedRows])
+
+  useEffect(() => {
+    form.setValue('goals', goals!)
+  }, [goals])
 
   useEffect(() => {
     setFilteredPlayersTeam_1(playersTeam_1)
@@ -162,14 +258,23 @@ const FixtureForm = ({ teams, players, locations }: FixtureFormProps) => {
     setFilteredPlayersTeam_2(playersTeam_2)
   }, [playersTeam_2])
 
+  useEffect(() => {
+    form.setValue('walkover', walkover!)
+  }, [walkover])
+
   async function onSubmit(values: z.infer<typeof formSchema>) {
     // TODO: Quitamos datos modificados de tabla del equipo sancionado
     // dejar el dato solo del portero si el otro equipo tuvo sancion
 
-    console.log({ values, modifiedRows, walkover })
+    console.log({ values })
+
     // limpiamos los datos modificados
     setModifiedRows([])
+    setWalkover([])
+    setPlayersTeam_1(undefined)
+    setPlayersTeam_2(undefined)
     form.reset()
+
     // try {
     //   setLoading(true)
     //   const { name, logo } = values
@@ -294,8 +399,7 @@ const FixtureForm = ({ teams, players, locations }: FixtureFormProps) => {
                 console.log({
                   goals,
                   modifiedRows,
-                  walkover,
-                  filteredPlayersTeam_1
+                  walkover
                 })
               }}
             />
@@ -662,9 +766,9 @@ const FixtureForm = ({ teams, players, locations }: FixtureFormProps) => {
           {playersTeam_1 && (
             <>
               <div
-                className={`w-full flex justify-center items-center gap-2 text-xs relative z-10`}
+                className={`w-full flex justify-center items-center gap-2 text-xs relative z-10 pb-5`}
               >
-                {playersTeam_1?.length > 0 && (
+                {playersTeam_1?.length > 0 ? (
                   <>
                     <Separator />
                     <span className='flex flex-col items-center relative top-5'>
@@ -695,13 +799,19 @@ const FixtureForm = ({ teams, players, locations }: FixtureFormProps) => {
                     </span>
                     <Separator />
                   </>
+                ) : (
+                  <p className='bg-pink-600 px-2 py-1 text-white rounded relative top-3 animate-pulse'>
+                    Equipo aún no tiene jugadores cargados
+                  </p>
                 )}
               </div>
-              <DataTable
-                columns={Columns}
-                intialValues={filteredPlayersTeam_1 || []}
-                addModifiedRows={addModifiedRows}
-              />
+              {filteredPlayersTeam_1 && (
+                <DataTable
+                  columns={Columns}
+                  intialValues={filteredPlayersTeam_1 || []}
+                  addModifiedRows={addModifiedRows}
+                />
+              )}
             </>
           )}
         </div>
@@ -710,9 +820,9 @@ const FixtureForm = ({ teams, players, locations }: FixtureFormProps) => {
           {playersTeam_2 && (
             <>
               <div
-                className={`w-full flex justify-center items-center gap-2 text-xs relative z-10 bg-transparent`}
+                className={`w-full flex justify-center items-center gap-2 text-xs relative z-10 pb-5`}
               >
-                {playersTeam_2?.length > 0 && (
+                {playersTeam_2?.length > 0 ? (
                   <>
                     <Separator />
                     <span className='flex flex-col items-center relative top-5'>
@@ -743,13 +853,19 @@ const FixtureForm = ({ teams, players, locations }: FixtureFormProps) => {
                     </span>
                     <Separator />
                   </>
+                ) : (
+                  <p className='bg-pink-600 px-2 py-1 text-white rounded relative top-3 animate-pulse'>
+                    Equipo aún no tiene jugadores cargados
+                  </p>
                 )}
               </div>
-              <DataTable
-                columns={Columns}
-                intialValues={filteredPlayersTeam_2 || []}
-                addModifiedRows={addModifiedRows}
-              />
+              {filteredPlayersTeam_2 && (
+                <DataTable
+                  columns={Columns}
+                  intialValues={filteredPlayersTeam_2 || []}
+                  addModifiedRows={addModifiedRows}
+                />
+              )}
             </>
           )}
         </div>
@@ -762,13 +878,19 @@ const FixtureForm = ({ teams, players, locations }: FixtureFormProps) => {
             {getTeamLogo(playersTeam_1 ?? playersTeam_1, 1)}
           </div>
           <h2 className='text-4xl text-muted-foreground text-center flex-none'>
-            {goals && playersTeam_1?.length
-              ? goals[playersTeam_1[0].team_id!] || 0
-              : 0}
+            {playersTeam_1?.length &&
+              goals !== undefined &&
+              goals.filter(item => item.id === playersTeam_1[0].team_id!)
+                .length &&
+              goals.filter(item => item.id === playersTeam_1[0].team_id!)[0]
+                .goals}
             -
-            {goals && playersTeam_2?.length
-              ? goals[playersTeam_2[0].team_id!] || 0
-              : 0}
+            {playersTeam_2?.length &&
+              goals !== undefined &&
+              goals.filter(item => item.id === playersTeam_2[0].team_id!)
+                .length &&
+              goals.filter(item => item.id === playersTeam_2[0].team_id!)[0]
+                .goals}
           </h2>
           <div
             className={`w-full flex justify-center items-center gap-2 text-xs relative `}
@@ -777,12 +899,37 @@ const FixtureForm = ({ teams, players, locations }: FixtureFormProps) => {
           </div>
         </div>
 
+        {/* Goals */}
+        <FormField
+          control={form.control}
+          name='goals'
+          render={({ field }) => (
+            <FormItem className='rounded bg-white'>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        {/* Walkovers */}
+        <FormField
+          control={form.control}
+          name='walkover'
+          render={({ field }) => (
+            <FormItem className='rounded bg-white'>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
         <div className='w-full'>
           <Button
             type='submit'
             variant={'default'}
             className='w-full'
             disabled={loading}
+            onClick={() => {
+              console.log(form.formState.errors)
+            }}
           >
             Agregar
           </Button>

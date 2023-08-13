@@ -3,7 +3,7 @@ import { useEffect, useState } from 'react'
 
 const TableCellYellowCard = ({ getValue, row, column, table }: any) => {
   const initialValue = getValue()
-  const [value, setValue] = useState('')
+  const [value, setValue] = useState<number>(0)
 
   useEffect(() => {
     setValue(initialValue)
@@ -13,19 +13,21 @@ const TableCellYellowCard = ({ getValue, row, column, table }: any) => {
     table.options.meta?.updateData(row.index, column.id, value)
     table.options.meta?.addModifiedRows({
       ...row.original,
-      yellow_cards: parseInt(value)
+      yellow_cards: value
     })
   }
 
   return (
     <Input
-      value={value}
       type='number'
       min={0}
       max={2}
-      onChange={e => setValue(e.target.value)}
+      value={value}
+      onChange={e => setValue(parseInt(e.target.value))}
       onBlur={onBlur}
-      className='min-w-[60px] w-full text-center text-xs h-[30px]'
+      className={`min-w-[60px] w-full text-center text-xs h-[30px] ${
+        value === 0 ? 'text-white' : ''
+      }`}
     />
   )
 }
