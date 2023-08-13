@@ -1,7 +1,7 @@
 'use client'
 import { useSupabase } from '@/providers/SupabaseProvider'
 import { Locations, Players, Teams } from '@/types'
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useForm } from 'react-hook-form'
 import * as z from 'zod'
 import { zodResolver } from '@hookform/resolvers/zod'
@@ -42,6 +42,7 @@ import { DataTable } from '@/components/Fixture/DataTable'
 import { Columns } from '@/components/Fixture/Columns'
 import { Separator } from './ui/separator'
 import { Toggle } from './ui/toggle'
+import { toast } from 'react-hot-toast'
 
 const formSchema = z
   .object({
@@ -147,7 +148,7 @@ interface PlayersFixture extends Players {
 
 const FixtureForm = ({ teams, players, locations }: FixtureFormProps) => {
   const router = useRouter()
-  const supabase = useSupabase()
+  const { supabase } = useSupabase()
   const [toggle1, setToggle1] = useState<boolean>(false)
   const [toggle2, setToggle2] = useState<boolean>(false)
   const [loading, setLoading] = useState<boolean>(false)
@@ -216,15 +217,20 @@ const FixtureForm = ({ teams, players, locations }: FixtureFormProps) => {
       }
 
       // Busca si existe el item en el array y suma los goles
-      const teamIndex = prev.indexOf((team: any) => team.id === curr.team_id)
+      const teamIndex = prev.findIndex(
+        (team: any) => +team.id === +curr.team_id
+      )
+
       if (teamIndex !== -1) {
         const filteredList = prev.filter(
           (team: any) => team.id !== curr.team_id
         )
         const foundItem = prev.filter((team: any) => team.id === curr.team_id)
+        console.log({ prev, teamIndex, filteredList, foundItem })
+
         prev = [
           ...filteredList,
-          { ...foundItem, goals: +foundItem.goals + +curr.goals }
+          { id: foundItem[0].id, goals: +foundItem[0].goals + +curr.goals }
         ]
         return prev
       } else {
@@ -267,57 +273,146 @@ const FixtureForm = ({ teams, players, locations }: FixtureFormProps) => {
   }, [walkover])
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
-    // TODO: Quitamos datos modificados de tabla del equipo sancionado
-    // dejar el dato solo del portero si el otro equipo tuvo sancion
-
     console.log({ values })
 
-    // limpiamos los datos modificados
-    setModifiedRows([])
-    setWalkover([])
-    setPlayersTeam_1(undefined)
-    setPlayersTeam_2(undefined)
-    form.reset()
+    try {
+      setLoading(true)
+      const { name, team_1, team_2, date, location_id, cancha_nro, walkover } =
+        values
 
-    // try {
-    //   setLoading(true)
-    //   const { name, logo } = values
-    //   if (!name) {
-    //     return toast.error('Faltan datos')
-    //   }
-    //   const uniqueID = uniqid()
-    //   let imagePath = ''
-    //   // upload image
-    //   if (logo) {
-    //     const { data: imageData, error: imageError } = await supabase.storage
-    //       .from('torneos')
-    //       .upload(`image-${name}-${uniqueID}`, logo, {
-    //         cacheControl: '3600',
-    //         upsert: false
-    //       })
-    //     if (imageError) {
-    //       setLoading(false)
-    //       return toast.error('No se pudo alzar la imagen')
-    //     }
-    //     imagePath = imageData?.path!
-    //   }
-    //   const { error: supabaseError } = await supabase.from('torneos').insert({
-    //     name,
-    //     logo_url: imagePath
-    //   })
-    //   if (supabaseError) {
-    //     setLoading(false)
-    //     return toast.error('No se pudo grabar')
-    //   }
-    //   router.refresh()
-    //   setLoading(false)
-    //   form.reset()
-    //   toast.success('Torneo creado!')
-    // } catch (error) {
-    //   toast.error('Hubo un error')
-    // } finally {
-    //   setLoading(false)
-    // }
+      if (!name || !team_1 || team_2 || !date) {
+        return toast.error('Faltan datos')
+      }
+
+      // format data for insert
+      if (walkover?.length) {
+        const walkoverArray = walkover.map(item => ({
+          fixture_id: 'id',
+          team_id: item
+        }))
+        console.log({ walkoverArray })
+      }
+
+      if (modifiedRows.length) {
+        const goalsArray = modifiedRows.map(player => ({
+          fixture_id: 'id',
+          player_id: player.id,
+          quantity: player.goals
+        }))
+
+        const yellowCardsArray = modifiedRows.map(player => ({
+          fixture_id: 'id',
+          player_id: player.id,
+          quantity: player.yellow_cards
+        }))
+
+        const redCardsArray = modifiedRows.map(player => ({
+          fixture_id: 'id',
+          player_id: player.id,
+          motivo: player.motivo
+        }))
+
+        console.log({ goalsArray, yellowCardsArray, redCardsArray })
+      }
+
+      // // fixture
+      // const { data: fixture, error: supabaseFixtureError } = await supabase
+      //   .from('fixtures')
+      //   .insert({
+      //     name,
+      //     location_id
+      //   })
+      //   .select('id')
+
+      // if (supabaseFixtureError) {
+      //   setLoading(false)
+      //   return toast.error('No se pudo grabar Fixture Cabecera')
+      // }
+
+      // // fixture details
+      // const { error: supabaseFixtureDetailError } = await supabase
+      //   .from('fixture_details')
+      //   .insert({
+      //     fixture_id: fixture[0].id,
+      //     team_1,
+      //     team_2,
+      //     cancha_nro,
+      //     date: date.toISOString()
+      //   })
+
+      // if (supabaseFixtureDetailError) {
+      //   setLoading(false)
+      //   return toast.error('No se pudo grabar Fixture Detalle')
+      // }
+
+      // // fixture goals cards and walkover
+      // const { error: supabaseGoalsError } = await supabase
+      //   .from('goals')
+      //   .insert({
+      //     fixture_id: fixture[0].id,
+      //     player_id: id,
+      //     quantity: goals
+      //   })
+
+      // if (supabaseGoalsError) {
+      //   setLoading(false)
+      //   return toast.error('No se pudieron grabar los Goles')
+      // }
+      // // fixture goals cards and walkover
+      // const { error: supabaseYellowCardsError } = await supabase
+      //   .from('yellow_cards')
+      //   .insert({
+      //     fixture_id: fixture[0].id,
+      //     player_id: id,
+      //     quantity: yellow_cards
+      //   })
+
+      // if (supabaseYellowCardsError) {
+      //   setLoading(false)
+      //   return toast.error('No se pudieron grabar los Goles')
+      // }
+      // // fixture goals cards and walkover
+      // const { error: supabaseRedCardError } = await supabase
+      //   .from('red_cards')
+      //   .insert({
+      //     fixture_id: fixture[0].id,
+      //     player_id: id,
+      //     motivo: motivo
+      //   })
+
+      // if (supabaseRedCardError) {
+      //   setLoading(false)
+      //   return toast.error('No se pudieron grabar los Goles')
+      // }
+      // // fixture goals cards and walkover
+      // const { error: supabaseRedCardError } = await supabase
+      //   .from('walkover')
+      //   .insert({
+      //     fixture_id: fixture[0].id,
+      //     team_id
+      //   })
+
+      // if (supabaseRedCardError) {
+      //   setLoading(false)
+      //   return toast.error('No se pudieron grabar los Goles')
+      // }
+
+      router.refresh()
+      setLoading(false)
+
+      // limpiamos los datos modificados
+      setModifiedRows([])
+      setWalkover([])
+      setPlayersTeam_1(undefined)
+      setPlayersTeam_2(undefined)
+      form.reset()
+
+      toast.success('Fixture creado!')
+    } catch (error) {
+      toast.error('Hubo un error')
+    } finally {
+      setLoading(false)
+    }
   }
 
   const getTeamLogo = (filteredPlayers?: Players[], teamNumber?: number) => {
@@ -546,7 +641,7 @@ const FixtureForm = ({ teams, players, locations }: FixtureFormProps) => {
                       <CommandGroup>
                         {teams.map(team => (
                           <CommandItem
-                            className={`text-xs ${
+                            className={`tex t-xs ${
                               form.getValues('team_1') === team.id
                                 ? 'opacity-50 bg-slate-50'
                                 : ''
