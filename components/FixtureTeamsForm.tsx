@@ -42,97 +42,6 @@ import { Separator } from './ui/separator'
 import { Toggle } from './ui/toggle'
 import { toast } from 'react-hot-toast'
 
-const formSchema = z
-  .object({
-    fixture_id: z.coerce.number({
-      required_error: 'Obligatorio',
-      invalid_type_error: 'Obligatorio'
-    }),
-    team_1: z.coerce.number(),
-    team_2: z.coerce.number(),
-    date: z.date({ required_error: 'Obligatorio' }),
-    cancha_nro: z.coerce.number().optional(),
-    goals: z
-      .object(
-        {
-          id: z.number(),
-          goals: z.number().min(0)
-        },
-        {
-          required_error: 'Faltan cargar los goles',
-          invalid_type_error: 'Faltan cargar los goles'
-        }
-      )
-      .array()
-      .max(2),
-    walkover: z.coerce
-      .number({
-        required_error: 'Falta cargar walkover',
-        invalid_type_error: 'Falta cargar walkover'
-      })
-      .array()
-      .max(2)
-      .optional()
-  })
-  .refine(
-    val => {
-      if (val.team_1 !== val.team_2) return true
-    },
-    {
-      message: 'No pueden ser el mismo equipo',
-      path: ['team_2']
-    }
-  )
-  .refine(
-    val => {
-      if (val.walkover?.length === 0) return true
-      if (val.walkover?.length === 2) return true
-
-      const vsTeamMinGoals =
-        val.walkover?.length &&
-        val.goals.length &&
-        val.walkover[0] !== val.goals[0].id &&
-        val.goals[0].goals > 0
-
-      if (val.walkover?.length === 1 && vsTeamMinGoals) return true
-    },
-    {
-      message: 'Goles por walkover deben ser mayores que cero',
-      path: ['walkover']
-    }
-  )
-  .refine(
-    val => {
-      if (val.walkover?.length === 0 || val.walkover?.length === 1) return true
-
-      const bothTeamsWalkover = val.walkover!.length === 2
-      const bothTeamsGoals = val.goals.length === 2
-
-      if (bothTeamsWalkover && bothTeamsGoals) return true
-    },
-    {
-      message:
-        'Goles por walkover deben ser mayores que cero para ambos equipos',
-      path: ['walkover']
-    }
-  )
-  .refine(
-    val => {
-      if (val.walkover?.length === 0 || val.walkover?.length === 1) return true
-      if (val.goals.length < 1) return false
-
-      const bothTeamsWalkover = val.walkover!.length === 2
-      const bothTeamsMinGoals =
-        +val.goals[0].goals > 0 && +val.goals[1]?.goals > 0
-
-      if (bothTeamsWalkover && bothTeamsMinGoals) return true
-    },
-    {
-      message: 'Goles por walkover deben ser mayores que cero',
-      path: ['walkover']
-    }
-  )
-
 interface FixtureTeamsFormProps {
   fixtures: Fixtures[]
   teams: Teams[]
@@ -151,8 +60,144 @@ const FixtureTeamsForm = ({
   teams,
   players
 }: FixtureTeamsFormProps) => {
-  const router = useRouter()
   const { supabase } = useSupabase()
+
+  const formSchema = z
+    .object({
+      fixture_id: z.coerce.number({
+        required_error: 'Obligatorio',
+        invalid_type_error: 'Obligatorio'
+      }),
+      team_1: z.coerce.number({
+        required_error: 'Obligatorio',
+        invalid_type_error: 'Obligatorio'
+      }),
+      team_2: z.coerce.number({
+        required_error: 'Obligatorio',
+        invalid_type_error: 'Obligatorio'
+      }),
+      date: z.date({ required_error: 'Obligatorio' }),
+      cancha_nro: z.coerce.number().optional(),
+      goals: z
+        .object(
+          {
+            id: z.number(),
+            goals: z.number().min(0)
+          },
+          {
+            required_error: 'Faltan cargar los goles',
+            invalid_type_error: 'Faltan cargar los goles'
+          }
+        )
+        .array()
+        .max(2),
+      walkover: z.coerce
+        .number({
+          required_error: 'Falta cargar walkover',
+          invalid_type_error: 'Falta cargar walkover'
+        })
+        .array()
+        .max(2)
+        .optional()
+    })
+    .refine(
+      val => {
+        if (val.team_1 !== val.team_2) return true
+      },
+      {
+        message: 'No pueden ser el mismo equipo',
+        path: ['team_2']
+      }
+    )
+    .refine(
+      async val => {
+        const { data } = await supabase
+          .from('fixture_details')
+          .select('*', { count: 'exact' })
+          .eq('fixture_id', val.fixture_id)
+          .or(`team_1.eq.${val.team_1},team_2.eq.${val.team_1}`)
+
+        if (data?.length) {
+          return false
+        }
+        return true
+      },
+      {
+        message: 'Equipo ya existe en este Fixture',
+        path: ['team_1']
+      }
+    )
+    .refine(
+      async val => {
+        const { data } = await supabase
+          .from('fixture_details')
+          .select('*', { count: 'exact' })
+          .eq('fixture_id', val.fixture_id)
+          .or(`team_1.eq.${val.team_2},team_2.eq.${val.team_2}`)
+
+        if (data?.length) {
+          return false
+        }
+        return true
+      },
+      {
+        message: 'Equipo ya existe en este Fixture',
+        path: ['team_2']
+      }
+    )
+    .refine(
+      val => {
+        if (val.walkover?.length === 0) return true
+        if (val.walkover?.length === 2) return true
+
+        const vsTeamMinGoals =
+          val.walkover?.length &&
+          val.goals.length &&
+          val.walkover[0] !== val.goals[0].id &&
+          val.goals[0].goals > 0
+
+        if (val.walkover?.length === 1 && vsTeamMinGoals) return true
+      },
+      {
+        message: 'Goles por walkover deben ser mayores que cero',
+        path: ['walkover']
+      }
+    )
+    .refine(
+      val => {
+        if (val.walkover?.length === 0 || val.walkover?.length === 1)
+          return true
+
+        const bothTeamsWalkover = val.walkover!.length === 2
+        const bothTeamsGoals = val.goals.length === 2
+
+        if (bothTeamsWalkover && bothTeamsGoals) return true
+      },
+      {
+        message:
+          'Goles por walkover deben ser mayores que cero para ambos equipos',
+        path: ['walkover']
+      }
+    )
+    .refine(
+      val => {
+        if (val.walkover?.length === 0 || val.walkover?.length === 1)
+          return true
+        if (val.goals.length < 1) return false
+
+        const bothTeamsWalkover = val.walkover!.length === 2
+        const bothTeamsMinGoals =
+          +val.goals[0].goals > 0 && +val.goals[1]?.goals > 0
+
+        if (bothTeamsWalkover && bothTeamsMinGoals) return true
+      },
+      {
+        message: 'Goles por walkover deben ser mayores que cero',
+        path: ['walkover']
+      }
+    )
+
+  const router = useRouter()
   const [toggle1, setToggle1] = useState<boolean>(false)
   const [toggle2, setToggle2] = useState<boolean>(false)
   const [loading, setLoading] = useState<boolean>(false)
@@ -298,6 +343,7 @@ const FixtureTeamsForm = ({
 
       if (supabaseFixtureDetailError) {
         setLoading(false)
+        console.log(supabaseFixtureDetailError)
         return toast.error('No se pudo grabar Fixture Detalle')
       }
 
