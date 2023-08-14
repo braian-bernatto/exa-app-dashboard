@@ -852,6 +852,7 @@ const FixtureTeamsForm = ({
                     type='number'
                     min={1}
                     {...field}
+                    onClick={e => e.currentTarget.select()}
                   />
                 </FormControl>
                 <FormMessage />
