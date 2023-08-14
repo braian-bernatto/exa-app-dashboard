@@ -131,20 +131,66 @@ const PlayerForm = ({
       // upload image
       const uniqueID = uniqid()
       let imagePath = ''
-      if (image) {
-        const { data: imageData, error: imageError } = await supabase.storage
-          .from('players')
-          .upload(`image-${name}-${uniqueID}`, image, {
-            cacheControl: '3600',
-            upsert: false
-          })
 
-        if (imageError) {
-          setLoading(false)
-          return toast.error('No se pudo agregar la imagen')
+      if (image) {
+        // background removal
+        const url = 'https://sdk.photoroom.com/v1/segment'
+        const formImage = new FormData()
+        formImage.append('image_file', image)
+        formImage.append('format', 'png')
+        formImage.append('channels', '')
+        formImage.append('bg_color', '')
+        formImage.append('size', '')
+        formImage.append('crop', '')
+
+        const options = {
+          method: 'POST',
+          headers: {
+            Accept: 'image/png, application/json',
+            'x-api-key': process.env.PHOTOROOM_API_KEY || ''
+          },
+          body: formImage
         }
 
-        imagePath = imageData?.path!
+        try {
+          const response = await fetch(url, options)
+          const dataFromApi = await response.blob()
+          const file = new File([dataFromApi], 'player.png', {
+            type: 'image/png'
+          })
+
+          // upload to supabase the edited image
+          const { data: imageData, error: imageError } = await supabase.storage
+            .from('players')
+            .upload(`image-${name}-${uniqueID}`, file, {
+              cacheControl: '3600',
+              upsert: false
+            })
+
+          if (imageError) {
+            setLoading(false)
+            return toast.error('No se pudo agregar la imagen')
+          }
+
+          imagePath = imageData?.path!
+        } catch (error) {
+          console.error(error)
+
+          // upload to supabase the original image
+          const { data: imageData, error: imageError } = await supabase.storage
+            .from('players')
+            .upload(`image-${name}-${uniqueID}`, image, {
+              cacheControl: '3600',
+              upsert: false
+            })
+
+          if (imageError) {
+            setLoading(false)
+            return toast.error('No se pudo agregar la imagen')
+          }
+
+          imagePath = imageData?.path!
+        }
       }
 
       // upload player
