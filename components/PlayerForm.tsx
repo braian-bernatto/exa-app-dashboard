@@ -140,39 +140,45 @@ const PlayerForm = ({
         formImage.append('format', 'png')
         formImage.append('channels', '')
         formImage.append('bg_color', '')
-        formImage.append('size', '')
-        formImage.append('crop', '')
+        formImage.append('size', 'preview')
+        formImage.append('crop', 'true')
 
         const options = {
           method: 'POST',
           headers: {
             Accept: 'image/png, application/json',
-            'x-api-key': process.env.PHOTOROOM_API_KEY || ''
+            'x-api-key': process.env.NEXT_PUBLIC_PHOTOROOM_API_KEY || ''
           },
           body: formImage
         }
 
         try {
           const response = await fetch(url, options)
-          const dataFromApi = await response.blob()
-          const file = new File([dataFromApi], 'player.png', {
-            type: 'image/png'
-          })
-
-          // upload to supabase the edited image
-          const { data: imageData, error: imageError } = await supabase.storage
-            .from('players')
-            .upload(`image-${name}-${uniqueID}`, file, {
-              cacheControl: '3600',
-              upsert: false
+          if (response.ok) {
+            const dataFromApi = await response.blob()
+            const file = new File([dataFromApi], 'player.png', {
+              type: 'image/png'
             })
 
-          if (imageError) {
-            setLoading(false)
-            return toast.error('No se pudo agregar la imagen')
-          }
+            console.log({ dataFromApi, file })
 
-          imagePath = imageData?.path!
+            // upload to supabase the edited image
+            const { data: imageData, error: imageError } =
+              await supabase.storage
+                .from('players')
+                .upload(`image-${name}-${uniqueID}`, file, {
+                  cacheControl: '3600',
+                  upsert: false
+                })
+
+            if (imageError) {
+              setLoading(false)
+              return toast.error('No se pudo agregar la imagen')
+            }
+            imagePath = imageData?.path!
+          } else {
+            throw new Error('Hubo un error en photoroom api')
+          }
         } catch (error) {
           console.error(error)
 
