@@ -150,7 +150,7 @@ export interface Database {
           quantity: number
         }
         Insert: {
-          fixture_id?: number
+          fixture_id: number
           player_id: number
           quantity: number
         }
@@ -324,7 +324,7 @@ export interface Database {
           player_id: number
         }
         Insert: {
-          fixture_id?: number
+          fixture_id: number
           motivo?: string | null
           player_id: number
         }
@@ -406,7 +406,7 @@ export interface Database {
           team_id: number
         }
         Insert: {
-          fixture_id?: number
+          fixture_id: number
           team_id: number
         }
         Update: {
@@ -435,7 +435,7 @@ export interface Database {
           quantity: number
         }
         Insert: {
-          fixture_id?: number
+          fixture_id: number
           player_id: number
           quantity: number
         }

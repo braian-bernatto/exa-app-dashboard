@@ -226,7 +226,6 @@ const FixtureForm = ({ teams, players, locations }: FixtureFormProps) => {
           (team: any) => team.id !== curr.team_id
         )
         const foundItem = prev.filter((team: any) => team.id === curr.team_id)
-        console.log({ prev, teamIndex, filteredList, foundItem })
 
         prev = [
           ...filteredList,
@@ -280,122 +279,116 @@ const FixtureForm = ({ teams, players, locations }: FixtureFormProps) => {
       const { name, team_1, team_2, date, location_id, cancha_nro, walkover } =
         values
 
-      if (!name || !team_1 || team_2 || !date) {
+      if (!name || !team_1 || !team_2 || !date) {
         return toast.error('Faltan datos')
       }
 
-      // format data for insert
+      // fixture
+      const { data: fixture, error: supabaseFixtureError } = await supabase
+        .from('fixtures')
+        .insert({
+          name,
+          location_id
+        })
+        .select('id')
+
+      if (supabaseFixtureError) {
+        setLoading(false)
+        return toast.error('No se pudo grabar Fixture Cabecera')
+      }
+
+      // fixture details
+      const { error: supabaseFixtureDetailError } = await supabase
+        .from('fixture_details')
+        .insert({
+          fixture_id: fixture[0].id,
+          team_1,
+          team_2,
+          cancha_nro,
+          date: date.toISOString()
+        })
+
+      if (supabaseFixtureDetailError) {
+        setLoading(false)
+        return toast.error('No se pudo grabar Fixture Detalle')
+      }
+
+      // cargamos datos si es que se modificaron datos de las tablas
+      if (modifiedRows.length) {
+        // goals
+        const goalsArray = modifiedRows
+          .filter(player => player.goals > 0)
+          .map(player => ({
+            fixture_id: fixture[0].id,
+            player_id: player.id,
+            quantity: player.goals
+          }))
+
+        if (goalsArray.length) {
+          const { error: supabaseGoalsError } = await supabase
+            .from('goals')
+            .insert(goalsArray)
+
+          if (supabaseGoalsError) {
+            setLoading(false)
+            console.log(supabaseGoalsError)
+            return toast.error('No se pudieron grabar los Goles')
+          }
+        }
+        // yellow cards
+        const yellowCardsArray = modifiedRows
+          .filter(player => player.yellow_cards > 0)
+          .map(player => ({
+            fixture_id: fixture[0].id,
+            player_id: player.id,
+            quantity: player.yellow_cards
+          }))
+        if (yellowCardsArray.length) {
+          const { error: supabaseYellowCardsError } = await supabase
+            .from('yellow_cards')
+            .insert(yellowCardsArray)
+
+          if (supabaseYellowCardsError) {
+            setLoading(false)
+            return toast.error('No se pudieron grabar las Tarjetas Amarillas')
+          }
+        }
+        // red cards
+        const redCardsArray = modifiedRows
+          .filter(player => player.red_cards)
+          .map(player => ({
+            fixture_id: fixture[0].id,
+            player_id: player.id,
+            motivo: player.motivo
+          }))
+
+        if (redCardsArray.length) {
+          const { error: supabaseRedCardError } = await supabase
+            .from('red_cards')
+            .insert(redCardsArray)
+
+          if (supabaseRedCardError) {
+            setLoading(false)
+            return toast.error('No se pudieron grabar las Tarjetas Rojas')
+          }
+        }
+      }
+
+      // walkover
       if (walkover?.length) {
-        const walkoverArray = walkover.map(item => ({
-          fixture_id: 'id',
+        const walkoverArray = walkover.map((item: any) => ({
+          fixture_id: fixture[0].id,
           team_id: item
         }))
-        console.log({ walkoverArray })
+        const { error: supabaseWalkoverError } = await supabase
+          .from('walkover')
+          .insert(walkoverArray)
+
+        if (supabaseWalkoverError) {
+          setLoading(false)
+          return toast.error('No se pudo guardar datos de Walkover')
+        }
       }
-
-      if (modifiedRows.length) {
-        const goalsArray = modifiedRows.map(player => ({
-          fixture_id: 'id',
-          player_id: player.id,
-          quantity: player.goals
-        }))
-
-        const yellowCardsArray = modifiedRows.map(player => ({
-          fixture_id: 'id',
-          player_id: player.id,
-          quantity: player.yellow_cards
-        }))
-
-        const redCardsArray = modifiedRows.map(player => ({
-          fixture_id: 'id',
-          player_id: player.id,
-          motivo: player.motivo
-        }))
-
-        console.log({ goalsArray, yellowCardsArray, redCardsArray })
-      }
-
-      // // fixture
-      // const { data: fixture, error: supabaseFixtureError } = await supabase
-      //   .from('fixtures')
-      //   .insert({
-      //     name,
-      //     location_id
-      //   })
-      //   .select('id')
-
-      // if (supabaseFixtureError) {
-      //   setLoading(false)
-      //   return toast.error('No se pudo grabar Fixture Cabecera')
-      // }
-
-      // // fixture details
-      // const { error: supabaseFixtureDetailError } = await supabase
-      //   .from('fixture_details')
-      //   .insert({
-      //     fixture_id: fixture[0].id,
-      //     team_1,
-      //     team_2,
-      //     cancha_nro,
-      //     date: date.toISOString()
-      //   })
-
-      // if (supabaseFixtureDetailError) {
-      //   setLoading(false)
-      //   return toast.error('No se pudo grabar Fixture Detalle')
-      // }
-
-      // // fixture goals cards and walkover
-      // const { error: supabaseGoalsError } = await supabase
-      //   .from('goals')
-      //   .insert({
-      //     fixture_id: fixture[0].id,
-      //     player_id: id,
-      //     quantity: goals
-      //   })
-
-      // if (supabaseGoalsError) {
-      //   setLoading(false)
-      //   return toast.error('No se pudieron grabar los Goles')
-      // }
-      // // fixture goals cards and walkover
-      // const { error: supabaseYellowCardsError } = await supabase
-      //   .from('yellow_cards')
-      //   .insert({
-      //     fixture_id: fixture[0].id,
-      //     player_id: id,
-      //     quantity: yellow_cards
-      //   })
-
-      // if (supabaseYellowCardsError) {
-      //   setLoading(false)
-      //   return toast.error('No se pudieron grabar los Goles')
-      // }
-      // // fixture goals cards and walkover
-      // const { error: supabaseRedCardError } = await supabase
-      //   .from('red_cards')
-      //   .insert({
-      //     fixture_id: fixture[0].id,
-      //     player_id: id,
-      //     motivo: motivo
-      //   })
-
-      // if (supabaseRedCardError) {
-      //   setLoading(false)
-      //   return toast.error('No se pudieron grabar los Goles')
-      // }
-      // // fixture goals cards and walkover
-      // const { error: supabaseRedCardError } = await supabase
-      //   .from('walkover')
-      //   .insert({
-      //     fixture_id: fixture[0].id,
-      //     team_id
-      //   })
-
-      // if (supabaseRedCardError) {
-      //   setLoading(false)
-      //   return toast.error('No se pudieron grabar los Goles')
-      // }
 
       router.refresh()
       setLoading(false)
