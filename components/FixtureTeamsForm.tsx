@@ -61,6 +61,28 @@ const FixtureTeamsForm = ({
   players
 }: FixtureTeamsFormProps) => {
   const { supabase } = useSupabase()
+  const router = useRouter()
+  const [toggle1, setToggle1] = useState<boolean>(false)
+  const [toggle2, setToggle2] = useState<boolean>(false)
+  const [loading, setLoading] = useState<boolean>(false)
+  const [hour, setHour] = useState<string>('')
+  const [goals, setGoals] = useState<
+    { id: number; goals: number }[] | undefined
+  >(undefined)
+  const [walkover, setWalkover] = useState<number[]>([])
+  const [playersTeam_1, setPlayersTeam_1] = useState<
+    PlayersFixture[] | undefined
+  >(undefined)
+  const [playersTeam_2, setPlayersTeam_2] = useState<
+    PlayersFixture[] | undefined
+  >(undefined)
+  const [filteredPlayersTeam_1, setFilteredPlayersTeam_1] = useState<
+    PlayersFixture[] | undefined
+  >(undefined)
+  const [filteredPlayersTeam_2, setFilteredPlayersTeam_2] = useState<
+    PlayersFixture[] | undefined
+  >(undefined)
+  const [modifiedRows, setModifiedRows] = useState<any[]>([])
 
   const formSchema = z
     .object({
@@ -197,29 +219,6 @@ const FixtureTeamsForm = ({
       }
     )
 
-  const router = useRouter()
-  const [toggle1, setToggle1] = useState<boolean>(false)
-  const [toggle2, setToggle2] = useState<boolean>(false)
-  const [loading, setLoading] = useState<boolean>(false)
-  const [hour, setHour] = useState<string>('')
-  const [goals, setGoals] = useState<
-    { id: number; goals: number }[] | undefined
-  >(undefined)
-  const [walkover, setWalkover] = useState<number[]>([])
-  const [playersTeam_1, setPlayersTeam_1] = useState<
-    PlayersFixture[] | undefined
-  >(undefined)
-  const [playersTeam_2, setPlayersTeam_2] = useState<
-    PlayersFixture[] | undefined
-  >(undefined)
-  const [filteredPlayersTeam_1, setFilteredPlayersTeam_1] = useState<
-    PlayersFixture[] | undefined
-  >(undefined)
-  const [filteredPlayersTeam_2, setFilteredPlayersTeam_2] = useState<
-    PlayersFixture[] | undefined
-  >(undefined)
-  const [modifiedRows, setModifiedRows] = useState<any[]>([])
-
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -296,28 +295,6 @@ const FixtureTeamsForm = ({
 
     setGoals(totalCount)
   }
-
-  useEffect(() => {
-    countGoals()
-  }, [modifiedRows])
-
-  useEffect(() => {
-    form.setValue('goals', goals!)
-  }, [goals])
-
-  useEffect(() => {
-    setFilteredPlayersTeam_1(playersTeam_1)
-    setFilteredPlayersTeam_2(playersTeam_2) // si estaba en walkover reinicia el listado automaticamente
-  }, [playersTeam_1])
-
-  useEffect(() => {
-    setFilteredPlayersTeam_2(playersTeam_2)
-    setFilteredPlayersTeam_1(playersTeam_1) // si estaba en walkover reinicia el listado automaticamente
-  }, [playersTeam_2])
-
-  useEffect(() => {
-    form.setValue('walkover', walkover!)
-  }, [walkover])
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     console.log({ values })
@@ -497,6 +474,28 @@ const FixtureTeamsForm = ({
 
     return true
   }
+
+  useEffect(() => {
+    countGoals()
+  }, [modifiedRows])
+
+  useEffect(() => {
+    form.setValue('goals', goals!)
+  }, [goals])
+
+  useEffect(() => {
+    setFilteredPlayersTeam_1(playersTeam_1)
+    setFilteredPlayersTeam_2(playersTeam_2) // si estaba en walkover reinicia el listado automaticamente
+  }, [playersTeam_1])
+
+  useEffect(() => {
+    setFilteredPlayersTeam_2(playersTeam_2)
+    setFilteredPlayersTeam_1(playersTeam_1) // si estaba en walkover reinicia el listado automaticamente
+  }, [playersTeam_2])
+
+  useEffect(() => {
+    form.setValue('walkover', walkover!)
+  }, [walkover])
 
   return (
     <Form {...form}>
