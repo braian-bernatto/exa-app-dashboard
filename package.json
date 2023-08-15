@@ -52,7 +52,8 @@
     "tailwindcss-animate": "^1.0.6",
     "typescript": "5.1.6",
     "uniqid": "^5.4.0",
-    "zod": "^3.21.4"
+    "zod": "^3.21.4",
+    "zustand": "^4.4.1"
   },
   "devDependencies": {
     "@types/uniqid": "^5.3.2",

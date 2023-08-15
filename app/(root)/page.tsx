@@ -10,7 +10,6 @@ import getTorneos from '@/actions/getTorneos'
 import ExaForm from '@/components/ExaForm'
 import FixtureForm from '@/components/FixtureForm'
 import FixtureTeamsForm from '@/components/FixtureTeamsForm'
-import Navbar from '@/components/Navbar'
 import PlayerForm from '@/components/PlayerForm'
 import TeamForm from '@/components/TeamForm'
 import TorneoForm from '@/components/TorneoForm'
@@ -27,27 +26,18 @@ export default async function Home() {
   const fixtures = await getFixtures()
 
   return (
-    <div className='px-8 xl:px-0'>
-      <Navbar />
-      <div className='w-full bg-neutral-100 my-10 rounded-md max-w-7xl min-h-[75vh] overflow-auto p-4 sm:p-10 gap-10 flex flex-wrap justify-center items-start mx-auto'>
-        <FixtureTeamsForm fixtures={fixtures} teams={teams} players={players} />
-        <FixtureForm torneos={torneos} locations={locations} />
-        <TorneoForm />
-        <PlayerForm
-          teams={teams}
-          positions={positions}
-          countries={countries}
-          foot={foot}
-        />
-        <TeamForm exas={exas} />
-        <ExaForm />
-      </div>
-      <footer className='flex items-center w-full justify-between mx-auto max-w-7xl'>
-        <div className='text-sm'>
-          <strong>Bernatto Inc</strong> |{' '}
-          <span>&copy; Todos los derechos reservados.</span>
-        </div>
-      </footer>
-    </div>
+    <>
+      <FixtureTeamsForm fixtures={fixtures} teams={teams} players={players} />
+      <FixtureForm torneos={torneos} locations={locations} />
+      <TorneoForm />
+      <PlayerForm
+        teams={teams}
+        positions={positions}
+        countries={countries}
+        foot={foot}
+      />
+      <TeamForm exas={exas} />
+      <ExaForm />
+    </>
   )
 }

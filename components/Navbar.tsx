@@ -12,17 +12,22 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Github, LifeBuoy, LogOut, User } from 'lucide-react'
 import Link from 'next/link'
+import MainNav from './MainNav'
 
 const Navbar = () => {
   const { user, signOut } = useAuth()
   return (
-    <nav className='w-full border-b border-neutral-100'>
+    <div className='w-full border-b border-neutral-100'>
       {/* Container */}
       <div className='flex items-center justify-between w-full py-6 mx-auto max-w-7xl'>
         {/* Logo */}
         <Link href={'/'}>
           <div className='text-lg font-bold'>EXA APP</div>
         </Link>
+
+        {/* Links */}
+        <MainNav className='mx-6' />
+
         {/* Avatar */}
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
@@ -52,12 +57,13 @@ const Navbar = () => {
               Perfil
             </DropdownMenuItem>
             <DropdownMenuItem>
-              <Github className='w-4 h-4 mr-2' />
-              <span>GitHub</span>
-            </DropdownMenuItem>
-            <DropdownMenuItem>
               <LifeBuoy className='w-4 h-4 mr-2' />
-              <span>Soporte</span>
+              <a
+                href='https://wa.me/595983709234?text=Hola,%20tengo%20una%20consulta%20sobre%20ExaApp%E2%9A%BD'
+                target='_blank'
+              >
+                Soporte
+              </a>
             </DropdownMenuItem>
             <DropdownMenuItem onClick={signOut}>
               <LogOut className='w-4 h-4 mr-2' />
@@ -66,7 +72,7 @@ const Navbar = () => {
           </DropdownMenuContent>
         </DropdownMenu>
       </div>
-    </nav>
+    </div>
   )
 }
 
