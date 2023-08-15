@@ -1,9 +1,9 @@
 'use client'
 import React, { useState } from 'react'
-import { Input } from './ui/input'
-import PreviewImage from './PreviewImage'
+import { Input } from '../../../../../components/ui/input'
+import PreviewImage from '../../../../../components/PreviewImage'
 import { Trophy } from 'lucide-react'
-import { Button } from './ui/button'
+import { Button } from '../../../../../components/ui/button'
 
 import { useForm } from 'react-hook-form'
 import * as z from 'zod'
@@ -20,6 +20,7 @@ import uniqid from 'uniqid'
 import { toast } from 'react-hot-toast'
 import { useSupabase } from '@/providers/SupabaseProvider'
 import { useRouter } from 'next/navigation'
+import { Exas } from '@/types'
 
 const MAX_FILE_SIZE = 5 * 1024 * 1024
 const ACCEPTED_IMAGE_TYPES = [
@@ -31,7 +32,7 @@ const ACCEPTED_IMAGE_TYPES = [
 
 const formSchema = z.object({
   name: z.string().min(1, { message: 'Obligatorio' }),
-  logo: z
+  logo_url: z
     .any()
     .refine(files => files?.size <= MAX_FILE_SIZE, `Límite de tamaño es 5MB.`)
     .refine(
@@ -41,22 +42,25 @@ const formSchema = z.object({
     .optional()
 })
 
-const ExaForm = () => {
+type ExaType = Pick<Exas, 'name' | 'logo_url'>
+
+interface ExaFormProps {
+  initialData: ExaType | null
+}
+
+const ExaForm = ({ initialData }: ExaFormProps) => {
   const router = useRouter()
   const { supabase } = useSupabase()
   const [loading, setLoading] = useState<boolean>(false)
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
-    defaultValues: {
-      name: '',
-      logo: undefined
-    }
+    defaultValues: initialData || { name: '', logo_url: '' }
   })
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     try {
       setLoading(true)
-      const { name, logo } = values
+      const { name, logo_url } = values
       if (!name) {
         return toast.error('Faltan datos')
       }
@@ -65,10 +69,10 @@ const ExaForm = () => {
       let imagePath = ''
 
       // upload image
-      if (logo) {
+      if (logo_url) {
         const { data: imageData, error: imageError } = await supabase.storage
           .from('exas')
-          .upload(`image-${name}-${uniqueID}`, logo, {
+          .upload(`image-${name}-${uniqueID}`, logo_url, {
             cacheControl: '3600',
             upsert: false
           })
@@ -81,7 +85,7 @@ const ExaForm = () => {
 
       const { error: supabaseError } = await supabase.from('exas').insert({
         name,
-        logo_url: imagePath
+        logo_url_url: imagePath
       })
       if (supabaseError) {
         setLoading(false)
@@ -130,7 +134,7 @@ const ExaForm = () => {
         {/* Logo */}
         <FormField
           control={form.control}
-          name='logo'
+          name='logo_url'
           render={({ field }) => (
             <FormItem className='rounded bg-white'>
               <FormLabel>Logo</FormLabel>

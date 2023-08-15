@@ -41,40 +41,40 @@ export interface Database {
           created_at: string | null
           id: number
           logo_url: string | null
-          name: string | null
+          name: string
         }
         Insert: {
           created_at?: string | null
           id?: number
           logo_url?: string | null
-          name?: string | null
+          name: string
         }
         Update: {
           created_at?: string | null
           id?: number
           logo_url?: string | null
-          name?: string | null
+          name?: string
         }
         Relationships: []
       }
       fixture_details: {
         Row: {
           cancha_nro: number | null
-          date: string | null
+          date: string
           fixture_id: number
           team_1: number
           team_2: number
         }
         Insert: {
           cancha_nro?: number | null
-          date?: string | null
+          date: string
           fixture_id: number
           team_1: number
           team_2: number
         }
         Update: {
           cancha_nro?: number | null
-          date?: string | null
+          date?: string
           fixture_id?: number
           team_1?: number
           team_2?: number
@@ -106,24 +106,33 @@ export interface Database {
           id: number
           location_id: number | null
           name: string
+          torneo_id: number
         }
         Insert: {
           created_at?: string
           id?: number
           location_id?: number | null
           name: string
+          torneo_id: number
         }
         Update: {
           created_at?: string
           id?: number
           location_id?: number | null
           name?: string
+          torneo_id?: number
         }
         Relationships: [
           {
             foreignKeyName: "fixtures_location_id_fkey"
             columns: ["location_id"]
             referencedRelation: "locations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fixtures_torneo_id_fkey"
+            columns: ["torneo_id"]
+            referencedRelation: "torneos"
             referencedColumns: ["id"]
           }
         ]
