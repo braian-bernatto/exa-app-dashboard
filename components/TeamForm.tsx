@@ -1,7 +1,7 @@
 'use client'
 import React, { useState } from 'react'
 import { Input } from './ui/input'
-import PreviewImage from './PreviewImage'
+import PreviewImage from './PreviewImageFile'
 import { Check, ChevronsUpDown, Shield } from 'lucide-react'
 import { Button } from './ui/button'
 

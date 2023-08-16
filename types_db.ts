@@ -473,7 +473,37 @@ export interface Database {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      delete_exa_logo: {
+        Args: {
+          logo_url: string
+        }
+        Returns: Record<string, unknown>
+      }
+      delete_player_image: {
+        Args: {
+          image_url: string
+        }
+        Returns: Record<string, unknown>
+      }
+      delete_storage_object: {
+        Args: {
+          bucket: string
+          object: string
+        }
+        Returns: Record<string, unknown>
+      }
+      delete_team_logo: {
+        Args: {
+          logo_url: string
+        }
+        Returns: Record<string, unknown>
+      }
+      delete_torneo_logo: {
+        Args: {
+          logo_url: string
+        }
+        Returns: Record<string, unknown>
+      }
     }
     Enums: {
       continents:

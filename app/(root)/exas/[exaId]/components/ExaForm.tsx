@@ -1,7 +1,7 @@
 'use client'
 import React, { useState } from 'react'
 import { Input } from '../../../../../components/ui/input'
-import PreviewImage from '../../../../../components/PreviewImage'
+import PreviewImageFile from '../../../../../components/PreviewImageFile'
 import { Trash, Trophy } from 'lucide-react'
 import { Button } from '../../../../../components/ui/button'
 
@@ -19,9 +19,10 @@ import {
 import uniqid from 'uniqid'
 import { toast } from 'react-hot-toast'
 import { useSupabase } from '@/providers/SupabaseProvider'
-import { useRouter } from 'next/navigation'
+import { useParams, useRouter } from 'next/navigation'
 import { Exas } from '@/types'
 import { AlertModal } from '@/components/modals/AlertModal'
+import PreviewImageUrl from '@/components/PreviewImageUrl'
 
 const MAX_FILE_SIZE = 5 * 1024 * 1024
 const ACCEPTED_IMAGE_TYPES = [
@@ -43,14 +44,17 @@ const formSchema = z.object({
     .optional()
 })
 
-type ExaType = Pick<Exas, 'name' | 'logo_url'>
+type ExaType = Pick<Exas, 'name' | 'logo_url'> & {
+  public_logo_url: string
+}
 
 interface ExaFormProps {
-  initialData: ExaType | null
+  initialData: ExaType | undefined
 }
 
 const ExaForm = ({ initialData }: ExaFormProps) => {
   const router = useRouter()
+  const params = useParams()
   const { supabase } = useSupabase()
   const [open, setOpen] = useState(false)
   const [loading, setLoading] = useState(false)
@@ -67,6 +71,7 @@ const ExaForm = ({ initialData }: ExaFormProps) => {
   async function onSubmit(values: z.infer<typeof formSchema>) {
     try {
       setLoading(true)
+
       const { name, logo_url } = values
       if (!name) {
         return toast.error('Faltan datos')
@@ -76,7 +81,7 @@ const ExaForm = ({ initialData }: ExaFormProps) => {
       let imagePath = ''
 
       // upload image
-      if (logo_url) {
+      if (typeof logo_url !== 'string') {
         const { data: imageData, error: imageError } = await supabase.storage
           .from('exas')
           .upload(`image-${name}-${uniqueID}`, logo_url, {
@@ -90,13 +95,32 @@ const ExaForm = ({ initialData }: ExaFormProps) => {
         imagePath = imageData?.path!
       }
 
-      const { error: supabaseError } = await supabase.from('exas').insert({
-        name,
-        logo_url_url: imagePath
-      })
-      if (supabaseError) {
-        setLoading(false)
-        return toast.error('No se pudo grabar')
+      if (initialData) {
+        //update
+        const { error: supabaseError } = await supabase
+          .from('exas')
+          .update({
+            name,
+            logo_url: imagePath || logo_url
+          })
+          .eq('id', +params.exaId)
+
+        if (supabaseError) {
+          console.log(supabaseError)
+          setLoading(false)
+          return toast.error(`No se pudo ${action}`)
+        }
+      } else {
+        //insert
+        const { error: supabaseError } = await supabase.from('exas').insert({
+          name,
+          logo_url: imagePath
+        })
+        if (supabaseError) {
+          console.log(supabaseError)
+          setLoading(false)
+          return toast.error(`No se pudo ${action}`)
+        }
       }
 
       router.refresh()
@@ -110,12 +134,39 @@ const ExaForm = ({ initialData }: ExaFormProps) => {
     }
   }
 
+  async function onDelete() {
+    try {
+      setLoading(true)
+
+      //insert
+      const { error: supabaseError } = await supabase
+        .from('exas')
+        .delete()
+        .eq('id', params.exaId)
+
+      if (supabaseError) {
+        console.log(supabaseError)
+        setLoading(false)
+        return toast.error(`No se pudo Borrar`)
+      }
+
+      router.push('/exas')
+      setLoading(false)
+      form.reset()
+      toast.success('Borrado con exito')
+    } catch (error) {
+      toast.error('Hubo un error')
+    } finally {
+      setLoading(false)
+    }
+  }
+
   return (
     <>
       <AlertModal
         isOpen={open}
         onClose={() => setOpen(false)}
-        onConfirm={() => {}}
+        onConfirm={onDelete}
         loading={loading}
       />
       <Form {...form}>
@@ -130,16 +181,18 @@ const ExaForm = ({ initialData }: ExaFormProps) => {
             <h1 className='text-xl font-semibold flex items-center gap-2'>
               {title}
             </h1>
-            <Button
-              type='button'
-              className='ml-auto'
-              disabled={loading}
-              variant='destructive'
-              size='icon'
-              onClick={() => setOpen(true)}
-            >
-              <Trash className='h-4 w-4' />
-            </Button>
+            {initialData && (
+              <Button
+                type='button'
+                className='ml-auto'
+                disabled={loading}
+                variant='destructive'
+                size='icon'
+                onClick={() => setOpen(true)}
+              >
+                <Trash className='h-4 w-4' />
+              </Button>
+            )}
           </div>
           {/* Name */}
           <FormField
@@ -171,7 +224,12 @@ const ExaForm = ({ initialData }: ExaFormProps) => {
                         field.onChange(e.target.files?.[0])
                       }}
                     />
-                    <PreviewImage file={field.value} />
+                    {typeof field.value === 'string' &&
+                    initialData?.public_logo_url.length ? (
+                      <PreviewImageUrl url={initialData?.public_logo_url} />
+                    ) : (
+                      <PreviewImageFile file={field.value} />
+                    )}
                   </div>
                 </FormControl>
                 <FormMessage />
