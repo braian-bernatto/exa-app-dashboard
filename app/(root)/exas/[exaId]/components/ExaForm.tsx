@@ -2,7 +2,7 @@
 import React, { useState } from 'react'
 import { Input } from '../../../../../components/ui/input'
 import PreviewImage from '../../../../../components/PreviewImage'
-import { Trophy } from 'lucide-react'
+import { Trash, Trophy } from 'lucide-react'
 import { Button } from '../../../../../components/ui/button'
 
 import { useForm } from 'react-hook-form'
@@ -21,6 +21,7 @@ import { toast } from 'react-hot-toast'
 import { useSupabase } from '@/providers/SupabaseProvider'
 import { useRouter } from 'next/navigation'
 import { Exas } from '@/types'
+import { AlertModal } from '@/components/modals/AlertModal'
 
 const MAX_FILE_SIZE = 5 * 1024 * 1024
 const ACCEPTED_IMAGE_TYPES = [
@@ -51,7 +52,13 @@ interface ExaFormProps {
 const ExaForm = ({ initialData }: ExaFormProps) => {
   const router = useRouter()
   const { supabase } = useSupabase()
-  const [loading, setLoading] = useState<boolean>(false)
+  const [open, setOpen] = useState(false)
+  const [loading, setLoading] = useState(false)
+
+  const title = initialData ? 'Editar Exa' : 'Agregar Exa'
+  const toastMessage = initialData ? 'Exa modificado' : 'Exa agregado'
+  const action = initialData ? 'Modificar' : 'Agregar'
+
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: initialData || { name: '', logo_url: '' }
@@ -95,7 +102,7 @@ const ExaForm = ({ initialData }: ExaFormProps) => {
       router.refresh()
       setLoading(false)
       form.reset()
-      toast.success('Exa creado!')
+      toast.success(toastMessage)
     } catch (error) {
       toast.error('Hubo un error')
     } finally {
@@ -104,68 +111,86 @@ const ExaForm = ({ initialData }: ExaFormProps) => {
   }
 
   return (
-    <Form {...form}>
-      <form
-        onSubmit={form.handleSubmit(onSubmit)}
-        className='flex flex-col w-full max-w-xs rounded bg-white py-3 px-4 shadow gap-5 justify-center'
-      >
-        <div className='flex gap-2'>
-          <span className='bg-gradient-to-r from-emerald-300 to-emerald-700 rounded-full p-2 flex items-center justify-center'>
-            <Trophy className='text-white' size={30} />
-          </span>
-          <h1 className='text-xl font-semibold flex items-center gap-2'>
-            Agregar Exa
-          </h1>
-        </div>
-        {/* Name */}
-        <FormField
-          control={form.control}
-          name='name'
-          render={({ field }) => (
-            <FormItem className='rounded bg-white'>
-              <FormLabel>Nombre</FormLabel>
-              <FormControl>
-                <Input {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        {/* Logo */}
-        <FormField
-          control={form.control}
-          name='logo_url'
-          render={({ field }) => (
-            <FormItem className='rounded bg-white'>
-              <FormLabel>Logo</FormLabel>
-              <FormControl>
-                <div className='flex flex-col items-center gap-2'>
-                  <Input
-                    type='file'
-                    accept='image/*'
-                    onChange={e => {
-                      field.onChange(e.target.files?.[0])
-                    }}
-                  />
-                  <PreviewImage file={field.value} />
-                </div>
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        <div className='w-full'>
-          <Button
-            type='submit'
-            variant={'default'}
-            className='w-full'
-            disabled={loading}
-          >
-            Agregar
-          </Button>
-        </div>
-      </form>
-    </Form>
+    <>
+      <AlertModal
+        isOpen={open}
+        onClose={() => setOpen(false)}
+        onConfirm={() => {}}
+        loading={loading}
+      />
+      <Form {...form}>
+        <form
+          onSubmit={form.handleSubmit(onSubmit)}
+          className='flex flex-col w-full max-w-xs rounded bg-white py-3 px-4 shadow gap-5 justify-center'
+        >
+          <div className='flex gap-2'>
+            <span className='bg-gradient-to-r from-emerald-300 to-emerald-700 rounded-full p-2 flex items-center justify-center'>
+              <Trophy className='text-white' size={30} />
+            </span>
+            <h1 className='text-xl font-semibold flex items-center gap-2'>
+              {title}
+            </h1>
+            <Button
+              type='button'
+              className='ml-auto'
+              disabled={loading}
+              variant='destructive'
+              size='icon'
+              onClick={() => setOpen(true)}
+            >
+              <Trash className='h-4 w-4' />
+            </Button>
+          </div>
+          {/* Name */}
+          <FormField
+            control={form.control}
+            name='name'
+            render={({ field }) => (
+              <FormItem className='rounded bg-white'>
+                <FormLabel>Nombre</FormLabel>
+                <FormControl>
+                  <Input {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          {/* Logo */}
+          <FormField
+            control={form.control}
+            name='logo_url'
+            render={({ field }) => (
+              <FormItem className='rounded bg-white'>
+                <FormLabel>Logo</FormLabel>
+                <FormControl>
+                  <div className='flex flex-col items-center gap-2'>
+                    <Input
+                      type='file'
+                      accept='image/*'
+                      onChange={e => {
+                        field.onChange(e.target.files?.[0])
+                      }}
+                    />
+                    <PreviewImage file={field.value} />
+                  </div>
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <div className='w-full'>
+            <Button
+              type='submit'
+              variant={'default'}
+              className='w-full'
+              disabled={loading}
+            >
+              {action}
+            </Button>
+          </div>
+        </form>
+      </Form>
+    </>
   )
 }
 
