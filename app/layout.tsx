@@ -6,7 +6,6 @@ import { createClient } from '@/utils/supabaseServer'
 import SupabaseAuthProvider from '@/providers/SupabaseAuthProvider'
 import ToasterProvider from '@/providers/ToasterProvider'
 import ModalProvider from '@/providers/ModalProvider'
-import Navbar from '@/components/Navbar'
 
 const inter = Inter({ subsets: ['latin'] })
 

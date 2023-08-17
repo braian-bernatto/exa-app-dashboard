@@ -4,16 +4,21 @@ import { Button } from '@/components/ui/button'
 import { Heading } from '@/components/ui/heading'
 import { Separator } from '@/components/ui/separator'
 import { Plus } from 'lucide-react'
-import { useParams, useRouter } from 'next/navigation'
+import { useRouter } from 'next/navigation'
+import { ExaColumn, columns } from './columns'
+import { DataTable } from '@/components/ui/data-table'
 
-const ExaClient = () => {
+interface ExaClientProps {
+  data: ExaColumn[]
+}
+
+const ExaClient = ({ data }: ExaClientProps) => {
   const router = useRouter()
-  const params = useParams()
   return (
     <>
       <div className='flex items-center justify-between'>
         <Heading
-          title='Exas (0)'
+          title={`Exas (${data.length})`}
           description='Maneja todos los datos de tus exas'
         />
         <Button onClick={() => router.push(`/exas/agregar`)}>
@@ -21,6 +26,12 @@ const ExaClient = () => {
         </Button>
       </div>
       <Separator />
+      <DataTable
+        columns={columns}
+        data={data}
+        filterLabel='Nombre'
+        filterKey='name'
+      />
     </>
   )
 }

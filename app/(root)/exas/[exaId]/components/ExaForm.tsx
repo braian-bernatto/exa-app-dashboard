@@ -41,6 +41,7 @@ const formSchema = z.object({
       files => ACCEPTED_IMAGE_TYPES.includes(files?.type),
       'Sólo se aceptan los formatos .jpg .jpeg .png .webp'
     )
+    .or(z.string())
     .optional()
 })
 
@@ -124,8 +125,7 @@ const ExaForm = ({ initialData }: ExaFormProps) => {
       }
 
       router.refresh()
-      setLoading(false)
-      form.reset()
+      router.push('/exas')
       toast.success(toastMessage)
     } catch (error) {
       toast.error('Hubo un error')
@@ -138,7 +138,6 @@ const ExaForm = ({ initialData }: ExaFormProps) => {
     try {
       setLoading(true)
 
-      //insert
       const { error: supabaseError } = await supabase
         .from('exas')
         .delete()
@@ -149,15 +148,14 @@ const ExaForm = ({ initialData }: ExaFormProps) => {
         setLoading(false)
         return toast.error(`No se pudo Borrar`)
       }
-
+      router.refresh()
       router.push('/exas')
-      setLoading(false)
-      form.reset()
-      toast.success('Borrado con exito')
+      toast.success('Borrado con éxito')
     } catch (error) {
       toast.error('Hubo un error')
     } finally {
       setLoading(false)
+      setOpen(false)
     }
   }
 

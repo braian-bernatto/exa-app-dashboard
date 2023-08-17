@@ -1,6 +1,8 @@
 import ExaForm from './components/ExaForm'
 import { createClient } from '@/utils/supabaseBrowser'
 
+export const revalidate = 0
+
 const ExaPage = async ({
   params
 }: {
