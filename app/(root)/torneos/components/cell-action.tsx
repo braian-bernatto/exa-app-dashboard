@@ -1,7 +1,7 @@
 'use client'
 
 import { Copy, Edit, MoreHorizontal, Trash } from 'lucide-react'
-import { ExaColumn } from './columns'
+import { TorneoColumn } from './columns'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -18,7 +18,7 @@ import { useSupabase } from '@/providers/SupabaseProvider'
 import { AlertModal } from '@/components/modals/AlertModal'
 
 interface CellActionProps {
-  data: ExaColumn
+  data: TorneoColumn
 }
 
 const CellAction = ({ data }: CellActionProps) => {
@@ -26,7 +26,6 @@ const CellAction = ({ data }: CellActionProps) => {
   const [open, setOpen] = useState(false)
   const { supabase } = useSupabase()
   const router = useRouter()
-
   const onCopy = () => {
     navigator.clipboard.writeText(data.id.toString())
     toast.success('ID copiado en el portapapeles')
@@ -36,10 +35,13 @@ const CellAction = ({ data }: CellActionProps) => {
     try {
       setLoading(true)
 
-      const { error } = await supabase.from('exas').delete().eq('id', data.id)
+      const { error: supabaseError } = await supabase
+        .from('torneos')
+        .delete()
+        .eq('id', data.id)
 
-      if (error) {
-        console.log(error)
+      if (supabaseError) {
+        console.log(supabaseError)
         setLoading(false)
         return toast.error(`No se pudo borrar`)
       }
@@ -72,10 +74,9 @@ const CellAction = ({ data }: CellActionProps) => {
           <DropdownMenuLabel>Acciones</DropdownMenuLabel>
           <DropdownMenuSeparator />
           <DropdownMenuItem onClick={onCopy}>
-            <Copy className='mr-2 h-4 w-4' />
-            Copiar ID
+            <Copy className='mr-2 h-4 w-4' /> Copiar ID
           </DropdownMenuItem>
-          <DropdownMenuItem onClick={() => router.push(`/exas/${data.id}`)}>
+          <DropdownMenuItem onClick={() => router.push(`/torneos/${data.id}`)}>
             <Edit className='mr-2 h-4 w-4' /> Editar
           </DropdownMenuItem>
           <DropdownMenuItem onClick={() => setOpen(true)}>

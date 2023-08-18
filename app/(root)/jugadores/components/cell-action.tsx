@@ -1,7 +1,6 @@
 'use client'
 
 import { Copy, Edit, MoreHorizontal, Trash } from 'lucide-react'
-import { ExaColumn } from './columns'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -16,9 +15,10 @@ import { useRouter } from 'next/navigation'
 import { useState } from 'react'
 import { useSupabase } from '@/providers/SupabaseProvider'
 import { AlertModal } from '@/components/modals/AlertModal'
+import { PlayerColumn } from './columns'
 
 interface CellActionProps {
-  data: ExaColumn
+  data: PlayerColumn
 }
 
 const CellAction = ({ data }: CellActionProps) => {
@@ -36,7 +36,10 @@ const CellAction = ({ data }: CellActionProps) => {
     try {
       setLoading(true)
 
-      const { error } = await supabase.from('exas').delete().eq('id', data.id)
+      const { error } = await supabase
+        .from('players')
+        .delete()
+        .eq('id', data.id)
 
       if (error) {
         console.log(error)
@@ -75,7 +78,9 @@ const CellAction = ({ data }: CellActionProps) => {
             <Copy className='mr-2 h-4 w-4' />
             Copiar ID
           </DropdownMenuItem>
-          <DropdownMenuItem onClick={() => router.push(`/exas/${data.id}`)}>
+          <DropdownMenuItem
+            onClick={() => router.push(`/jugadores/${data.id}`)}
+          >
             <Edit className='mr-2 h-4 w-4' /> Editar
           </DropdownMenuItem>
           <DropdownMenuItem onClick={() => setOpen(true)}>

@@ -1,5 +1,5 @@
 import ExaForm from './components/ExaForm'
-import { createClient } from '@/utils/supabaseBrowser'
+import { createClient } from '@/utils/supabaseServer'
 
 export const revalidate = 0
 
@@ -12,9 +12,9 @@ const ExaPage = async ({
 }) => {
   const supabase = createClient()
 
-  const { data: exa, error } = await supabase
+  const { data: exa } = await supabase
     .from('exas')
-    .select('name, logo_url')
+    .select('name, image_url')
     .eq('id', params.exaId)
     .single()
 
@@ -23,9 +23,9 @@ const ExaPage = async ({
   if (exa) {
     const { data: storage } = supabase.storage
       .from('exas')
-      .getPublicUrl(exa.logo_url!)
+      .getPublicUrl(exa.image_url!)
     if (storage) {
-      data = { ...exa, public_logo_url: storage.publicUrl }
+      data = { ...exa, public_image_url: storage.publicUrl }
     }
   }
 

@@ -1,7 +1,7 @@
 'use client'
 import React, { useState } from 'react'
 import { Input } from '../../../../../components/ui/input'
-import PreviewImageFile from '../../../../../components/PreviewImageFile'
+import PreviewImage from '../../../../../components/PreviewImageFile'
 import { Trash, Trophy } from 'lucide-react'
 import { Button } from '../../../../../components/ui/button'
 
@@ -20,9 +20,10 @@ import uniqid from 'uniqid'
 import { toast } from 'react-hot-toast'
 import { useSupabase } from '@/providers/SupabaseProvider'
 import { useParams, useRouter } from 'next/navigation'
-import { Exas } from '@/types'
+import { Torneos } from '@/types'
 import { AlertModal } from '@/components/modals/AlertModal'
 import PreviewImageUrl from '@/components/PreviewImageUrl'
+import PreviewImageFile from '../../../../../components/PreviewImageFile'
 
 const MAX_FILE_SIZE = 5 * 1024 * 1024
 const ACCEPTED_IMAGE_TYPES = [
@@ -45,15 +46,15 @@ const formSchema = z.object({
     .optional()
 })
 
-type ExaType = Pick<Exas, 'name' | 'image_url'> & {
+type TorneoType = Pick<Torneos, 'name' | 'image_url'> & {
   public_image_url: string
 }
 
-interface ExaFormProps {
-  initialData: ExaType | undefined
+interface TorneoFormProps {
+  initialData: TorneoType | undefined
 }
 
-const ExaForm = ({ initialData }: ExaFormProps) => {
+const TorneoForm = ({ initialData }: TorneoFormProps) => {
   const router = useRouter()
   const params = useParams()
 
@@ -61,8 +62,8 @@ const ExaForm = ({ initialData }: ExaFormProps) => {
   const [loading, setLoading] = useState(false)
   const [open, setOpen] = useState(false)
 
-  const title = initialData ? 'Editar Exa' : 'Agregar Exa'
-  const toastMessage = initialData ? 'Exa modificado' : 'Exa agregado'
+  const title = initialData ? 'Editar Torneo' : 'Agregar Torneo'
+  const toastMessage = initialData ? 'Torneo modificado' : 'Torneo agregado'
   const action = initialData ? 'Modificar' : 'Agregar'
 
   const form = useForm<z.infer<typeof formSchema>>({
@@ -85,48 +86,48 @@ const ExaForm = ({ initialData }: ExaFormProps) => {
       // upload image
       if (image_url && typeof image_url !== 'string') {
         const { data: imageData, error: imageError } = await supabase.storage
-          .from('exas')
+          .from('torneos')
           .upload(`image-${name}-${uniqueID}`, image_url, {
             cacheControl: '3600',
             upsert: false
           })
         if (imageError) {
           setLoading(false)
-          return toast.error('No se pudo agregar la imagen')
+          return toast.error('No se pudo alzar la imagen')
         }
         imagePath = imageData?.path!
       }
 
       if (initialData) {
         //update
-        const { error } = await supabase
-          .from('exas')
+        const { error: supabaseError } = await supabase
+          .from('torneos')
           .update({
             name,
             image_url: imagePath || image_url
           })
-          .eq('id', +params.exaId)
+          .eq('id', +params.torneoId)
 
-        if (error) {
-          console.log(error)
+        if (supabaseError) {
+          console.log(supabaseError)
           setLoading(false)
           return toast.error(`No se pudo ${action}`)
         }
       } else {
         //insert
-        const { error } = await supabase.from('exas').insert({
+        const { error: supabaseError } = await supabase.from('torneos').insert({
           name,
           image_url: imagePath
         })
-        if (error) {
-          console.log(error)
+        if (supabaseError) {
+          console.log(supabaseError)
           setLoading(false)
           return toast.error(`No se pudo ${action}`)
         }
       }
 
       router.refresh()
-      router.push('/exas')
+      router.push('/torneos')
       toast.success(toastMessage)
     } catch (error) {
       toast.error('Hubo un error')
@@ -140,17 +141,18 @@ const ExaForm = ({ initialData }: ExaFormProps) => {
       setLoading(true)
 
       const { error } = await supabase
-        .from('exas')
+        .from('torneos')
         .delete()
-        .eq('id', +params.exaId)
+        .eq('id', +params.torneoId)
 
       if (error) {
         console.log(error)
         setLoading(false)
         return toast.error(`No se pudo borrar`)
       }
+
       router.refresh()
-      router.push('/exas')
+      router.push('/torneos')
       toast.success('Borrado con éxito')
     } catch (error) {
       toast.error('Hubo un error')
@@ -251,4 +253,4 @@ const ExaForm = ({ initialData }: ExaFormProps) => {
   )
 }
 
-export default ExaForm
+export default TorneoForm

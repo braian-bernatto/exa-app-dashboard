@@ -15,8 +15,8 @@ const getTorneos = async (): Promise<Torneos[]> => {
   const dataWithImage = data?.map(data => {
     const { data: imageData } = supabase.storage
       .from('torneos')
-      .getPublicUrl(data.logo_url!)
-    return { ...data, logo_url: imageData.publicUrl }
+      .getPublicUrl(data.image_url!)
+    return { ...data, image_url: imageData.publicUrl }
   })
 
   return (dataWithImage as any) || []

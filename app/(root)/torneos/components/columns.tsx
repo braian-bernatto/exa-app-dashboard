@@ -1,13 +1,13 @@
 'use client'
 
+import { Torneos } from '@/types'
 import { ColumnDef } from '@tanstack/react-table'
 import CellAction from './cell-action'
-import { Exas } from '@/types'
 import CellImage from './cell-image'
 
-export type ExaColumn = Exas
+export type TorneoColumn = Torneos
 
-export const columns: ColumnDef<ExaColumn>[] = [
+export const columns: ColumnDef<TorneoColumn>[] = [
   {
     accessorKey: 'logo_url',
     header: 'Logo',

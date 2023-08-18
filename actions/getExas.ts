@@ -12,8 +12,8 @@ const getExas = async (): Promise<Exas[]> => {
   const dataWithImage = data?.map(data => {
     const { data: imageData } = supabase.storage
       .from('exas')
-      .getPublicUrl(data.logo_url!)
-    return { ...data, logo_url: imageData.publicUrl }
+      .getPublicUrl(data.image_url!)
+    return { ...data, image_url: imageData.publicUrl }
   })
 
   return (dataWithImage as any) || []

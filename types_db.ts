@@ -40,19 +40,19 @@ export interface Database {
         Row: {
           created_at: string | null
           id: number
-          logo_url: string | null
+          image_url: string | null
           name: string
         }
         Insert: {
           created_at?: string | null
           id?: number
-          logo_url?: string | null
+          image_url?: string | null
           name: string
         }
         Update: {
           created_at?: string | null
           id?: number
-          logo_url?: string | null
+          image_url?: string | null
           name?: string
         }
         Relationships: []
@@ -210,13 +210,13 @@ export interface Database {
           foot_id: number | null
           id: number
           image_url: string | null
-          name: string | null
+          name: string
           pas: number | null
-          position_id: string | null
+          position_id: string
           rating: number | null
           reg: number | null
           rit: number | null
-          team_id: number | null
+          team_id: number
           tir: number | null
         }
         Insert: {
@@ -227,13 +227,13 @@ export interface Database {
           foot_id?: number | null
           id?: number
           image_url?: string | null
-          name?: string | null
+          name: string
           pas?: number | null
-          position_id?: string | null
+          position_id: string
           rating?: number | null
           reg?: number | null
           rit?: number | null
-          team_id?: number | null
+          team_id: number
           tir?: number | null
         }
         Update: {
@@ -244,13 +244,13 @@ export interface Database {
           foot_id?: number | null
           id?: number
           image_url?: string | null
-          name?: string | null
+          name?: string
           pas?: number | null
-          position_id?: string | null
+          position_id?: string
           rating?: number | null
           reg?: number | null
           rit?: number | null
-          team_id?: number | null
+          team_id?: number
           tir?: number | null
         }
         Relationships: [
@@ -282,16 +282,16 @@ export interface Database {
       }
       positions: {
         Row: {
-          description: string | null
           id: string
+          name: string | null
         }
         Insert: {
-          description?: string | null
           id: string
+          name?: string | null
         }
         Update: {
-          description?: string | null
           id?: string
+          name?: string | null
         }
         Relationships: []
       }
@@ -360,24 +360,24 @@ export interface Database {
       teams: {
         Row: {
           created_at: string | null
-          exa_id: number | null
+          exa_id: number
           id: number
-          logo_url: string | null
-          name: string | null
+          image_url: string | null
+          name: string
         }
         Insert: {
           created_at?: string | null
-          exa_id?: number | null
+          exa_id: number
           id?: number
-          logo_url?: string | null
-          name?: string | null
+          image_url?: string | null
+          name: string
         }
         Update: {
           created_at?: string | null
-          exa_id?: number | null
+          exa_id?: number
           id?: number
-          logo_url?: string | null
-          name?: string | null
+          image_url?: string | null
+          name?: string
         }
         Relationships: [
           {
@@ -392,20 +392,20 @@ export interface Database {
         Row: {
           created_at: string | null
           id: number
-          logo_url: string | null
-          name: string | null
+          image_url: string | null
+          name: string
         }
         Insert: {
           created_at?: string | null
           id?: number
-          logo_url?: string | null
-          name?: string | null
+          image_url?: string | null
+          name: string
         }
         Update: {
           created_at?: string | null
           id?: number
-          logo_url?: string | null
-          name?: string | null
+          image_url?: string | null
+          name?: string
         }
         Relationships: []
       }

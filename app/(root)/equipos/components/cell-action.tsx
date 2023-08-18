@@ -1,7 +1,9 @@
-'use client'
-
-import { Copy, Edit, MoreHorizontal, Trash } from 'lucide-react'
-import { ExaColumn } from './columns'
+import { AlertModal } from '@/components/modals/AlertModal'
+import { TeamColumn } from './columns'
+import { useState } from 'react'
+import { useSupabase } from '@/providers/SupabaseProvider'
+import { useRouter } from 'next/navigation'
+import { toast } from 'react-hot-toast'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -11,14 +13,10 @@ import {
   DropdownMenuTrigger
 } from '@/components/ui/dropdown-menu'
 import { Button } from '@/components/ui/button'
-import { toast } from 'react-hot-toast'
-import { useRouter } from 'next/navigation'
-import { useState } from 'react'
-import { useSupabase } from '@/providers/SupabaseProvider'
-import { AlertModal } from '@/components/modals/AlertModal'
+import { Copy, Edit, MoreHorizontal, Trash } from 'lucide-react'
 
 interface CellActionProps {
-  data: ExaColumn
+  data: TeamColumn
 }
 
 const CellAction = ({ data }: CellActionProps) => {
@@ -36,13 +34,14 @@ const CellAction = ({ data }: CellActionProps) => {
     try {
       setLoading(true)
 
-      const { error } = await supabase.from('exas').delete().eq('id', data.id)
+      const { error } = await supabase.from('teams').delete().eq('id', data.id)
 
       if (error) {
         console.log(error)
         setLoading(false)
-        return toast.error(`No se pudo borrar`)
+        return toast.error('No se pudo borrar')
       }
+
       router.refresh()
       toast.success('Borrado con éxito')
     } catch (error) {
@@ -75,11 +74,13 @@ const CellAction = ({ data }: CellActionProps) => {
             <Copy className='mr-2 h-4 w-4' />
             Copiar ID
           </DropdownMenuItem>
-          <DropdownMenuItem onClick={() => router.push(`/exas/${data.id}`)}>
-            <Edit className='mr-2 h-4 w-4' /> Editar
+          <DropdownMenuItem onClick={() => router.push(`/equipos/${data.id}`)}>
+            <Edit className='mr-2 h-4 w-4' />
+            Editar
           </DropdownMenuItem>
           <DropdownMenuItem onClick={() => setOpen(true)}>
-            <Trash className='mr-2 h-4 w-4' /> Borrar
+            <Trash className='mr-2 h-4 w-4' />
+            Borrar
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
