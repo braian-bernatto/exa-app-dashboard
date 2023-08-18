@@ -48,7 +48,7 @@ const ACCEPTED_IMAGE_TYPES = [
 
 const formSchema = z.object({
   name: z.string().min(1, { message: 'Obligatorio' }),
-  logo_url: z
+  image_url: z
     .any()
     .refine(files => files?.size <= MAX_FILE_SIZE, `Límite de tamaño es 5MB.`)
     .refine(
@@ -60,8 +60,8 @@ const formSchema = z.object({
   exa_id: z.coerce.number({ invalid_type_error: 'Obligatorio' })
 })
 
-type TeamType = Pick<Teams, 'name' | 'logo_url' | 'exa_id'> & {
-  public_logo_url: string
+type TeamType = Pick<Teams, 'name' | 'image_url' | 'exa_id'> & {
+  public_image_url: string
 }
 
 interface TeamFormProps {
@@ -85,7 +85,7 @@ const TeamForm = ({ initialData, exas }: TeamFormProps) => {
     resolver: zodResolver(formSchema),
     defaultValues: initialData || {
       name: '',
-      logo_url: undefined,
+      image_url: undefined,
       exa_id: undefined
     }
   })
@@ -94,7 +94,7 @@ const TeamForm = ({ initialData, exas }: TeamFormProps) => {
     try {
       setLoading(true)
 
-      const { name, logo_url, exa_id } = values
+      const { name, image_url, exa_id } = values
       if (!name || !exa_id) {
         return toast.error('Faltan datos')
       }
@@ -103,10 +103,10 @@ const TeamForm = ({ initialData, exas }: TeamFormProps) => {
       let imagePath = ''
 
       // upload image
-      if (logo_url && typeof logo_url !== 'string') {
+      if (image_url && typeof image_url !== 'string') {
         const { data: imageData, error: imageError } = await supabase.storage
           .from('teams')
-          .upload(`image-${name}-${uniqueID}`, logo_url, {
+          .upload(`image-${name}-${uniqueID}`, image_url, {
             cacheControl: '3600',
             upsert: false
           })
@@ -125,7 +125,7 @@ const TeamForm = ({ initialData, exas }: TeamFormProps) => {
           .from('teams')
           .update({
             name,
-            logo_url: imagePath || logo_url,
+            image_url: imagePath || image_url,
             exa_id
           })
           .eq('id', +params.equipoId)
@@ -139,7 +139,7 @@ const TeamForm = ({ initialData, exas }: TeamFormProps) => {
         //insert
         const { error } = await supabase.from('teams').insert({
           name,
-          logo_url: imagePath,
+          image_url: imagePath,
           exa_id
         })
 
@@ -236,7 +236,7 @@ const TeamForm = ({ initialData, exas }: TeamFormProps) => {
           {/* Logo */}
           <FormField
             control={form.control}
-            name='logo_url'
+            name='image_url'
             render={({ field }) => (
               <FormItem className='rounded bg-white'>
                 <FormLabel>Logo</FormLabel>
@@ -250,8 +250,8 @@ const TeamForm = ({ initialData, exas }: TeamFormProps) => {
                       }}
                     />
                     {typeof field.value === 'string' &&
-                    initialData?.public_logo_url.length ? (
-                      <PreviewImageUrl url={initialData?.public_logo_url} />
+                    initialData?.public_image_url.length ? (
+                      <PreviewImageUrl url={initialData?.public_image_url} />
                     ) : (
                       <PreviewImageFile file={field.value} />
                     )}
@@ -309,9 +309,9 @@ const TeamForm = ({ initialData, exas }: TeamFormProps) => {
                                       : 'opacity-0'
                                   )}
                                 />
-                                {exa.logo_url?.length ? (
+                                {exa.image_url?.length ? (
                                   <Image
-                                    src={exa.logo_url}
+                                    src={exa.image_url}
                                     width={30}
                                     height={30}
                                     alt='exa logo'

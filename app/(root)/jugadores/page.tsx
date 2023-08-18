@@ -15,10 +15,13 @@ export default async function JugadoresPage() {
   const formattedPlayers: PlayerColumn[] | undefined = data?.map(item => ({
     id: item.id,
     name: item.name,
+    team_id: item.team_id,
     team_image_url: item.teams?.image_url,
     image_url: item.image_url,
+    position_id: item.position_id,
     position_name: item.positions?.name,
     rating: item.rating,
+    foot_id: item.foot_id,
     foot: item.foot?.name,
     rit: item.rit,
     tir: item.tir,
@@ -26,7 +29,7 @@ export default async function JugadoresPage() {
     reg: item.reg,
     def: item.def,
     fis: item.fis,
-    country_iso2: item.country_iso2,
+    country_iso2: item.country_iso2 || '',
     created_at: format(parseISO(item.created_at!), 'dd/MM/yyyy')
   }))
 

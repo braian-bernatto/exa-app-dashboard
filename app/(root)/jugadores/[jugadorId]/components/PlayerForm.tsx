@@ -1,7 +1,6 @@
 'use client'
 import React, { useState } from 'react'
 import { Input } from '../../../../../components/ui/input'
-import PreviewImage from '../../../../../components/PreviewImageFile'
 import { Shield, Trash, UserPlus } from 'lucide-react'
 import { Button } from '../../../../../components/ui/button'
 
@@ -64,17 +63,15 @@ const formSchema = z.object({
     .or(z.string())
     .optional(),
   country_iso2: z.string().optional(),
-  position_id: z.string().optional(),
+  position_id: z.string(),
   rating: z.coerce.number().optional(),
   foot_id: z.coerce.number().optional(),
-  attributes: z.object({
-    rit: z.coerce.number().optional(),
-    tir: z.coerce.number().optional(),
-    pas: z.coerce.number().optional(),
-    reg: z.coerce.number().optional(),
-    def: z.coerce.number().optional(),
-    fis: z.coerce.number().optional()
-  })
+  rit: z.coerce.number().optional(),
+  tir: z.coerce.number().optional(),
+  pas: z.coerce.number().optional(),
+  reg: z.coerce.number().optional(),
+  def: z.coerce.number().optional(),
+  fis: z.coerce.number().optional()
 })
 
 type PlayerType = Pick<
@@ -132,14 +129,12 @@ const PlayerForm = ({
       position_id: undefined,
       foot_id: undefined,
       rating: 0,
-      attributes: {
-        rit: 0,
-        tir: 0,
-        pas: 0,
-        reg: 0,
-        def: 0,
-        fis: 0
-      }
+      rit: 0,
+      tir: 0,
+      pas: 0,
+      reg: 0,
+      def: 0,
+      fis: 0
     }
   })
 
@@ -153,7 +148,12 @@ const PlayerForm = ({
       position_id,
       rating,
       foot_id,
-      attributes
+      rit,
+      tir,
+      pas,
+      reg,
+      def,
+      fis
     } = values
     try {
       setLoading(true)
@@ -246,12 +246,12 @@ const PlayerForm = ({
             position_id,
             rating,
             foot_id,
-            rit: attributes.rit,
-            tir: attributes.tir,
-            pas: attributes.pas,
-            reg: attributes.reg,
-            def: attributes.def,
-            fis: attributes.fis
+            rit: rit,
+            tir: tir,
+            pas: pas,
+            reg: reg,
+            def: def,
+            fis: fis
           })
           .eq('id', +params.jugadorId)
 
@@ -270,12 +270,12 @@ const PlayerForm = ({
           position_id,
           rating,
           foot_id,
-          rit: attributes.rit,
-          tir: attributes.tir,
-          pas: attributes.pas,
-          reg: attributes.reg,
-          def: attributes.def,
-          fis: attributes.fis
+          rit: rit,
+          tir: tir,
+          pas: pas,
+          reg: reg,
+          def: def,
+          fis: fis
         })
 
         if (supabaseError) {
@@ -633,7 +633,7 @@ const PlayerForm = ({
             {/* rit */}
             <FormField
               control={form.control}
-              name='attributes.rit'
+              name='rit'
               render={({ field }) => (
                 <FormItem className='rounded bg-white'>
                   <FormLabel>Ritmo</FormLabel>
@@ -647,7 +647,7 @@ const PlayerForm = ({
             {/* tir */}
             <FormField
               control={form.control}
-              name='attributes.tir'
+              name='tir'
               render={({ field }) => (
                 <FormItem className='rounded bg-white'>
                   <FormLabel>Tiro</FormLabel>
@@ -661,7 +661,7 @@ const PlayerForm = ({
             {/* pas */}
             <FormField
               control={form.control}
-              name='attributes.pas'
+              name='pas'
               render={({ field }) => (
                 <FormItem className='rounded bg-white'>
                   <FormLabel>Pase</FormLabel>
@@ -675,7 +675,7 @@ const PlayerForm = ({
             {/* reg */}
             <FormField
               control={form.control}
-              name='attributes.reg'
+              name='reg'
               render={({ field }) => (
                 <FormItem className='rounded bg-white'>
                   <FormLabel>Regate</FormLabel>
@@ -689,7 +689,7 @@ const PlayerForm = ({
             {/* def */}
             <FormField
               control={form.control}
-              name='attributes.def'
+              name='def'
               render={({ field }) => (
                 <FormItem className='rounded bg-white'>
                   <FormLabel>Defensa</FormLabel>
@@ -703,7 +703,7 @@ const PlayerForm = ({
             {/* fís */}
             <FormField
               control={form.control}
-              name='attributes.fis'
+              name='fis'
               render={({ field }) => (
                 <FormItem className='rounded bg-white'>
                   <FormLabel>Físico</FormLabel>
