@@ -50,46 +50,19 @@ const ACCEPTED_IMAGE_TYPES = [
   'image/webp'
 ]
 
-const formSchema = z.object({
-  name: z.string().min(1, { message: 'Obligatorio' }),
-  team_id: z.coerce.number({ invalid_type_error: 'Ingrese un número' }),
-  image_url: z
-    .any()
-    .refine(files => files?.size <= MAX_FILE_SIZE, `Límite de tamaño es 5MB.`)
-    .refine(
-      files => ACCEPTED_IMAGE_TYPES.includes(files?.type),
-      'Sólo se aceptan los formatos .jpg .jpeg .png .webp'
-    )
-    .or(z.string())
-    .optional(),
-  country_iso2: z.string().optional(),
-  position_id: z.string(),
-  rating: z.coerce.number().optional(),
-  foot_id: z.coerce.number().optional(),
-  rit: z.coerce.number().optional(),
-  tir: z.coerce.number().optional(),
-  pas: z.coerce.number().optional(),
-  reg: z.coerce.number().optional(),
-  def: z.coerce.number().optional(),
-  fis: z.coerce.number().optional()
-})
-
 type PlayerType = Pick<
   Players,
-  | 'name'
-  | 'team_id'
-  | 'image_url'
-  | 'country_iso2'
-  | 'position_id'
-  | 'foot_id'
-  | 'rating'
-  | 'rit'
-  | 'def'
-  | 'fis'
-  | 'pas'
-  | 'reg'
-  | 'tir'
+  'name' | 'team_id' | 'image_url' | 'position_id'
 > & {
+  foot_id: number
+  rating: number
+  rit: number
+  def: number
+  fis: number
+  pas: number
+  reg: number
+  tir: number
+  country_iso2: string
   public_image_url: string
 }
 
@@ -118,6 +91,30 @@ const PlayerForm = ({
   const title = initialData ? 'Editar Jugador' : 'Agregar Jugador'
   const toastMessage = initialData ? 'Jugador modificado' : 'Jugador agregado'
   const action = initialData ? 'Modificar' : 'Agregar'
+
+  const formSchema = z.object({
+    name: z.string().min(1, { message: 'Obligatorio' }),
+    team_id: z.coerce.number({ invalid_type_error: 'Ingrese un número' }),
+    image_url: z
+      .any()
+      .refine(files => files?.size <= MAX_FILE_SIZE, `Límite de tamaño es 5MB.`)
+      .refine(
+        files => ACCEPTED_IMAGE_TYPES.includes(files?.type),
+        'Sólo se aceptan los formatos .jpg .jpeg .png .webp'
+      )
+      .or(z.string())
+      .optional(),
+    country_iso2: z.string().optional(),
+    position_id: z.string(),
+    rating: z.number().optional(),
+    foot_id: z.number().optional(),
+    rit: z.number().optional(),
+    tir: z.number().optional(),
+    pas: z.number().optional(),
+    reg: z.number().optional(),
+    def: z.number().optional(),
+    fis: z.number().optional()
+  })
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),

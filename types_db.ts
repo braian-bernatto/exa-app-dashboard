@@ -475,7 +475,7 @@ export interface Database {
     Functions: {
       delete_exa_logo: {
         Args: {
-          logo_url: string
+          image_url: string
         }
         Returns: Record<string, unknown>
       }
@@ -494,13 +494,13 @@ export interface Database {
       }
       delete_team_logo: {
         Args: {
-          logo_url: string
+          image_url: string
         }
         Returns: Record<string, unknown>
       }
       delete_torneo_logo: {
         Args: {
-          logo_url: string
+          image_url: string
         }
         Returns: Record<string, unknown>
       }

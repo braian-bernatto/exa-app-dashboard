@@ -24,10 +24,10 @@ const TeamPage = async ({
   if (team) {
     const { data: storage } = supabase.storage
       .from('teams')
-      .getPublicUrl(team.logo_url!)
+      .getPublicUrl(team.image_url!)
 
     if (storage) {
-      data = { ...team, public_logo_url: storage.publicUrl }
+      data = { ...team, public_image_url: storage.publicUrl }
     }
   }
 

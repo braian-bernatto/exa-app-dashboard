@@ -9,7 +9,7 @@ export type ExaColumn = Exas
 
 export const columns: ColumnDef<ExaColumn>[] = [
   {
-    accessorKey: 'logo_url',
+    accessorKey: 'image_url',
     header: 'Logo',
     cell: ({ row }) => <CellImage data={row.original} />
   },

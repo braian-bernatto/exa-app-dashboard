@@ -9,7 +9,7 @@ export type TorneoColumn = Torneos
 
 export const columns: ColumnDef<TorneoColumn>[] = [
   {
-    accessorKey: 'logo_url',
+    accessorKey: 'image_url',
     header: 'Logo',
     cell: ({ row }) => <CellImage data={row.original} />
   },

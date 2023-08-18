@@ -66,7 +66,7 @@ type TeamType = Pick<Teams, 'name' | 'image_url' | 'exa_id'> & {
 
 interface TeamFormProps {
   initialData: TeamType | undefined
-  exas: Exas[] | undefined
+  exas: Exas[]
 }
 
 const TeamForm = ({ initialData, exas }: TeamFormProps) => {

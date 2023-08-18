@@ -10,7 +10,7 @@ const useLoadImage = (team: Teams) => {
 
   const { data: imageData } = supabase.storage
     .from('teams')
-    .getPublicUrl(team.logo_url!)
+    .getPublicUrl(team.image_url!)
 
   return imageData.publicUrl
 }

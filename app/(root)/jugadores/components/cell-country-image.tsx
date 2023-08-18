@@ -1,4 +1,3 @@
-import { useSupabase } from '@/providers/SupabaseProvider'
 import Image from 'next/image'
 import { PlayerColumn } from './columns'
 
@@ -7,8 +6,6 @@ interface CellCountryImageProps {
 }
 
 const CellCountryImage = ({ data }: CellCountryImageProps) => {
-  const { supabase } = useSupabase()
-
   if (!data.country_iso2) {
     return data.country_iso2
   }

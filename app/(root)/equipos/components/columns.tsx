@@ -9,7 +9,7 @@ export type TeamColumn = Teams
 
 export const columns: ColumnDef<TeamColumn>[] = [
   {
-    accessorKey: 'logo_url',
+    accessorKey: 'image_url',
     header: 'Logo',
     cell: ({ row }) => <CellImage data={row.original} />
   },

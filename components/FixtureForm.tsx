@@ -177,9 +177,9 @@ const FixtureForm = ({ torneos, locations }: FixtureFormProps) => {
                                   : 'opacity-0'
                               )}
                             />
-                            {torneo.logo_url?.length ? (
+                            {torneo.image_url?.length ? (
                               <Image
-                                src={torneo.logo_url}
+                                src={torneo.image_url}
                                 width={30}
                                 height={30}
                                 alt='torneo logo'

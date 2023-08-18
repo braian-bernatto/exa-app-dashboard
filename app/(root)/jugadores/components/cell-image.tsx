@@ -23,7 +23,7 @@ const CellImage = ({ data }: CellImageProps) => {
       width={50}
       height={50}
       alt='foto de jugador'
-      className='shadow flex rounded-full overflow-hidden border'
+      className='shadow rounded-full overflow-hidden border'
     />
   )
 }

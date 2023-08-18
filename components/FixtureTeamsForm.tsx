@@ -423,7 +423,7 @@ const FixtureTeamsForm = ({
     if (filteredPlayers && filteredPlayers.length > 0) {
       const url = teams.filter(
         team => team.id === filteredPlayers[0].team_id
-      )[0].logo_url
+      )[0].image_url
 
       if (url) {
         return <Image src={url} width={50} height={50} alt='team logo' />
@@ -646,9 +646,9 @@ const FixtureTeamsForm = ({
                                     : 'opacity-0'
                                 )}
                               />
-                              {team.logo_url?.length ? (
+                              {team.image_url?.length ? (
                                 <Image
-                                  src={team.logo_url}
+                                  src={team.image_url}
                                   width={30}
                                   height={30}
                                   alt='team logo'
@@ -741,9 +741,9 @@ const FixtureTeamsForm = ({
                                     : 'opacity-0'
                                 )}
                               />
-                              {team.logo_url?.length ? (
+                              {team.image_url?.length ? (
                                 <Image
-                                  src={team.logo_url}
+                                  src={team.image_url}
                                   width={30}
                                   height={30}
                                   alt='team logo'
