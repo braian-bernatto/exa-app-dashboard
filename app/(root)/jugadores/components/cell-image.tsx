@@ -1,4 +1,3 @@
-'use client'
 import { useSupabase } from '@/providers/SupabaseProvider'
 import Image from 'next/image'
 import { PlayerColumn } from './columns'
