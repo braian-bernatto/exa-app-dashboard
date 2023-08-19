@@ -10,7 +10,7 @@ import {
   DropdownMenuTrigger
 } from '@/components/ui/dropdown-menu'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
-import { Github, LifeBuoy, LogOut, User } from 'lucide-react'
+import { LifeBuoy, LogOut, Trophy, User } from 'lucide-react'
 import Link from 'next/link'
 import MainNav from './MainNav'
 
@@ -22,7 +22,14 @@ const Navbar = () => {
       <div className='flex items-center justify-between w-full py-6 mx-auto max-w-7xl'>
         {/* Logo */}
         <Link href={'/'}>
-          <div className='text-lg font-bold'>EXA APP</div>
+          <div className='flex gap-2 items-center'>
+            <span className='bg-gradient-to-r from-emerald-300 to-emerald-700 rounded-full p-2 flex items-center justify-center'>
+              <Trophy className='text-white' size={30} />
+            </span>
+            <h1 className='hidden sm:flex text-xl font-semibold  items-center gap-2'>
+              Exa App
+            </h1>
+          </div>
         </Link>
 
         {/* Links */}
