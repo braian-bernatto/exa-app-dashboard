@@ -10,7 +10,7 @@ const CellImage = ({ data }: CellImageProps) => {
   const { supabase } = useSupabase()
 
   if (!data.image_url) {
-    return <p className='text-center'>Sin logo</p>
+    return <p>Sin logo</p>
   }
 
   const { data: url } = supabase.storage
