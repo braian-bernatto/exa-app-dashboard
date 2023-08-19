@@ -9,6 +9,7 @@ import CellCountryImage from './cell-country-image'
 
 export type PlayerColumn = Players & {
   team_image_url: string
+  team_name: string
 }
 
 export const columns: ColumnDef<PlayerColumn>[] = [

@@ -16,6 +16,7 @@ export default async function JugadoresPage() {
     id: item.id,
     name: item.name,
     team_id: item.team_id,
+    team_name: item.teams?.name || '',
     team_image_url: item.teams?.image_url || '',
     image_url: item.image_url,
     position_id: item.position_id,
