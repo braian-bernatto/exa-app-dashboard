@@ -52,17 +52,20 @@ const ACCEPTED_IMAGE_TYPES = [
 
 type PlayerType = Pick<
   Players,
-  'name' | 'team_id' | 'image_url' | 'position_id'
+  | 'name'
+  | 'team_id'
+  | 'image_url'
+  | 'position_id'
+  | 'foot_id'
+  | 'rating'
+  | 'rit'
+  | 'def'
+  | 'fis'
+  | 'pas'
+  | 'reg'
+  | 'tir'
+  | 'country_iso2'
 > & {
-  foot_id: number
-  rating: number
-  rit: number
-  def: number
-  fis: number
-  pas: number
-  reg: number
-  tir: number
-  country_iso2: string
   public_image_url: string
 }
 
@@ -104,16 +107,16 @@ const PlayerForm = ({
       )
       .or(z.string())
       .optional(),
-    country_iso2: z.string().optional(),
+    country_iso2: z.string().optional().nullable(),
     position_id: z.string(),
-    rating: z.number().optional(),
-    foot_id: z.number().optional(),
-    rit: z.number().optional(),
-    tir: z.number().optional(),
-    pas: z.number().optional(),
-    reg: z.number().optional(),
-    def: z.number().optional(),
-    fis: z.number().optional()
+    rating: z.coerce.number().nullable(),
+    foot_id: z.coerce.number().nullable(),
+    rit: z.coerce.number().nullable(),
+    tir: z.coerce.number().nullable(),
+    pas: z.coerce.number().nullable(),
+    reg: z.coerce.number().nullable(),
+    def: z.coerce.number().nullable(),
+    fis: z.coerce.number().nullable()
   })
 
   const form = useForm<z.infer<typeof formSchema>>({
@@ -635,7 +638,15 @@ const PlayerForm = ({
                 <FormItem className='rounded bg-white'>
                   <FormLabel>Ritmo</FormLabel>
                   <FormControl>
-                    <Input type='number' min={0} {...field} />
+                    <Input
+                      type='number'
+                      min={0}
+                      {...field}
+                      value={field.value === null ? 0 : field.value}
+                      onBlur={e => {
+                        form.setValue('rit', +e.target.value)
+                      }}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -649,7 +660,15 @@ const PlayerForm = ({
                 <FormItem className='rounded bg-white'>
                   <FormLabel>Tiro</FormLabel>
                   <FormControl>
-                    <Input type='number' min={0} {...field} />
+                    <Input
+                      type='number'
+                      min={0}
+                      {...field}
+                      value={field.value === null ? 0 : field.value}
+                      onBlur={e => {
+                        form.setValue('tir', +e.target.value)
+                      }}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -663,7 +682,15 @@ const PlayerForm = ({
                 <FormItem className='rounded bg-white'>
                   <FormLabel>Pase</FormLabel>
                   <FormControl>
-                    <Input type='number' min={0} {...field} />
+                    <Input
+                      type='number'
+                      min={0}
+                      {...field}
+                      value={field.value === null ? 0 : field.value}
+                      onBlur={e => {
+                        form.setValue('pas', +e.target.value)
+                      }}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -677,7 +704,15 @@ const PlayerForm = ({
                 <FormItem className='rounded bg-white'>
                   <FormLabel>Regate</FormLabel>
                   <FormControl>
-                    <Input type='number' min={0} {...field} />
+                    <Input
+                      type='number'
+                      min={0}
+                      {...field}
+                      value={field.value === null ? 0 : field.value}
+                      onBlur={e => {
+                        form.setValue('reg', +e.target.value)
+                      }}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -691,7 +726,15 @@ const PlayerForm = ({
                 <FormItem className='rounded bg-white'>
                   <FormLabel>Defensa</FormLabel>
                   <FormControl>
-                    <Input type='number' min={0} {...field} />
+                    <Input
+                      type='number'
+                      min={0}
+                      {...field}
+                      value={field.value === null ? 0 : field.value}
+                      onBlur={e => {
+                        form.setValue('def', +e.target.value)
+                      }}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -705,7 +748,15 @@ const PlayerForm = ({
                 <FormItem className='rounded bg-white'>
                   <FormLabel>Físico</FormLabel>
                   <FormControl>
-                    <Input type='number' min={0} {...field} />
+                    <Input
+                      type='number'
+                      min={0}
+                      {...field}
+                      value={field.value === null ? 0 : field.value}
+                      onBlur={e => {
+                        form.setValue('fis', +e.target.value)
+                      }}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -719,7 +770,15 @@ const PlayerForm = ({
                 <FormItem className='rounded bg-white'>
                   <FormLabel>Rating</FormLabel>
                   <FormControl>
-                    <Input type='number' min={0} {...field} />
+                    <Input
+                      type='number'
+                      min={0}
+                      {...field}
+                      value={field.value === null ? 0 : field.value}
+                      onBlur={e => {
+                        form.setValue('rating', +e.target.value)
+                      }}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>

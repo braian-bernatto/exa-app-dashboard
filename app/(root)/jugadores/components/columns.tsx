@@ -7,7 +7,9 @@ import CellAction from './cell-action'
 import CellTeamImage from './cell-team-image'
 import CellCountryImage from './cell-country-image'
 
-export type PlayerColumn = Players
+export type PlayerColumn = Players & {
+  team_image_url: string
+}
 
 export const columns: ColumnDef<PlayerColumn>[] = [
   {

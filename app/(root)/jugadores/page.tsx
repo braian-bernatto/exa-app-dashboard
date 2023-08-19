@@ -2,7 +2,6 @@ import { createClient } from '@/utils/supabaseServer'
 import PlayerClient from './components/client'
 import { PlayerColumn } from './components/columns'
 import { format, parseISO } from 'date-fns'
-import { mutate } from 'swr'
 
 export default async function JugadoresPage() {
   const supabase = createClient()
@@ -17,7 +16,7 @@ export default async function JugadoresPage() {
     id: item.id,
     name: item.name,
     team_id: item.team_id,
-    team_image_url: item.teams?.image_url,
+    team_image_url: item.teams?.image_url || '',
     image_url: item.image_url,
     position_id: item.position_id,
     position_name: item.positions?.name,
