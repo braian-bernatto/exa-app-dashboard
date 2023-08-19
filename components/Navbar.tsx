@@ -44,7 +44,7 @@ const Navbar = () => {
               </AvatarFallback>
             </Avatar>
           </DropdownMenuTrigger>
-          <DropdownMenuContent>
+          <DropdownMenuContent align='end'>
             <DropdownMenuLabel className='w-full flex flex-col items-center uppercase'>
               {user?.username}
               <span className='text-neutral-400 text-xs capitalize'>
