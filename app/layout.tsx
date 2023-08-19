@@ -28,7 +28,7 @@ export default async function RootLayout({
   } = await supabase.auth.getSession()
 
   return (
-    <html lang='en'>
+    <html lang='es'>
       <body className={inter.className}>
         <ToasterProvider />
         <SupabaseProvider>
