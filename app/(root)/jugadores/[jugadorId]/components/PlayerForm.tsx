@@ -642,6 +642,7 @@ const PlayerForm = ({
                       type='number'
                       min={0}
                       {...field}
+                      onClick={e => e.currentTarget.select()}
                       value={field.value === null ? 0 : field.value}
                       onBlur={e => {
                         form.setValue('rit', +e.target.value)
@@ -664,6 +665,7 @@ const PlayerForm = ({
                       type='number'
                       min={0}
                       {...field}
+                      onClick={e => e.currentTarget.select()}
                       value={field.value === null ? 0 : field.value}
                       onBlur={e => {
                         form.setValue('tir', +e.target.value)
@@ -686,6 +688,7 @@ const PlayerForm = ({
                       type='number'
                       min={0}
                       {...field}
+                      onClick={e => e.currentTarget.select()}
                       value={field.value === null ? 0 : field.value}
                       onBlur={e => {
                         form.setValue('pas', +e.target.value)
@@ -708,6 +711,7 @@ const PlayerForm = ({
                       type='number'
                       min={0}
                       {...field}
+                      onClick={e => e.currentTarget.select()}
                       value={field.value === null ? 0 : field.value}
                       onBlur={e => {
                         form.setValue('reg', +e.target.value)
@@ -730,6 +734,7 @@ const PlayerForm = ({
                       type='number'
                       min={0}
                       {...field}
+                      onClick={e => e.currentTarget.select()}
                       value={field.value === null ? 0 : field.value}
                       onBlur={e => {
                         form.setValue('def', +e.target.value)
@@ -752,6 +757,7 @@ const PlayerForm = ({
                       type='number'
                       min={0}
                       {...field}
+                      onClick={e => e.currentTarget.select()}
                       value={field.value === null ? 0 : field.value}
                       onBlur={e => {
                         form.setValue('fis', +e.target.value)
@@ -774,6 +780,7 @@ const PlayerForm = ({
                       type='number'
                       min={0}
                       {...field}
+                      onClick={e => e.currentTarget.select()}
                       value={field.value === null ? 0 : field.value}
                       onBlur={e => {
                         form.setValue('rating', +e.target.value)
