@@ -12,7 +12,7 @@ const CellCountryImage = ({ data }: CellCountryImageProps) => {
   return (
     <>
       <Image
-        src={`https://flagcdn.com/w20/${data.country_iso2.toLowerCase()}.png`}
+        src={`https://flagcdn.com/${data.country_iso2.toLowerCase()}.svg`}
         width={20}
         height={20}
         alt='country flag'

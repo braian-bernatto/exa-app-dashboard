@@ -574,7 +574,7 @@ const PlayerForm = ({
                                 )}
                               />
                               <Image
-                                src={`https://flagcdn.com/w20/${country.iso2.toLowerCase()}.png`}
+                                src={`https://flagcdn.com/${country.iso2.toLowerCase()}.svg`}
                                 width={20}
                                 height={20}
                                 alt='country flag'
