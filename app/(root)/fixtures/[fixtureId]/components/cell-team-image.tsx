@@ -1,22 +1,27 @@
 import { useSupabase } from '@/providers/SupabaseProvider'
 import Image from 'next/image'
-import { FixtureColumn } from './columns'
+import { FixtureDetailsColumn } from './columns'
 import { useState } from 'react'
 
-interface CellTorneoImageProps {
-  data: FixtureColumn
+interface CellTeamImageProps {
+  data: FixtureDetailsColumn
 }
 
-const CellTorneoImage = ({ data }: CellTorneoImageProps) => {
+const CellTeamImage = async ({ data }: CellTeamImageProps) => {
   const [imageError, setImageError] = useState(false)
   const { supabase } = useSupabase()
 
   let url = ''
 
-  if (data.torneos!.image_url) {
+  const { data: team } = await supabase
+    .from('teams')
+    .select('image_url')
+    .eq('id', data.team_1)
+
+  if (team) {
     const { data: storage } = supabase.storage
       .from('torneos')
-      .getPublicUrl(data.torneos!.image_url)
+      .getPublicUrl(team.image_url)
     url = storage.publicUrl
   }
 
@@ -40,4 +45,4 @@ const CellTorneoImage = ({ data }: CellTorneoImageProps) => {
   )
 }
 
-export default CellTorneoImage
+export default CellTeamImage
