@@ -15,10 +15,10 @@ import { useRouter } from 'next/navigation'
 import { useState } from 'react'
 import { useSupabase } from '@/providers/SupabaseProvider'
 import { AlertModal } from '@/components/modals/AlertModal'
-import { PlayerColumn } from './columns'
+import { FixtureColumn } from './columns'
 
 interface CellActionProps {
-  data: PlayerColumn
+  data: FixtureColumn
 }
 
 const CellAction = ({ data }: CellActionProps) => {
@@ -37,7 +37,7 @@ const CellAction = ({ data }: CellActionProps) => {
       setLoading(true)
 
       const { error } = await supabase
-        .from('players')
+        .from('fixtures')
         .delete()
         .eq('id', data.id)
 
@@ -78,9 +78,7 @@ const CellAction = ({ data }: CellActionProps) => {
             <Copy className='mr-2 h-4 w-4' />
             Copiar ID
           </DropdownMenuItem>
-          <DropdownMenuItem
-            onClick={() => router.push(`/jugadores/${data.id}`)}
-          >
+          <DropdownMenuItem onClick={() => router.push(`/fixtures/${data.id}`)}>
             <Edit className='mr-2 h-4 w-4' /> Editar
           </DropdownMenuItem>
           <DropdownMenuItem onClick={() => setOpen(true)}>

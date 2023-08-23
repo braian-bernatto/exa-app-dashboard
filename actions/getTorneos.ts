@@ -5,7 +5,7 @@ const getTorneos = async (): Promise<Torneos[]> => {
   const supabase = createClient()
   const { data, error } = await supabase
     .from('torneos')
-    .select('*')
+    .select()
     .order('created_at', { ascending: false })
 
   if (error) {

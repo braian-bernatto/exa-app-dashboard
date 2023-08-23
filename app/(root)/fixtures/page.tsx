@@ -1,22 +1,18 @@
-import getFixtures from '@/actions/getFixtures'
-import getLocations from '@/actions/getLocations'
-import getPlayers from '@/actions/getPlayers'
-import getTeams from '@/actions/getTeams'
-import getTorneos from '@/actions/getTorneos'
-import FixtureForm from '@/components/FixtureForm'
-import FixtureTeamsForm from '@/components/FixtureTeamsForm'
+import FixtureClient from './components/client'
+import { createClient } from '@/utils/supabaseServer'
 
 export default async function FixturesPage() {
-  const teams = await getTeams()
-  const players = await getPlayers()
-  const locations = await getLocations()
-  const torneos = await getTorneos()
-  const fixtures = await getFixtures()
+  const supabase = createClient()
+  const { data } = await supabase
+    .from('fixtures')
+    .select('*, torneos(name, image_url), locations(name)')
+    .order('created_at', { ascending: true })
 
   return (
-    <>
-      <FixtureForm torneos={torneos} locations={locations} />
-      <FixtureTeamsForm fixtures={fixtures} teams={teams} players={players} />
-    </>
+    <div className='flex-col w-full'>
+      <div className='flex-1 space-y-4'>
+        <FixtureClient data={data || []} />
+      </div>
+    </div>
   )
 }
