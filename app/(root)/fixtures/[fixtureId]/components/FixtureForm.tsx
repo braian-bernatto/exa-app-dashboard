@@ -47,7 +47,7 @@ type FixtureType = Fixtures & {
 }
 
 interface FixtureFormProps {
-  initialData: FixtureType[] | undefined
+  initialData: FixtureType | undefined
   torneos: Torneos[]
   locations: Locations[]
 }
