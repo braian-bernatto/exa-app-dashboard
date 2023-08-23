@@ -1,3 +1,4 @@
+'use client'
 import { useSupabase } from '@/providers/SupabaseProvider'
 import Image from 'next/image'
 import { FixtureDetailsColumn } from './columns'
@@ -7,7 +8,7 @@ interface CellTeamImageProps {
   data: FixtureDetailsColumn
 }
 
-const CellTeamImage = async ({ data }: CellTeamImageProps) => {
+const CellTeamOneImage = async ({ data }: CellTeamImageProps) => {
   const [imageError, setImageError] = useState(false)
   const { supabase } = useSupabase()
 
@@ -15,34 +16,36 @@ const CellTeamImage = async ({ data }: CellTeamImageProps) => {
 
   const { data: team } = await supabase
     .from('teams')
-    .select('image_url')
+    .select('name, image_url')
     .eq('id', data.team_1)
 
   if (team) {
     const { data: storage } = supabase.storage
-      .from('torneos')
-      .getPublicUrl(team.image_url)
+      .from('teams')
+      .getPublicUrl(team[0].image_url!)
     url = storage.publicUrl
   }
 
   return (
     <div className='flex gap-2'>
-      <div className='w-[30px] h-[30px] relative shadow rounded-full overflow-hidden border'>
-        {!imageError && (
+      {data.team_1}
+      <div className='w-[30px] h-[30px] relative'>
+        {!imageError ? (
           <Image
             src={url}
             onError={() => {
               setImageError(true)
             }}
             fill
-            alt='logo de torneo'
+            alt='logo de equipo'
             className='object-contain'
           />
+        ) : (
+          team && team[0].name
         )}
       </div>
-      {data.torneos!.name}
     </div>
   )
 }
 
-export default CellTeamImage
+export default CellTeamOneImage

@@ -1,9 +1,10 @@
 'use client'
-
 import { FixtureDetails } from '@/types'
 import { ColumnDef } from '@tanstack/react-table'
 import CellAction from './cell-action'
 import CellDate from './cell-date'
+import CellTeamOneImage from './cell-team-one-image'
+import CellTeamTwoImage from './cell-team-two-image'
 
 export type FixtureDetailsColumn = FixtureDetails
 
@@ -19,11 +20,13 @@ export const columns: ColumnDef<FixtureDetailsColumn>[] = [
   },
   {
     accessorKey: 'team_1',
-    header: 'Equipo 1'
+    header: 'Equipo 1',
+    cell: ({ row }) => <CellTeamOneImage data={row.original} />
   },
   {
     accessorKey: 'team_2',
-    header: 'Equipo 2'
+    header: 'Equipo 2',
+    cell: ({ row }) => <CellTeamTwoImage data={row.original} />
   },
   {
     id: 'actions',

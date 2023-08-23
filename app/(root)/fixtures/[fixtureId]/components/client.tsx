@@ -1,15 +1,13 @@
-'use client'
-
 import { Button } from '@/components/ui/button'
 import { Heading } from '@/components/ui/heading'
 import { Separator } from '@/components/ui/separator'
 import { Plus } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import { DataTable } from '@/components/ui/data-table'
-import { FixtureColumn, columns } from './columns'
+import { FixtureDetailsColumn, columns } from './columns'
 
 interface FixtureClientProps {
-  data: FixtureColumn[] | []
+  data: FixtureDetailsColumn[] | []
 }
 
 const FixtureClient = ({ data }: FixtureClientProps) => {
