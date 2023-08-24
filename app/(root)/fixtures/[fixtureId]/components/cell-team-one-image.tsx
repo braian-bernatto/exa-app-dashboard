@@ -13,11 +13,17 @@ const CellTeamOneImage = async ({ data }: CellTeamImageProps) => {
   const { supabase } = useSupabase()
 
   let url = ''
+  let goles
 
   const { data: team } = await supabase
     .from('teams')
     .select('name, image_url')
     .eq('id', data.team_1)
+
+  const { data: goals } = await supabase.rpc('get_goals', {
+    fixture: data.fixture_id,
+    team: data.team_1
+  })
 
   if (team) {
     const { data: storage } = supabase.storage
@@ -27,8 +33,7 @@ const CellTeamOneImage = async ({ data }: CellTeamImageProps) => {
   }
 
   return (
-    <div className='flex gap-2'>
-      {data.team_1}
+    <div className='flex gap-2 items-center'>
       <div className='w-[30px] h-[30px] relative'>
         {!imageError ? (
           <Image
@@ -44,6 +49,9 @@ const CellTeamOneImage = async ({ data }: CellTeamImageProps) => {
           team && team[0].name
         )}
       </div>
+      <span className='font-semibold text-muted-foreground rounded-full shadow text-lg w-[25px] h-[25px] text-center flex justify-center items-center border'>
+        {goals ? goals : '-'}
+      </span>
     </div>
   )
 }

@@ -504,6 +504,13 @@ export interface Database {
         }
         Returns: Record<string, unknown>
       }
+      get_goals: {
+        Args: {
+          fixture: number
+          team: number
+        }
+        Returns: number
+      }
     }
     Enums: {
       continents:

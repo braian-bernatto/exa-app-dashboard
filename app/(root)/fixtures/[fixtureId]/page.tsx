@@ -22,7 +22,7 @@ const FixutrePage = async ({
   const { data: fixture } = await supabase
     .from('fixtures')
     .select(
-      '*, torneos(name, image_url), fixture_details(team_1, team_2, date, cancha_nro)'
+      '*, torneos(name, image_url), fixture_details(fixture_id,team_1, team_2, date, cancha_nro)'
     )
     .eq('id', +params.fixtureId)
     .single()
