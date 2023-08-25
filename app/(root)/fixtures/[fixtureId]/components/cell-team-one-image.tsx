@@ -1,4 +1,3 @@
-'use client'
 import { useSupabase } from '@/providers/SupabaseProvider'
 import Image from 'next/image'
 import { FixtureDetailsColumn } from './columns'
@@ -13,19 +12,25 @@ const CellTeamOneImage = async ({ data }: CellTeamImageProps) => {
   const { supabase } = useSupabase()
 
   let url = ''
-  let goles
+  let goals
 
   const { data: team } = await supabase
     .from('teams')
     .select('name, image_url')
     .eq('id', data.team_1)
 
-  const { data: goals } = await supabase.rpc('get_goals', {
+  const { data: goles } = await supabase.rpc('get_goals', {
     fixture: data.fixture_id,
     team: data.team_1
   })
 
-  if (team) {
+  if (goles) {
+    goals = goles
+  } else {
+    goals = 0
+  }
+
+  if (team && team.length) {
     const { data: storage } = supabase.storage
       .from('teams')
       .getPublicUrl(team[0].image_url!)
@@ -39,6 +44,8 @@ const CellTeamOneImage = async ({ data }: CellTeamImageProps) => {
           <Image
             src={url}
             onError={() => {
+              console.log('hubo un error con este logo')
+
               setImageError(true)
             }}
             fill
