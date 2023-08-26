@@ -1,12 +1,19 @@
 'use client'
-import { FixtureDetails } from '@/types'
 import { ColumnDef } from '@tanstack/react-table'
 import CellAction from './cell-action'
 import CellDate from './cell-date'
 import CellTeamOneImage from './cell-team-one-image'
 import CellTeamTwoImage from './cell-team-two-image'
 
-export type FixtureDetailsColumn = FixtureDetails
+export type FixtureDetailsColumn =
+  | {
+      fixture_id: number
+      team_1: { id: number; name: string; image_url: string }
+      team_2: { id: number; name: string; image_url: string }
+      cancha_nro: number | null
+      date: string
+    }
+  | any
 
 export const columns: ColumnDef<FixtureDetailsColumn>[] = [
   {

@@ -25,8 +25,8 @@ import { Input } from './input'
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[]
   data: TData[]
-  filterLabel: string
-  filterKey: string
+  filterLabel?: string
+  filterKey?: string
 }
 
 export function DataTable<TData, TValue>({
@@ -49,16 +49,20 @@ export function DataTable<TData, TValue>({
 
   return (
     <div>
-      <div className='flex items-center py-4'>
-        <Input
-          placeholder={`Filtrar por ${filterLabel}...`}
-          value={(table.getColumn(filterKey)?.getFilterValue() as string) ?? ''}
-          onChange={event =>
-            table.getColumn(filterKey)?.setFilterValue(event.target.value)
-          }
-          className='max-w-sm text-xs sm:text-base'
-        />
-      </div>
+      {filterKey && filterLabel && (
+        <div className='flex items-center py-4'>
+          <Input
+            placeholder={`Filtrar por ${filterLabel}...`}
+            value={
+              (table.getColumn(filterKey)?.getFilterValue() as string) ?? ''
+            }
+            onChange={event =>
+              table.getColumn(filterKey)?.setFilterValue(event.target.value)
+            }
+            className='max-w-sm text-xs sm:text-base'
+          />
+        </div>
+      )}
       <div className='rounded-md border bg-white'>
         <Table className='text-xs sm:text-base'>
           <TableHeader>

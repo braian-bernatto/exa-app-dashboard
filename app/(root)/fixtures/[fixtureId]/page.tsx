@@ -21,9 +21,7 @@ const FixutrePage = async ({
 
   const { data: fixture } = await supabase
     .from('fixtures')
-    .select(
-      '*, torneos(name, image_url), fixture_details(fixture_id,team_1, team_2, date, cancha_nro)'
-    )
+    .select('*, torneos(name, image_url)')
     .eq('id', +params.fixtureId)
     .single()
 
@@ -38,15 +36,21 @@ const FixutrePage = async ({
     }
   }
 
+  const { data: fixtureDetails } = await supabase
+    .from('fixture_details')
+    .select('*, team_1(id, name, image_url), team_2(id, name, image_url)')
+    .eq('fixture_id', +params.fixtureId)
+    .order('date', { ascending: true })
+
   return (
-    <div className='flex flex-col items-center gap-5'>
+    <div className='flex flex-col gap-5'>
       <FixtureForm initialData={data} torneos={torneos} locations={locations} />
       <Separator />
       <DataTable
         columns={columns}
-        data={data?.fixture_details || []}
-        filterLabel='Nombre'
-        filterKey='name'
+        data={fixtureDetails || []}
+        filterLabel='Fecha'
+        filterKey='date'
       />
     </div>
   )

@@ -1,5 +1,3 @@
-'use client'
-
 import { Copy, Edit, MoreHorizontal, Trash } from 'lucide-react'
 import {
   DropdownMenu,
@@ -15,10 +13,10 @@ import { useRouter } from 'next/navigation'
 import { useState } from 'react'
 import { useSupabase } from '@/providers/SupabaseProvider'
 import { AlertModal } from '@/components/modals/AlertModal'
-import { FixtureColumn } from './columns'
+import { FixtureDetailsColumn } from './columns'
 
 interface CellActionProps {
-  data: FixtureColumn
+  data: FixtureDetailsColumn
 }
 
 const CellAction = ({ data }: CellActionProps) => {
@@ -28,7 +26,7 @@ const CellAction = ({ data }: CellActionProps) => {
   const router = useRouter()
 
   const onCopy = () => {
-    navigator.clipboard.writeText(data.id.toString())
+    navigator.clipboard.writeText(data.fixture_id.toString())
     toast.success('ID copiado en el portapapeles')
   }
 
@@ -39,7 +37,7 @@ const CellAction = ({ data }: CellActionProps) => {
       const { error } = await supabase
         .from('fixtures')
         .delete()
-        .eq('id', data.id)
+        .eq('id', data.fixture_id)
 
       if (error) {
         console.log(error)
@@ -78,7 +76,9 @@ const CellAction = ({ data }: CellActionProps) => {
             <Copy className='mr-2 h-4 w-4' />
             Copiar ID
           </DropdownMenuItem>
-          <DropdownMenuItem onClick={() => router.push(`/fixtures/${data.id}`)}>
+          <DropdownMenuItem
+            onClick={() => router.push(`/fixtures/${data.fixture_id}`)}
+          >
             <Edit className='mr-2 h-4 w-4' /> Editar
           </DropdownMenuItem>
           <DropdownMenuItem onClick={() => setOpen(true)}>
