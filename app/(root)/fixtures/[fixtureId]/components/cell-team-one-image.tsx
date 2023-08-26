@@ -67,7 +67,7 @@ const CellTeamOneImage = ({ data }: CellTeamImageProps) => {
         {goals}
       </span>
       {walkover && (
-        <span className='text-pink-800 shadow rounded-full px-2 bg-white'>
+        <span className='text-pink-800 shadow rounded-full px-2 bg-white absolute -top-[13px] opacity-80 text-xs'>
           Walkover
         </span>
       )}
