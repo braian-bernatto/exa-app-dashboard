@@ -22,7 +22,7 @@ const CellTorneoImage = ({ data }: CellTorneoImageProps) => {
 
   return (
     <div className='flex gap-2'>
-      <div className='w-[30px] h-[30px] relative shadow rounded-full overflow-hidden border'>
+      <div className='w-[30px] h-[30px] relative shadow rounded-full overflow-hidden border flex-none'>
         {!imageError && (
           <Image
             src={url}

@@ -47,7 +47,7 @@ const CellTeamOneImage = ({ data }: CellTeamImageProps) => {
   }, [])
 
   return (
-    <div className='flex gap-2 items-center relative'>
+    <div className='flex gap-2 items-center relative text-xs'>
       {!imageError ? (
         <div className='w-[30px] h-[30px] relative'>
           <Image
@@ -63,7 +63,7 @@ const CellTeamOneImage = ({ data }: CellTeamImageProps) => {
       ) : (
         data.team_1.name
       )}
-      <span className='font-semibold text-muted-foreground rounded-full shadow text-lg w-[25px] h-[25px] text-center flex justify-center items-center border'>
+      <span className='font-semibold text-muted-foreground rounded-full shadow text-lg w-[25px] h-[25px] text-center flex justify-center items-center border bg-white'>
         {goals}
       </span>
       {walkover && (

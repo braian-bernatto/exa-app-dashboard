@@ -77,7 +77,7 @@ const CellAction = ({ data }: CellActionProps) => {
             Copiar ID
           </DropdownMenuItem>
           <DropdownMenuItem
-            onClick={() => router.push(`/fixtures/${data.fixture_id}`)}
+            onClick={() => router.push(`/fixtures/${data.fixture_id}/editar`)}
           >
             <Edit className='mr-2 h-4 w-4' /> Editar
           </DropdownMenuItem>

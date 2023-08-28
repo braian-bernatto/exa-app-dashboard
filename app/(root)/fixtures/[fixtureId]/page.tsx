@@ -5,6 +5,9 @@ import getLocations from '@/actions/getLocations'
 import { DataTable } from '@/components/ui/data-table'
 import { columns } from './components/columns'
 import { Separator } from '@/components/ui/separator'
+import { Button } from '@/components/ui/button'
+import { Plus } from 'lucide-react'
+import Link from 'next/link'
 
 export const revalidate = 0
 
@@ -46,6 +49,13 @@ const FixutrePage = async ({
     <div className='flex flex-col gap-5'>
       <FixtureForm initialData={data} torneos={torneos} locations={locations} />
       <Separator />
+      <div className='flex items-center justify-end'>
+        <Link href={`/fixtures/${params.fixtureId}/agregar`}>
+          <Button>
+            <Plus className='mr-2 h-4 w-4' /> Agregar Versus
+          </Button>
+        </Link>
+      </div>
       <DataTable
         columns={columns}
         data={fixtureDetails || []}
