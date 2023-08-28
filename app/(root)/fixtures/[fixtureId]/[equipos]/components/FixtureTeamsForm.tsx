@@ -650,7 +650,6 @@ const FixtureTeamsForm = ({
       .select()
       .eq('fixture_id', +params.fixtureId)
       .eq('player_id', id)
-    console.log(card)
 
     if (card.data?.length) {
       return card.data[0].quantity
@@ -668,7 +667,7 @@ const FixtureTeamsForm = ({
     if (card.data?.length) {
       return card.data[0]
     }
-    return 0
+    return false
   }
 
   useEffect(() => {
@@ -680,29 +679,34 @@ const FixtureTeamsForm = ({
   }, [goals])
 
   useEffect(() => {
+    const getPlayersDetails = async (id: number) => {
+      const result = await Promise.all(
+        players
+          .filter(player => player.team_id === id)
+          .map(async players => {
+            const redData = await getPlayerRedCard(players.id)
+
+            return {
+              ...players,
+              goals: await getPlayerGoals(players.id),
+              yellow_cards: await getPlayerYellowCards(players.id),
+              red_cards: redData ? true : false,
+              motivo: redData ? redData.motivo! : ''
+            }
+          })
+      )
+      return result
+    }
+
+    const setPlayers = async () => {
+      const players_1 = await getPlayersDetails(initialData.team_1)
+      const players_2 = await getPlayersDetails(initialData.team_2)
+      setPlayersTeam_1(players_1 || undefined)
+      setPlayersTeam_2(players_2 || undefined)
+    }
+
     if (initialData) {
-      setPlayersTeam_1(
-        players
-          .filter(player => player.team_id === initialData.team_1)
-          .map(players => ({
-            ...players,
-            goals: 0,
-            yellow_cards: 0,
-            red_cards: false,
-            motivo: ''
-          }))
-      )
-      setPlayersTeam_2(
-        players
-          .filter(player => player.team_id === initialData.team_2)
-          .map(players => ({
-            ...players,
-            goals: 0,
-            yellow_cards: 0,
-            red_cards: false,
-            motivo: ''
-          }))
-      )
+      setPlayers()
     }
   }, [])
 
