@@ -21,11 +21,15 @@ import {
   Shield,
   Swords
 } from 'lucide-react'
-import { Input } from './ui/input'
-import { Button } from './ui/button'
-import { Popover, PopoverContent, PopoverTrigger } from './ui/popover'
+import { Input } from '../../../../../../components/ui/input'
+import { Button } from '../../../../../../components/ui/button'
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger
+} from '../../../../../../components/ui/popover'
 import { cn } from '@/lib/utils'
-import { Calendar } from './ui/calendar'
+import { Calendar } from '../../../../../../components/ui/calendar'
 import { format, set, subDays } from 'date-fns'
 import { es } from 'date-fns/esm/locale'
 import {
@@ -34,12 +38,12 @@ import {
   CommandGroup,
   CommandInput,
   CommandItem
-} from './ui/command'
+} from '../../../../../../components/ui/command'
 import Image from 'next/image'
 import { DataTable } from '@/components/Fixture/DataTable'
 import { Columns } from '@/components/Fixture/Columns'
-import { Separator } from './ui/separator'
-import { Toggle } from './ui/toggle'
+import { Separator } from '../../../../../../components/ui/separator'
+import { Toggle } from '../../../../../../components/ui/toggle'
 import { toast } from 'react-hot-toast'
 import { FixtureDetailsColumn } from '@/app/(root)/fixtures/[fixtureId]/components/columns'
 
@@ -67,6 +71,12 @@ const FixtureTeamsForm = ({
   const params = useParams()
 
   console.log(initialData)
+  initialData = {
+    ...initialData,
+    team_1: initialData.team_1.id,
+    team_2: initialData.team_2.id,
+    date: new Date(initialData.date)
+  }
 
   const { supabase } = useSupabase()
   const [loading, setLoading] = useState(false)
@@ -621,6 +631,46 @@ const FixtureTeamsForm = ({
     return true
   }
 
+  const getPlayerGoals = async (id: number) => {
+    const goals = await supabase
+      .from('goals')
+      .select()
+      .eq('fixture_id', +params.fixtureId)
+      .eq('player_id', id)
+
+    if (goals.data?.length) {
+      return goals.data[0].quantity
+    }
+    return 0
+  }
+
+  const getPlayerYellowCards = async (id: number) => {
+    const card = await supabase
+      .from('yellow_cards')
+      .select()
+      .eq('fixture_id', +params.fixtureId)
+      .eq('player_id', id)
+    console.log(card)
+
+    if (card.data?.length) {
+      return card.data[0].quantity
+    }
+    return 0
+  }
+
+  const getPlayerRedCard = async (id: number) => {
+    const card = await supabase
+      .from('red_cards')
+      .select()
+      .eq('fixture_id', +params.fixtureId)
+      .eq('player_id', id)
+
+    if (card.data?.length) {
+      return card.data[0]
+    }
+    return 0
+  }
+
   useEffect(() => {
     countGoals()
   }, [modifiedRows])
@@ -628,6 +678,33 @@ const FixtureTeamsForm = ({
   useEffect(() => {
     form.setValue('goals', goals!)
   }, [goals])
+
+  useEffect(() => {
+    if (initialData) {
+      setPlayersTeam_1(
+        players
+          .filter(player => player.team_id === initialData.team_1)
+          .map(players => ({
+            ...players,
+            goals: 0,
+            yellow_cards: 0,
+            red_cards: false,
+            motivo: ''
+          }))
+      )
+      setPlayersTeam_2(
+        players
+          .filter(player => player.team_id === initialData.team_2)
+          .map(players => ({
+            ...players,
+            goals: 0,
+            yellow_cards: 0,
+            red_cards: false,
+            motivo: ''
+          }))
+      )
+    }
+  }, [])
 
   useEffect(() => {
     setFilteredPlayersTeam_1(playersTeam_1)
