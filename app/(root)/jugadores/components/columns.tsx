@@ -23,7 +23,7 @@ export const columns: ColumnDef<PlayerColumn>[] = [
     header: 'Nombre'
   },
   {
-    accessorKey: 'team_image_url',
+    accessorKey: 'team_name',
     header: 'Equipo',
     cell: ({ row }) => <CellTeamImage data={row.original} />
   },

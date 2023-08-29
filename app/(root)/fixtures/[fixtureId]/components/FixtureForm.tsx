@@ -42,7 +42,7 @@ import Image from 'next/image'
 import { toast } from 'react-hot-toast'
 import { AlertModal } from '@/components/modals/AlertModal'
 
-type FixtureType = Fixtures & {
+export type FixtureType = Fixtures & {
   torneo_public_image_url: string
 }
 

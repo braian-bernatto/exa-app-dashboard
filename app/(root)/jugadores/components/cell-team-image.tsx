@@ -20,15 +20,18 @@ const CellTeamImage = ({ data }: CellTeamImageProps) => {
     .getPublicUrl(data.team_image_url!)
 
   return (
-    <Image
-      src={url.publicUrl}
-      width={40}
-      height={40}
-      alt='logo de equipo'
-      onError={() => {
-        setImageError(true)
-      }}
-    />
+    <>
+      <Image
+        src={url.publicUrl}
+        width={40}
+        height={40}
+        alt='logo de equipo'
+        onError={() => {
+          setImageError(true)
+        }}
+      />
+      <p className='hidden'>{data.team_name}</p>
+    </>
   )
 }
 

@@ -71,11 +71,12 @@ const FixtureTeamsForm = ({
   const params = useParams()
 
   console.log(initialData)
-  initialData = {
-    ...initialData,
-    team_1: initialData.team_1.id,
-    team_2: initialData.team_2.id,
-    date: new Date(initialData.date)
+
+  if (initialData) {
+    initialData = {
+      ...initialData,
+      date: new Date(initialData.date)
+    }
   }
 
   const { supabase } = useSupabase()
@@ -632,51 +633,104 @@ const FixtureTeamsForm = ({
   }
 
   const getPlayerGoals = async (id: number) => {
-    const goals = await supabase
+    const { data } = await supabase
       .from('goals')
       .select()
       .eq('fixture_id', +params.fixtureId)
       .eq('player_id', id)
 
-    if (goals.data?.length) {
-      return goals.data[0].quantity
+    if (data?.length) {
+      return data[0].quantity
     }
     return 0
   }
 
   const getPlayerYellowCards = async (id: number) => {
-    const card = await supabase
+    const { data } = await supabase
       .from('yellow_cards')
       .select()
       .eq('fixture_id', +params.fixtureId)
       .eq('player_id', id)
 
-    if (card.data?.length) {
-      return card.data[0].quantity
+    if (data?.length) {
+      return data[0].quantity
     }
     return 0
   }
 
   const getPlayerRedCard = async (id: number) => {
-    const card = await supabase
+    const { data } = await supabase
       .from('red_cards')
       .select()
       .eq('fixture_id', +params.fixtureId)
       .eq('player_id', id)
 
-    if (card.data?.length) {
-      return card.data[0]
+    if (data?.length) {
+      return data[0]
     }
     return false
   }
 
-  useEffect(() => {
-    countGoals()
-  }, [modifiedRows])
+  const getTeamWalkover = async (id: number) => {
+    const { data } = await supabase
+      .from('walkover')
+      .select()
+      .eq('fixture_id', +params.fixtureId)
+      .eq('team_id', id)
 
-  useEffect(() => {
-    form.setValue('goals', goals!)
-  }, [goals])
+    console.log(data)
+
+    if (data?.length) {
+      return true
+    }
+    return false
+  }
+
+  const hideTeamsToggle_1 = (e: boolean) => {
+    if (playersTeam_1 && playersTeam_1?.length) {
+      // agregamos el id del equipo en el array de walkover
+      e
+        ? setWalkover([...walkover, playersTeam_1[0].team_id!])
+        : setWalkover([
+            ...walkover.filter(id => id !== playersTeam_1[0].team_id)
+          ])
+
+      // filtramos el listado del otro equipo a solo porteros
+      updatePlayersList(
+        e,
+        playersTeam_1,
+        setFilteredPlayersTeam_1,
+        playersTeam_2!,
+        setFilteredPlayersTeam_2
+      )
+
+      // limpiamos los datos modificados
+      setModifiedRows([])
+    }
+  }
+
+  const hideTeamsToggle_2 = (e: boolean) => {
+    if (playersTeam_2 && playersTeam_2?.length) {
+      // agregamos el id del equipo en el array de walkover
+      e
+        ? setWalkover([...walkover, playersTeam_2[0].team_id!])
+        : setWalkover([
+            ...walkover.filter(id => id !== playersTeam_2[0].team_id)
+          ])
+
+      // filtramos el listado del otro equipo a solo porteros
+      updatePlayersList(
+        e,
+        playersTeam_2,
+        setFilteredPlayersTeam_2,
+        playersTeam_1!,
+        setFilteredPlayersTeam_1
+      )
+
+      // limpiamos los datos modificados
+      setModifiedRows([])
+    }
+  }
 
   useEffect(() => {
     const getPlayersDetails = async (id: number) => {
@@ -701,14 +755,36 @@ const FixtureTeamsForm = ({
     const setPlayers = async () => {
       const players_1 = await getPlayersDetails(initialData.team_1)
       const players_2 = await getPlayersDetails(initialData.team_2)
+
       setPlayersTeam_1(players_1 || undefined)
       setPlayersTeam_2(players_2 || undefined)
+
+      setModifiedRows([...players_1, ...players_2])
+    }
+
+    const setTeamWalkover = async () => {
+      const team_1 = await getTeamWalkover(initialData.team_1)
+      const team_2 = await getTeamWalkover(initialData.team_2)
+
+      setToggle1(team_1)
+      setToggle2(team_2)
+      hideTeamsToggle_1(team_1)
+      hideTeamsToggle_2(team_2)
     }
 
     if (initialData) {
       setPlayers()
+      setTeamWalkover()
     }
   }, [])
+
+  useEffect(() => {
+    countGoals()
+  }, [modifiedRows])
+
+  useEffect(() => {
+    form.setValue('goals', goals!)
+  }, [goals])
 
   useEffect(() => {
     setFilteredPlayersTeam_1(playersTeam_1)
@@ -735,7 +811,7 @@ const FixtureTeamsForm = ({
             <Swords className='text-white' size={30} />
           </span>
           <h1 className='text-xl font-semibold flex items-center gap-2'>
-            Agregar Equipos Fixture
+            {title}
           </h1>
         </div>
 
@@ -1111,30 +1187,7 @@ const FixtureTeamsForm = ({
                         className='left-0 top-0 h-5 text-muted-foreground'
                         onPressedChange={e => {
                           setToggle1(!toggle1)
-
-                          // agregamos el id del equipo en el array de walkover
-                          e
-                            ? setWalkover([
-                                ...walkover,
-                                playersTeam_1[0].team_id!
-                              ])
-                            : setWalkover([
-                                ...walkover.filter(
-                                  id => id !== playersTeam_1[0].team_id
-                                )
-                              ])
-
-                          // filtramos el listado del otro equipo a solo porteros
-                          updatePlayersList(
-                            e,
-                            playersTeam_1,
-                            setFilteredPlayersTeam_1,
-                            playersTeam_2!,
-                            setFilteredPlayersTeam_2
-                          )
-
-                          // limpiamos los datos modificados
-                          setModifiedRows([])
+                          hideTeamsToggle_1(e)
                         }}
                       >
                         Walkover
@@ -1181,30 +1234,7 @@ const FixtureTeamsForm = ({
                         className='left-0 top-0 h-5 text-muted-foreground'
                         onPressedChange={e => {
                           setToggle2(!toggle2)
-
-                          // agregamos el id del equipo en el array de walkover
-                          e
-                            ? setWalkover([
-                                ...walkover,
-                                playersTeam_2[0].team_id!
-                              ])
-                            : setWalkover([
-                                ...walkover.filter(
-                                  id => id !== playersTeam_2[0].team_id
-                                )
-                              ])
-
-                          // filtramos el listado del otro equipo a solo porteros
-                          updatePlayersList(
-                            e,
-                            playersTeam_2,
-                            setFilteredPlayersTeam_2,
-                            playersTeam_1!,
-                            setFilteredPlayersTeam_1
-                          )
-
-                          // limpiamos los datos modificados
-                          setModifiedRows([])
+                          hideTeamsToggle_2(e)
                         }}
                       >
                         Walkover
@@ -1288,7 +1318,7 @@ const FixtureTeamsForm = ({
             className='w-full'
             disabled={loading}
           >
-            Agregar
+            {action}
           </Button>
         </div>
       </form>
