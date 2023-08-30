@@ -70,8 +70,6 @@ const FixtureTeamsForm = ({
   const router = useRouter()
   const params = useParams()
 
-  console.log(initialData)
-
   if (initialData) {
     initialData = {
       ...initialData,
@@ -89,7 +87,7 @@ const FixtureTeamsForm = ({
   const [goals, setGoals] = useState<
     { id: number; goals: number }[] | undefined
   >(undefined)
-  const [walkover, setWalkover] = useState<number[]>([])
+  const walkover: [number, number] = [0, 0]
   const [playersTeam_1, setPlayersTeam_1] = useState<
     PlayersFixture[] | undefined
   >(undefined)
@@ -323,6 +321,9 @@ const FixtureTeamsForm = ({
   async function onSubmit(values: z.infer<typeof formSchema>) {
     console.log({ values })
 
+    form.setValue('goals', goals!)
+    form.setValue('walkover', walkover!)
+
     try {
       setLoading(true)
       const { fixture_id, team_1, team_2, date, cancha_nro, walkover } = values
@@ -538,7 +539,7 @@ const FixtureTeamsForm = ({
 
       // limpiamos los datos modificados
       setModifiedRows([])
-      setWalkover([])
+      walkover!.length = 0
       setPlayersTeam_1(undefined)
       setPlayersTeam_2(undefined)
       form.reset()
@@ -597,17 +598,18 @@ const FixtureTeamsForm = ({
   }
 
   const updatePlayersList = (
-    targetTeamWalkover: boolean,
-    targetTeamPlayers: PlayersFixture[],
-    setTargetTeamPlayers: (list: PlayersFixture[] | undefined) => void,
+    teamWalkover: boolean,
+    teamPlayers: PlayersFixture[],
+    setTeamPlayers: (list: PlayersFixture[] | undefined) => void,
     vsTeamPlayers: PlayersFixture[],
     setVsTeamPlayers: (list: PlayersFixture[] | undefined) => void
   ) => {
     // revisamos si el equipo contrario esta en walkover
     const vsTeamWalkover = checkWalkoverId(vsTeamPlayers[0].team_id!)
+    console.log({ vsTeamWalkover })
 
-    // filtramos los equipos contrarios
-    targetTeamWalkover
+    // filtramos los jugadores del equipo contrario
+    teamWalkover
       ? setVsTeamPlayers(
           vsTeamPlayers.filter(player => player.position_id === 'POR')
         )
@@ -617,12 +619,12 @@ const FixtureTeamsForm = ({
 
     // filtramos equipo en walkover si el otro equipo tambien esta sancionado
     vsTeamWalkover
-      ? setTargetTeamPlayers(
-          targetTeamPlayers.filter(player => player.position_id === 'POR')
+      ? setTeamPlayers(
+          teamPlayers.filter(player => player.position_id === 'POR')
         )
-      : targetTeamWalkover
-      ? setTargetTeamPlayers(undefined)
-      : setTargetTeamPlayers(targetTeamPlayers)
+      : teamWalkover
+      ? setTeamPlayers(undefined)
+      : setTeamPlayers(teamPlayers)
   }
 
   const checkWalkoverId = (id: number) => {
@@ -678,8 +680,6 @@ const FixtureTeamsForm = ({
       .eq('fixture_id', +params.fixtureId)
       .eq('team_id', id)
 
-    console.log(data)
-
     if (data?.length) {
       return true
     }
@@ -687,36 +687,32 @@ const FixtureTeamsForm = ({
   }
 
   const hideTeamsToggle_1 = (e: boolean) => {
-    if (playersTeam_1 && playersTeam_1?.length) {
-      // agregamos el id del equipo en el array de walkover
-      e
-        ? setWalkover([...walkover, playersTeam_1[0].team_id!])
-        : setWalkover([
-            ...walkover.filter(id => id !== playersTeam_1[0].team_id)
-          ])
+    console.log('entro en toggle')
 
-      // filtramos el listado del otro equipo a solo porteros
-      updatePlayersList(
-        e,
-        playersTeam_1,
-        setFilteredPlayersTeam_1,
-        playersTeam_2!,
-        setFilteredPlayersTeam_2
-      )
+    // agregamos el id del equipo en el array de walkover
+    e
+      ? (walkover[0] = playersTeam_1[0].team_id)
+      : walkover.filter(id => id !== playersTeam_1[0].team_id)
 
-      // limpiamos los datos modificados
-      setModifiedRows([])
-    }
+    // filtramos el listado del otro equipo a solo porteros
+    updatePlayersList(
+      e,
+      playersTeam_1,
+      setFilteredPlayersTeam_1,
+      playersTeam_2!,
+      setFilteredPlayersTeam_2
+    )
+
+    // limpiamos los datos modificados
+    setModifiedRows([])
   }
 
   const hideTeamsToggle_2 = (e: boolean) => {
-    if (playersTeam_2 && playersTeam_2?.length) {
+    if (playersTeam_2?.length) {
       // agregamos el id del equipo en el array de walkover
       e
-        ? setWalkover([...walkover, playersTeam_2[0].team_id!])
-        : setWalkover([
-            ...walkover.filter(id => id !== playersTeam_2[0].team_id)
-          ])
+        ? (walkover[1] = playersTeam_2[0].team_id)
+        : walkover.filter(id => id !== playersTeam_2[0].team_id)
 
       // filtramos el listado del otro equipo a solo porteros
       updatePlayersList(
@@ -732,73 +728,58 @@ const FixtureTeamsForm = ({
     }
   }
 
-  useEffect(() => {
-    const getPlayersDetails = async (id: number) => {
-      const result = await Promise.all(
-        players
-          .filter(player => player.team_id === id)
-          .map(async players => {
-            const redData = await getPlayerRedCard(players.id)
+  const getPlayersDetails = async (id: number) => {
+    //filtro los jugadores del equipo seleccionado y agrego los detalles de cada uno
+    const result = await Promise.all(
+      players
+        .filter(player => player.team_id === id)
+        .map(async players => {
+          const redData = await getPlayerRedCard(players.id)
 
-            return {
-              ...players,
-              goals: await getPlayerGoals(players.id),
-              yellow_cards: await getPlayerYellowCards(players.id),
-              red_cards: redData ? true : false,
-              motivo: redData ? redData.motivo! : ''
-            }
-          })
-      )
-      return result
-    }
+          return {
+            ...players,
+            goals: await getPlayerGoals(players.id),
+            yellow_cards: await getPlayerYellowCards(players.id),
+            red_cards: redData ? true : false,
+            motivo: redData ? redData.motivo! : ''
+          }
+        })
+    )
+    return result
+  }
 
-    const setPlayers = async () => {
-      const players_1 = await getPlayersDetails(initialData.team_1)
-      const players_2 = await getPlayersDetails(initialData.team_2)
+  const setPlayers = async () => {
+    const players_1 = await getPlayersDetails(initialData.team_1)
+    const players_2 = await getPlayersDetails(initialData.team_2)
+    const team_1 = await getTeamWalkover(initialData.team_1)
 
-      setPlayersTeam_1(players_1 || undefined)
-      setPlayersTeam_2(players_2 || undefined)
-
-      setModifiedRows([...players_1, ...players_2])
-    }
-
-    const setTeamWalkover = async () => {
-      const team_1 = await getTeamWalkover(initialData.team_1)
-      const team_2 = await getTeamWalkover(initialData.team_2)
-
-      setToggle1(team_1)
-      setToggle2(team_2)
+    setModifiedRows([...players_1, ...players_2])
+    setPlayersTeam_1(players_1)
+    setPlayersTeam_2(players_2)
+    setFilteredPlayersTeam_1(players_1)
+    setFilteredPlayersTeam_2(players_2)
+    if (players_1.length && team_1) {
       hideTeamsToggle_1(team_1)
-      hideTeamsToggle_2(team_2)
     }
+  }
+
+  const setTeamWalkover = async () => {
+    const team_1 = await getTeamWalkover(initialData.team_1)
+    const team_2 = await getTeamWalkover(initialData.team_2)
+
+    setToggle1(team_1)
+    setToggle2(team_2)
+    // hideTeamsToggle_2(team_2)
+  }
+
+  useEffect(() => {
+    console.log('entro en useEfect')
 
     if (initialData) {
       setPlayers()
-      setTeamWalkover()
+      // setTeamWalkover()
     }
   }, [])
-
-  useEffect(() => {
-    countGoals()
-  }, [modifiedRows])
-
-  useEffect(() => {
-    form.setValue('goals', goals!)
-  }, [goals])
-
-  useEffect(() => {
-    setFilteredPlayersTeam_1(playersTeam_1)
-    setFilteredPlayersTeam_2(playersTeam_2) // si estaba en walkover reinicia el listado automaticamente
-  }, [playersTeam_1])
-
-  useEffect(() => {
-    setFilteredPlayersTeam_2(playersTeam_2)
-    setFilteredPlayersTeam_1(playersTeam_1) // si estaba en walkover reinicia el listado automaticamente
-  }, [playersTeam_2])
-
-  useEffect(() => {
-    form.setValue('walkover', walkover!)
-  }, [walkover])
 
   return (
     <Form {...form}>
@@ -808,7 +789,11 @@ const FixtureTeamsForm = ({
       >
         <div className='flex items-center gap-2'>
           <span className='bg-gradient-to-r from-emerald-300 to-emerald-700 rounded-full p-2 flex items-center justify-center'>
-            <Swords className='text-white' size={30} />
+            <Swords
+              className='text-white'
+              size={30}
+              onClick={() => console.log({ modifiedRows, walkover })}
+            />
           </span>
           <h1 className='text-xl font-semibold flex items-center gap-2'>
             {title}
@@ -925,7 +910,8 @@ const FixtureTeamsForm = ({
                               // reseteo walkovers
                               setToggle1(false)
                               setToggle2(false)
-                              setWalkover([])
+                              walkover[0] = 0
+                              walkover[1] = 0
 
                               form.setValue('team_1', team.id)
                               setPlayersTeam_1(
@@ -1020,7 +1006,8 @@ const FixtureTeamsForm = ({
                               // reseteo walkovers
                               setToggle1(false)
                               setToggle2(false)
-                              setWalkover([])
+                              walkover[0] = 0
+                              walkover[1] = 0
 
                               form.setValue('team_2', team.id)
                               setPlayersTeam_2(
