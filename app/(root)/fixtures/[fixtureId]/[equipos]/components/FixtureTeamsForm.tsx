@@ -606,7 +606,6 @@ const FixtureTeamsForm = ({
   ) => {
     // revisamos si el equipo contrario esta en walkover
     const vsTeamWalkover = checkWalkoverId(vsTeamPlayers[0].team_id!)
-    console.log({ vsTeamWalkover })
 
     // filtramos los jugadores del equipo contrario
     teamWalkover
@@ -687,24 +686,25 @@ const FixtureTeamsForm = ({
   }
 
   const hideTeamsToggle_1 = (e: boolean) => {
-    console.log('entro en toggle')
+    if (playersTeam_1) {
+      console.log('entro en toggle')
+      // agregamos el id del equipo en el array de walkover
+      e
+        ? (walkover[0] = playersTeam_1[0].team_id)
+        : walkover.filter(id => id !== playersTeam_1[0].team_id)
 
-    // agregamos el id del equipo en el array de walkover
-    e
-      ? (walkover[0] = playersTeam_1[0].team_id)
-      : walkover.filter(id => id !== playersTeam_1[0].team_id)
+      // filtramos el listado del otro equipo a solo porteros
+      updatePlayersList(
+        e,
+        playersTeam_1,
+        setFilteredPlayersTeam_1,
+        playersTeam_2!,
+        setFilteredPlayersTeam_2
+      )
 
-    // filtramos el listado del otro equipo a solo porteros
-    updatePlayersList(
-      e,
-      playersTeam_1,
-      setFilteredPlayersTeam_1,
-      playersTeam_2!,
-      setFilteredPlayersTeam_2
-    )
-
-    // limpiamos los datos modificados
-    setModifiedRows([])
+      // limpiamos los datos modificados
+      setModifiedRows([])
+    }
   }
 
   const hideTeamsToggle_2 = (e: boolean) => {
@@ -751,16 +751,11 @@ const FixtureTeamsForm = ({
   const setPlayers = async () => {
     const players_1 = await getPlayersDetails(initialData.team_1)
     const players_2 = await getPlayersDetails(initialData.team_2)
-    const team_1 = await getTeamWalkover(initialData.team_1)
-
     setModifiedRows([...players_1, ...players_2])
     setPlayersTeam_1(players_1)
     setPlayersTeam_2(players_2)
     setFilteredPlayersTeam_1(players_1)
     setFilteredPlayersTeam_2(players_2)
-    if (players_1.length && team_1) {
-      hideTeamsToggle_1(team_1)
-    }
   }
 
   const setTeamWalkover = async () => {
@@ -769,17 +764,21 @@ const FixtureTeamsForm = ({
 
     setToggle1(team_1)
     setToggle2(team_2)
-    // hideTeamsToggle_2(team_2)
+    hideTeamsToggle_1(team_1)
+    hideTeamsToggle_2(team_2)
   }
 
   useEffect(() => {
-    console.log('entro en useEfect')
-
     if (initialData) {
       setPlayers()
-      // setTeamWalkover()
     }
   }, [])
+
+  useEffect(() => {
+    if (initialData && filteredPlayersTeam_1?.length) {
+      setTeamWalkover()
+    }
+  }, [playersTeam_1])
 
   return (
     <Form {...form}>
