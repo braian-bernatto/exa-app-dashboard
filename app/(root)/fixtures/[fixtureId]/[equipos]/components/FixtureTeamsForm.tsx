@@ -83,6 +83,10 @@ const FixtureTeamsForm = ({
 
   const [toggle1, setToggle1] = useState(false)
   const [toggle2, setToggle2] = useState(false)
+
+  const [walkoverTeam1, setWalkoverTeam1] = useState(false)
+  const [walkoverTeam2, setWalkoverTeam2] = useState(false)
+
   const [hour, setHour] = useState('')
   const [goals, setGoals] = useState<
     { id: number; goals: number }[] | undefined
@@ -558,12 +562,10 @@ const FixtureTeamsForm = ({
     teamWalkover: boolean,
     teamPlayers: PlayersFixture[],
     setTeamPlayers: (list: PlayersFixture[] | undefined) => void,
+    vsTeamWalkover: boolean,
     vsTeamPlayers: PlayersFixture[],
     setVsTeamPlayers: (list: PlayersFixture[] | undefined) => void
   ) => {
-    // revisamos si el equipo contrario esta en walkover
-    const vsTeamWalkover = checkWalkoverId(vsTeamPlayers[0].team_id!)
-
     // filtramos los jugadores del equipo contrario
     teamWalkover
       ? setVsTeamPlayers(
@@ -679,63 +681,40 @@ const FixtureTeamsForm = ({
     setGoals(totalCount)
   }
 
-  const checkWalkoverId = (id: number) => {
-    const exists = walkover.indexOf(id)
-    if (exists === -1) return false
-
-    return true
-  }
-
-  const addWalkover = (id: number) => {
-    const exists = checkWalkoverId(id)
-    if (exists) return null
-
-    setWalkover([...walkover, id])
-  }
-
-  const removeWalkover = (id: number) => {
-    const index = walkover.indexOf(id)
-    if (index === -1) return
-
-    const newArray = walkover.filter(item => item !== id)
-    setWalkover(newArray)
-  }
-
   const clearWalkover = () => {
-    setWalkover([])
+    setWalkoverTeam1(false)
+    setWalkoverTeam2(false)
   }
 
-  const hideTeamsToggle_1 = (e: boolean) => {
+  const hideTeamsToggle_1 = (e: boolean, vs: boolean) => {
     if (playersTeam_1) {
       console.log('entro en toggle')
       // agregamos el id del equipo en el array de walkover
-      e
-        ? addWalkover(playersTeam_1[0].team_id)
-        : removeWalkover(playersTeam_1[0].team_id)
+      setWalkoverTeam1(e)
 
       // filtramos el listado del otro equipo a solo porteros
       updatePlayersList(
         e,
         playersTeam_1,
         setFilteredPlayersTeam_1,
+        vs,
         playersTeam_2!,
         setFilteredPlayersTeam_2
       )
     }
   }
 
-  const hideTeamsToggle_2 = (e: boolean) => {
+  const hideTeamsToggle_2 = (e: boolean, vs: boolean) => {
     if (playersTeam_2) {
       // agregamos el id del equipo en el array de walkover
-      e
-        ? addWalkover(playersTeam_2[0].team_id)
-        : removeWalkover(playersTeam_2[0].team_id)
+      setWalkoverTeam2(e)
 
       // filtramos el listado del otro equipo a solo porteros
       updatePlayersList(
         e,
         playersTeam_2,
         setFilteredPlayersTeam_2,
+        vs,
         playersTeam_1!,
         setFilteredPlayersTeam_1
       )
@@ -778,8 +757,8 @@ const FixtureTeamsForm = ({
 
     setToggle1(team_1)
     setToggle2(team_2)
-    hideTeamsToggle_1(team_1)
-    hideTeamsToggle_2(team_2)
+    hideTeamsToggle_1(team_1, team_2)
+    hideTeamsToggle_2(team_2, team_1)
   }
 
   useEffect(() => {
@@ -1196,7 +1175,7 @@ const FixtureTeamsForm = ({
                         onPressedChange={e => {
                           setToggle1(!toggle1)
                           setModifiedRows([])
-                          hideTeamsToggle_1(e)
+                          hideTeamsToggle_1(e, walkoverTeam2)
                         }}
                       >
                         Walkover
@@ -1244,7 +1223,7 @@ const FixtureTeamsForm = ({
                         onPressedChange={e => {
                           setToggle2(!toggle2)
                           setModifiedRows([])
-                          hideTeamsToggle_2(e)
+                          hideTeamsToggle_2(e, walkoverTeam1)
                         }}
                       >
                         Walkover
