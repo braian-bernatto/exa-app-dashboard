@@ -87,7 +87,7 @@ const FixtureTeamsForm = ({
   const [goals, setGoals] = useState<
     { id: number; goals: number }[] | undefined
   >(undefined)
-  const walkover: [number, number] = [0, 0]
+  const [walkover, setWalkover] = useState<number[]>([])
   const [playersTeam_1, setPlayersTeam_1] = useState<
     PlayersFixture[] | undefined
   >(undefined)
@@ -274,55 +274,8 @@ const FixtureTeamsForm = ({
     }
   }
 
-  const countGoals = () => {
-    const totalCount = modifiedRows.reduce((prev, curr) => {
-      // Inicia el array con el primer item
-      if (!prev.length) {
-        prev.push({
-          id: curr.team_id,
-          goals: +curr.goals
-        })
-        return prev
-      }
-
-      // Busca si existe el item en el array y suma los goles
-      const teamIndex = prev.findIndex(
-        (team: any) => +team.id === +curr.team_id
-      )
-
-      if (teamIndex !== -1) {
-        const filteredList = prev.filter(
-          (team: any) => team.id !== curr.team_id
-        )
-        const foundItem = prev.filter((team: any) => team.id === curr.team_id)
-
-        prev = [
-          ...filteredList,
-          { id: foundItem[0].id, goals: +foundItem[0].goals + +curr.goals }
-        ]
-        return prev
-      } else {
-        // Si no encontro el dato en el array entonces se agrega como nuevo
-        prev = [
-          ...prev,
-          {
-            id: curr.team_id,
-            goals: +curr.goals
-          }
-        ]
-      }
-
-      return prev
-    }, [])
-
-    setGoals(totalCount)
-  }
-
   async function onSubmit(values: z.infer<typeof formSchema>) {
     console.log({ values })
-
-    form.setValue('goals', goals!)
-    form.setValue('walkover', walkover!)
 
     try {
       setLoading(true)
@@ -417,6 +370,10 @@ const FixtureTeamsForm = ({
             fixture_id,
             team_id: item
           }))
+
+          // delete previous goals that are not from the POR
+
+          // add or update the goals of the POR
 
           const { error: deleteError1 } = await supabase
             .from('walkover')
@@ -539,7 +496,7 @@ const FixtureTeamsForm = ({
 
       // limpiamos los datos modificados
       setModifiedRows([])
-      walkover!.length = 0
+      clearWalkover()
       setPlayersTeam_1(undefined)
       setPlayersTeam_2(undefined)
       form.reset()
@@ -626,13 +583,6 @@ const FixtureTeamsForm = ({
       : setTeamPlayers(teamPlayers)
   }
 
-  const checkWalkoverId = (id: number) => {
-    const exists = walkover.indexOf(id)
-    if (exists === -1) return false
-
-    return true
-  }
-
   const getPlayerGoals = async (id: number) => {
     const { data } = await supabase
       .from('goals')
@@ -685,13 +635,83 @@ const FixtureTeamsForm = ({
     return false
   }
 
+  const countGoals = () => {
+    const totalCount = modifiedRows.reduce((prev, curr) => {
+      // Inicia el array con el primer item
+      if (!prev.length) {
+        prev.push({
+          id: curr.team_id,
+          goals: +curr.goals
+        })
+        return prev
+      }
+
+      // Busca si existe el item en el array y suma los goles
+      const teamIndex = prev.findIndex(
+        (team: any) => +team.id === +curr.team_id
+      )
+
+      if (teamIndex !== -1) {
+        const filteredList = prev.filter(
+          (team: any) => team.id !== curr.team_id
+        )
+        const foundItem = prev.filter((team: any) => team.id === curr.team_id)
+
+        prev = [
+          ...filteredList,
+          { id: foundItem[0].id, goals: +foundItem[0].goals + +curr.goals }
+        ]
+        return prev
+      } else {
+        // Si no encontro el dato en el array entonces se agrega como nuevo
+        prev = [
+          ...prev,
+          {
+            id: curr.team_id,
+            goals: +curr.goals
+          }
+        ]
+      }
+
+      return prev
+    }, [])
+
+    setGoals(totalCount)
+  }
+
+  const checkWalkoverId = (id: number) => {
+    const exists = walkover.indexOf(id)
+    if (exists === -1) return false
+
+    return true
+  }
+
+  const addWalkover = (id: number) => {
+    const exists = checkWalkoverId(id)
+    if (exists) return null
+
+    setWalkover([...walkover, id])
+  }
+
+  const removeWalkover = (id: number) => {
+    const index = walkover.indexOf(id)
+    if (index === -1) return
+
+    const newArray = walkover.filter(item => item !== id)
+    setWalkover(newArray)
+  }
+
+  const clearWalkover = () => {
+    setWalkover([])
+  }
+
   const hideTeamsToggle_1 = (e: boolean) => {
     if (playersTeam_1) {
       console.log('entro en toggle')
       // agregamos el id del equipo en el array de walkover
       e
-        ? (walkover[0] = playersTeam_1[0].team_id)
-        : walkover.filter(id => id !== playersTeam_1[0].team_id)
+        ? addWalkover(playersTeam_1[0].team_id)
+        : removeWalkover(playersTeam_1[0].team_id)
 
       // filtramos el listado del otro equipo a solo porteros
       updatePlayersList(
@@ -701,18 +721,15 @@ const FixtureTeamsForm = ({
         playersTeam_2!,
         setFilteredPlayersTeam_2
       )
-
-      // limpiamos los datos modificados
-      setModifiedRows([])
     }
   }
 
   const hideTeamsToggle_2 = (e: boolean) => {
-    if (playersTeam_2?.length) {
+    if (playersTeam_2) {
       // agregamos el id del equipo en el array de walkover
       e
-        ? (walkover[1] = playersTeam_2[0].team_id)
-        : walkover.filter(id => id !== playersTeam_2[0].team_id)
+        ? addWalkover(playersTeam_2[0].team_id)
+        : removeWalkover(playersTeam_2[0].team_id)
 
       // filtramos el listado del otro equipo a solo porteros
       updatePlayersList(
@@ -722,9 +739,6 @@ const FixtureTeamsForm = ({
         playersTeam_1!,
         setFilteredPlayersTeam_1
       )
-
-      // limpiamos los datos modificados
-      setModifiedRows([])
     }
   }
 
@@ -779,6 +793,10 @@ const FixtureTeamsForm = ({
       setTeamWalkover()
     }
   }, [playersTeam_1])
+
+  useEffect(() => {
+    countGoals()
+  }, [modifiedRows])
 
   return (
     <Form {...form}>
@@ -873,6 +891,7 @@ const FixtureTeamsForm = ({
                   <PopoverTrigger asChild>
                     <FormControl>
                       <Button
+                        disabled={initialData ? true : false}
                         variant='outline'
                         role='combobox'
                         className={cn(
@@ -909,21 +928,22 @@ const FixtureTeamsForm = ({
                               // reseteo walkovers
                               setToggle1(false)
                               setToggle2(false)
-                              walkover[0] = 0
-                              walkover[1] = 0
+                              clearWalkover()
 
                               form.setValue('team_1', team.id)
-                              setPlayersTeam_1(
-                                players
-                                  .filter(player => player.team_id === team.id)
-                                  .map(players => ({
-                                    ...players,
-                                    goals: 0,
-                                    yellow_cards: 0,
-                                    red_cards: false,
-                                    motivo: ''
-                                  }))
-                              )
+
+                              const filtered = players
+                                .filter(player => player.team_id === team.id)
+                                .map(players => ({
+                                  ...players,
+                                  goals: 0,
+                                  yellow_cards: 0,
+                                  red_cards: false,
+                                  motivo: ''
+                                }))
+
+                              setPlayersTeam_1(filtered)
+                              setFilteredPlayersTeam_1(filtered)
                             }}
                           >
                             <>
@@ -969,6 +989,7 @@ const FixtureTeamsForm = ({
                   <PopoverTrigger asChild>
                     <FormControl>
                       <Button
+                        disabled={initialData ? true : false}
                         variant='outline'
                         role='combobox'
                         className={cn(
@@ -1005,21 +1026,22 @@ const FixtureTeamsForm = ({
                               // reseteo walkovers
                               setToggle1(false)
                               setToggle2(false)
-                              walkover[0] = 0
-                              walkover[1] = 0
+                              clearWalkover()
 
                               form.setValue('team_2', team.id)
-                              setPlayersTeam_2(
-                                players
-                                  .filter(player => player.team_id === team.id)
-                                  .map(players => ({
-                                    ...players,
-                                    goals: 0,
-                                    yellow_cards: 0,
-                                    red_cards: false,
-                                    motivo: ''
-                                  }))
-                              )
+
+                              const filtered = players
+                                .filter(player => player.team_id === team.id)
+                                .map(players => ({
+                                  ...players,
+                                  goals: 0,
+                                  yellow_cards: 0,
+                                  red_cards: false,
+                                  motivo: ''
+                                }))
+
+                              setPlayersTeam_2(filtered)
+                              setFilteredPlayersTeam_2(filtered)
                             }}
                           >
                             <>
@@ -1173,6 +1195,7 @@ const FixtureTeamsForm = ({
                         className='left-0 top-0 h-5 text-muted-foreground'
                         onPressedChange={e => {
                           setToggle1(!toggle1)
+                          setModifiedRows([])
                           hideTeamsToggle_1(e)
                         }}
                       >
@@ -1220,6 +1243,7 @@ const FixtureTeamsForm = ({
                         className='left-0 top-0 h-5 text-muted-foreground'
                         onPressedChange={e => {
                           setToggle2(!toggle2)
+                          setModifiedRows([])
                           hideTeamsToggle_2(e)
                         }}
                       >
@@ -1303,6 +1327,10 @@ const FixtureTeamsForm = ({
             variant={'default'}
             className='w-full'
             disabled={loading}
+            onClick={() => {
+              form.setValue('goals', goals!)
+              form.setValue('walkover', walkover!)
+            }}
           >
             {action}
           </Button>
