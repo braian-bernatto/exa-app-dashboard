@@ -31,7 +31,7 @@ import {
 } from '../../../../../../components/ui/popover'
 import { cn } from '@/lib/utils'
 import { Calendar } from '../../../../../../components/ui/calendar'
-import { format, parseISO, set, subDays } from 'date-fns'
+import { format, set, subDays } from 'date-fns'
 import { es } from 'date-fns/esm/locale'
 import {
   Command,
@@ -723,6 +723,11 @@ const FixtureTeamsForm = ({
     setWalkoverTeam2(false)
   }
 
+  const filterModifiedRows = (id: number) => {
+    const filteredData = modifiedRows.filter(team => team.team_id !== id)
+    setModifiedRows(filteredData)
+  }
+
   const hideTeamsToggle_1 = (e: boolean, vs: boolean) => {
     if (playersTeam_1) {
       // agregamos el id del equipo en el array de walkover
@@ -970,6 +975,7 @@ const FixtureTeamsForm = ({
                                 setToggle1(false)
                                 setToggle2(false)
                                 clearWalkover()
+                                filterModifiedRows(form.getValues('team_1'))
 
                                 form.setValue('team_1', team.id)
 
@@ -1068,6 +1074,7 @@ const FixtureTeamsForm = ({
                                 setToggle1(false)
                                 setToggle2(false)
                                 clearWalkover()
+                                filterModifiedRows(form.getValues('team_2'))
 
                                 form.setValue('team_2', team.id)
 
