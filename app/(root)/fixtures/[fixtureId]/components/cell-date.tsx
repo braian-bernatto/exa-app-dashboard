@@ -6,7 +6,7 @@ interface CellDateProps {
 }
 
 const CellDate = ({ data }: CellDateProps) => {
-  return format(parseISO(data.date), 'dd/MM/yyyy')
+  return format(parseISO(data.date), 'dd/MM/yyyy | HH:mm') + ' Hs'
 }
 
 export default CellDate

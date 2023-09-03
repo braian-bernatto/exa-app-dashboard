@@ -479,11 +479,27 @@ export interface Database {
         }
         Returns: Record<string, unknown>
       }
+      delete_goals: {
+        Args: {
+          fixture: number
+          team_1: number
+          team_2: number
+        }
+        Returns: boolean
+      }
       delete_player_image: {
         Args: {
           image_url: string
         }
         Returns: Record<string, unknown>
+      }
+      delete_red_cards: {
+        Args: {
+          fixture: number
+          team_1: number
+          team_2: number
+        }
+        Returns: boolean
       }
       delete_storage_object: {
         Args: {
@@ -503,6 +519,30 @@ export interface Database {
           image_url: string
         }
         Returns: Record<string, unknown>
+      }
+      delete_versus: {
+        Args: {
+          fixture: number
+          team_one: number
+          team_two: number
+        }
+        Returns: boolean
+      }
+      delete_walkovers: {
+        Args: {
+          fixture: number
+          team_1: number
+          team_2: number
+        }
+        Returns: boolean
+      }
+      delete_yellow_cards: {
+        Args: {
+          fixture: number
+          team_1: number
+          team_2: number
+        }
+        Returns: boolean
       }
       get_goals: {
         Args: {

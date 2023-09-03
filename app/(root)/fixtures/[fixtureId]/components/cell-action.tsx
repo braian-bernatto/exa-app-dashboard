@@ -34,10 +34,13 @@ const CellAction = ({ data }: CellActionProps) => {
     try {
       setLoading(true)
 
-      const { error } = await supabase
-        .from('fixtures')
-        .delete()
-        .eq('id', data.fixture_id)
+      const { error } = await supabase.rpc('delete_versus', {
+        fixture: data.fixture_id,
+        team_one: data.team_1.id,
+        team_two: data.team_2.id
+      })
+
+      console.log({ data })
 
       if (error) {
         console.log(error)

@@ -27,20 +27,26 @@ const FixtureDetailsClient = ({
   return (
     <>
       <FixtureForm initialData={data} torneos={torneos} locations={locations} />
-      <Separator />
-      <div className='flex items-center justify-end'>
-        <Button
-          onClick={() => router.push(`/fixtures/${params.fixtureId}/agregar`)}
-        >
-          <Plus className='mr-2 h-4 w-4' /> Agregar Versus
-        </Button>
-      </div>
-      <DataTable
-        columns={columns}
-        data={fixtureDetails || []}
-        filterLabel='Fecha'
-        filterKey='date'
-      />
+      {data && (
+        <>
+          <Separator />
+          <div className='flex items-center justify-end'>
+            <Button
+              onClick={() =>
+                router.push(`/fixtures/${params.fixtureId}/agregar`)
+              }
+            >
+              <Plus className='mr-2 h-4 w-4' /> Agregar Versus
+            </Button>
+          </div>
+          <DataTable
+            columns={columns}
+            data={fixtureDetails || []}
+            filterLabel='Fecha'
+            filterKey='date'
+          />
+        </>
+      )}
     </>
   )
 }

@@ -42,6 +42,8 @@ import Image from 'next/image'
 import { toast } from 'react-hot-toast'
 import { AlertModal } from '@/components/modals/AlertModal'
 
+export const revalidate = 0
+
 export type FixtureType = Fixtures & {
   torneo_public_image_url: string
 }

@@ -19,7 +19,8 @@ import {
   Check,
   ChevronsUpDown,
   Shield,
-  Swords
+  Swords,
+  Trash
 } from 'lucide-react'
 import { Input } from '../../../../../../components/ui/input'
 import { Button } from '../../../../../../components/ui/button'
@@ -30,7 +31,7 @@ import {
 } from '../../../../../../components/ui/popover'
 import { cn } from '@/lib/utils'
 import { Calendar } from '../../../../../../components/ui/calendar'
-import { format, set, subDays } from 'date-fns'
+import { format, parseISO, set, subDays } from 'date-fns'
 import { es } from 'date-fns/esm/locale'
 import {
   Command,
@@ -40,12 +41,13 @@ import {
   CommandItem
 } from '../../../../../../components/ui/command'
 import Image from 'next/image'
-import { DataTable } from '@/components/Fixture/DataTable'
-import { Columns } from '@/components/Fixture/Columns'
+import { DataTable } from './DataTable'
+import { Columns } from '@/app/(root)/fixtures/[fixtureId]/[equipos]/components/Columns'
 import { Separator } from '../../../../../../components/ui/separator'
 import { Toggle } from '../../../../../../components/ui/toggle'
 import { toast } from 'react-hot-toast'
 import { FixtureDetailsColumn } from '@/app/(root)/fixtures/[fixtureId]/components/columns'
+import { AlertModal } from '@/components/modals/AlertModal'
 
 interface FixtureTeamsFormProps {
   initialData: FixtureDetailsColumn | undefined
@@ -91,7 +93,6 @@ const FixtureTeamsForm = ({
   const [goals, setGoals] = useState<
     { id: number; goals: number }[] | undefined
   >(undefined)
-  const [walkover, setWalkover] = useState<number[]>([])
   const [playersTeam_1, setPlayersTeam_1] = useState<
     PlayersFixture[] | undefined
   >(undefined)
@@ -139,14 +140,8 @@ const FixtureTeamsForm = ({
         )
         .array()
         .max(2),
-      walkover: z.coerce
-        .number({
-          required_error: 'Falta cargar walkover',
-          invalid_type_error: 'Falta cargar walkover'
-        })
-        .array()
-        .max(2)
-        .optional()
+      walkover_team_1: z.boolean(),
+      walkover_team_2: z.boolean()
     })
     .refine(
       val => {
@@ -159,6 +154,7 @@ const FixtureTeamsForm = ({
     )
     .refine(
       async val => {
+        if (initialData) return true
         const { data } = await supabase
           .from('fixture_details')
           .select('*', { count: 'exact' })
@@ -177,6 +173,7 @@ const FixtureTeamsForm = ({
     )
     .refine(
       async val => {
+        if (initialData) return true
         const { data } = await supabase
           .from('fixture_details')
           .select('*', { count: 'exact' })
@@ -195,53 +192,24 @@ const FixtureTeamsForm = ({
     )
     .refine(
       val => {
-        if (val.walkover?.length === 0) return true
-        if (val.walkover?.length === 2) return true
+        const bothWalkover = val.walkover_team_1 && val.walkover_team_2
 
-        const vsTeamMinGoals =
-          val.walkover?.length &&
-          val.goals.length &&
-          val.walkover[0] !== val.goals[0].id &&
-          val.goals[0].goals > 0
+        // if none of the teams are in walkover omit this refine
+        if (!val.walkover_team_1 && !val.walkover_team_2) return true
 
-        if (val.walkover?.length === 1 && vsTeamMinGoals) return true
+        // if there is walkover there must be goals to the other team
+        if (!goals) return false
+        if (goals?.length === 0) return false
+        if (bothWalkover && goals?.length < 2) return false
+
+        if (bothWalkover && goals[0].goals > 0 && goals[1].goals > 0)
+          return true
+        if (val.walkover_team_1 && goals[0].goals > 0) return true
+        if (val.walkover_team_2 && goals[0].goals > 0) return true
       },
       {
         message: 'Goles por walkover deben ser mayores que cero',
-        path: ['walkover']
-      }
-    )
-    .refine(
-      val => {
-        if (val.walkover?.length === 0 || val.walkover?.length === 1)
-          return true
-
-        const bothTeamsWalkover = val.walkover!.length === 2
-        const bothTeamsGoals = val.goals.length === 2
-
-        if (bothTeamsWalkover && bothTeamsGoals) return true
-      },
-      {
-        message:
-          'Goles por walkover deben ser mayores que cero para ambos equipos',
-        path: ['walkover']
-      }
-    )
-    .refine(
-      val => {
-        if (val.walkover?.length === 0 || val.walkover?.length === 1)
-          return true
-        if (val.goals.length < 1) return false
-
-        const bothTeamsWalkover = val.walkover!.length === 2
-        const bothTeamsMinGoals =
-          +val.goals[0].goals > 0 && +val.goals[1]?.goals > 0
-
-        if (bothTeamsWalkover && bothTeamsMinGoals) return true
-      },
-      {
-        message: 'Goles por walkover deben ser mayores que cero',
-        path: ['walkover']
+        path: ['walkover_team_1']
       }
     )
 
@@ -254,7 +222,8 @@ const FixtureTeamsForm = ({
       date: undefined,
       cancha_nro: 0,
       goals: undefined,
-      walkover: []
+      walkover_team_1: false,
+      walkover_team_2: false
     }
   })
 
@@ -283,7 +252,15 @@ const FixtureTeamsForm = ({
 
     try {
       setLoading(true)
-      const { fixture_id, team_1, team_2, date, cancha_nro, walkover } = values
+      const {
+        fixture_id,
+        team_1,
+        team_2,
+        date,
+        cancha_nro,
+        walkover_team_1,
+        walkover_team_2
+      } = values
 
       if (!fixture_id || !team_1 || !team_2 || !date) {
         return toast.error('Faltan cargar datos')
@@ -309,6 +286,41 @@ const FixtureTeamsForm = ({
 
         // cargamos datos si es que se modificaron datos de las tablas
         if (modifiedRows.length) {
+          // clear all tables
+          const { error: deleteGoalsError } = await supabase.rpc(
+            'delete_goals',
+            {
+              fixture: fixture_id,
+              team_1,
+              team_2
+            }
+          )
+          const { error: deleteYellowCardsError } = await supabase.rpc(
+            'delete_yellow_cards',
+            {
+              fixture: fixture_id,
+              team_1,
+              team_2
+            }
+          )
+          const { error: deleteRedCardsError } = await supabase.rpc(
+            'delete_red_cards',
+            {
+              fixture: fixture_id,
+              team_1,
+              team_2
+            }
+          )
+          // delete previous walkover
+          const { data, error: deleteWalkoversError } = await supabase.rpc(
+            'delete_walkovers',
+            {
+              fixture: fixture_id,
+              team_1,
+              team_2
+            }
+          )
+
           // goals
           const goalsArray = modifiedRows
             .filter(player => player.goals > 0)
@@ -369,31 +381,36 @@ const FixtureTeamsForm = ({
         }
 
         // walkover
-        if (walkover?.length) {
-          const walkoverArray = walkover.map((item: any) => ({
-            fixture_id,
-            team_id: item
-          }))
-
-          // delete previous goals that are not from the POR
-
-          // add or update the goals of the POR
-
-          const { error: deleteError1 } = await supabase
-            .from('walkover')
-            .delete()
-            .eq('fixture_id', fixture_id)
-            .eq('team_id', team_1)
-
-          const { error: deleteError2 } = await supabase
-            .from('walkover')
-            .delete()
-            .eq('fixture_id', fixture_id)
-            .eq('team_id', team_2)
+        if (walkover_team_1 || walkover_team_2) {
+          const walkoverArray =
+            walkover_team_1 && walkover_team_2
+              ? [
+                  {
+                    fixture_id,
+                    team_id: team_1
+                  },
+                  {
+                    fixture_id,
+                    team_id: team_2
+                  }
+                ]
+              : walkover_team_1
+              ? [
+                  {
+                    fixture_id,
+                    team_id: team_1
+                  }
+                ]
+              : [
+                  {
+                    fixture_id,
+                    team_id: team_2
+                  }
+                ]
 
           const { error: supabaseWalkoverError } = await supabase
             .from('walkover')
-            .insert(walkoverArray)
+            .upsert(walkoverArray)
 
           if (supabaseWalkoverError) {
             setLoading(false)
@@ -480,11 +497,32 @@ const FixtureTeamsForm = ({
         }
 
         // walkover
-        if (walkover?.length) {
-          const walkoverArray = walkover.map((item: any) => ({
-            fixture_id,
-            team_id: item
-          }))
+        if (walkoverTeam1 || walkoverTeam2) {
+          const walkoverArray =
+            walkoverTeam1 && walkoverTeam2
+              ? [
+                  {
+                    fixture_id,
+                    team_id: team_1
+                  },
+                  {
+                    fixture_id,
+                    team_id: team_2
+                  }
+                ]
+              : walkoverTeam1
+              ? [
+                  {
+                    fixture_id,
+                    team_id: team_1
+                  }
+                ]
+              : [
+                  {
+                    fixture_id,
+                    team_id: team_2
+                  }
+                ]
           const { error: supabaseWalkoverError } = await supabase
             .from('walkover')
             .insert(walkoverArray)
@@ -504,6 +542,7 @@ const FixtureTeamsForm = ({
       setPlayersTeam_1(undefined)
       setPlayersTeam_2(undefined)
       form.reset()
+      router.refresh()
       router.back()
       toast.success(toastMessage)
     } catch (error) {
@@ -513,30 +552,28 @@ const FixtureTeamsForm = ({
     }
   }
 
-  // const onDelete = async () => {
-  //   try {
-  //     setLoading(true)
-
-  //     const { error } = await supabase
-  //       .from('players')
-  //       .delete()
-  //       .eq('id', +params.jugadorId)
-
-  //     if (error) {
-  //       console.log(error)
-  //       setLoading(false)
-  //       return toast.error(`No se pudo borrar`)
-  //     }
-  //     router.refresh()
-  //     router.push('/jugadores')
-  //     toast.success('Borrado con éxito')
-  //   } catch (error) {
-  //     toast.error('Hubo un error')
-  //   } finally {
-  //     setLoading(false)
-  //     setOpen(false)
-  //   }
-  // }
+  const onDelete = async () => {
+    try {
+      // setLoading(true)
+      // const { error } = await supabase
+      //   .from('players')
+      //   .delete()
+      //   .eq('id', +params.jugadorId)
+      // if (error) {
+      //   console.log(error)
+      //   setLoading(false)
+      //   return toast.error(`No se pudo borrar`)
+      // }
+      // router.refresh()
+      // router.push('/jugadores')
+      // toast.success('Borrado con éxito')
+    } catch (error) {
+      toast.error('Hubo un error')
+    } finally {
+      setLoading(false)
+      setOpen(false)
+    }
+  }
 
   const getTeamLogo = (filteredPlayers?: Players[], teamNumber?: number) => {
     if (filteredPlayers && filteredPlayers.length > 0) {
@@ -688,7 +725,6 @@ const FixtureTeamsForm = ({
 
   const hideTeamsToggle_1 = (e: boolean, vs: boolean) => {
     if (playersTeam_1) {
-      console.log('entro en toggle')
       // agregamos el id del equipo en el array de walkover
       setWalkoverTeam1(e)
 
@@ -778,544 +814,575 @@ const FixtureTeamsForm = ({
   }, [modifiedRows])
 
   return (
-    <Form {...form}>
-      <form
-        onSubmit={form.handleSubmit(onSubmit)}
-        className='flex flex-col w-full max-w-xs rounded bg-white py-3 px-4 shadow gap-5 justify-center'
-      >
-        <div className='flex items-center gap-2'>
-          <span className='bg-gradient-to-r from-emerald-300 to-emerald-700 rounded-full p-2 flex items-center justify-center'>
-            <Swords
-              className='text-white'
-              size={30}
-              onClick={() => console.log({ modifiedRows, walkover })}
-            />
-          </span>
-          <h1 className='text-xl font-semibold flex items-center gap-2'>
-            {title}
-          </h1>
-        </div>
+    <>
+      <AlertModal
+        isOpen={open}
+        onClose={() => setOpen(false)}
+        onConfirm={onDelete}
+        loading={loading}
+      />
+      <Form {...form}>
+        <form
+          onSubmit={form.handleSubmit(onSubmit)}
+          className='flex flex-col w-full max-w-xs sm:max-w-[800px] rounded bg-white py-3 px-4 shadow gap-5 justify-center'
+        >
+          <div className='flex items-center gap-2'>
+            <span className='bg-gradient-to-r from-emerald-300 to-emerald-700 rounded-full p-2 flex items-center justify-center'>
+              <Swords
+                className='text-white'
+                size={30}
+                onClick={() =>
+                  console.log({
+                    modifiedRows,
+                    walkoverTeam1,
+                    walkoverTeam2,
+                    goals
+                  })
+                }
+              />
+            </span>
+            <h1 className='text-xl font-semibold flex items-center justify-between w-full gap-2'>
+              {title}
+              {initialData && (
+                <Button
+                  type='button'
+                  className='ml-auto'
+                  disabled={loading}
+                  variant='destructive'
+                  size='icon'
+                  onClick={() => setOpen(true)}
+                >
+                  <Trash className='h-4 w-4' />
+                </Button>
+              )}
+            </h1>
+          </div>
 
-        {/* fixture */}
-        <FormField
-          control={form.control}
-          name='fixture_id'
-          render={({ field }) => (
-            <FormItem className='rounded bg-white'>
-              <FormLabel>Fixture</FormLabel>
-              <Popover>
-                <PopoverTrigger asChild>
-                  <FormControl>
-                    <Button
-                      disabled={true}
-                      variant='outline'
-                      role='combobox'
-                      className={cn(
-                        'w-full justify-between',
-                        !field.value && 'text-muted-foreground'
-                      )}
-                    >
-                      {field.value
-                        ? fixtures.find(fixture => fixture.id === field.value)
-                            ?.name
-                        : 'Elige un fixture'}
-                      <ChevronsUpDown className='ml-2 h-4 w-4 shrink-0 opacity-50' />
-                    </Button>
-                  </FormControl>
-                </PopoverTrigger>
-                <PopoverContent className='max-w-[300px] p-0 sm:max-h-[500px] max-h-[300px] overflow-y-auto'>
-                  <Command>
-                    <CommandInput placeholder='Buscador de fixtures...' />
-                    <CommandEmpty>No hay coincidencias.</CommandEmpty>
-                    <CommandGroup>
-                      {fixtures.map(fixture => (
-                        <CommandItem
-                          value={fixture.name!}
-                          key={fixture.id}
-                          onSelect={() => {
-                            form.setValue('fixture_id', fixture.id)
-                          }}
+          {/* fixture */}
+          <FormField
+            control={form.control}
+            name='fixture_id'
+            render={({ field }) => (
+              <FormItem className='rounded bg-white'>
+                <FormLabel>Fixture</FormLabel>
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <FormControl>
+                      <Button
+                        disabled={true}
+                        variant='outline'
+                        role='combobox'
+                        className={cn(
+                          'w-full justify-between',
+                          !field.value && 'text-muted-foreground'
+                        )}
+                      >
+                        {field.value
+                          ? fixtures.find(fixture => fixture.id === field.value)
+                              ?.name
+                          : 'Elige un fixture'}
+                        <ChevronsUpDown className='ml-2 h-4 w-4 shrink-0 opacity-50' />
+                      </Button>
+                    </FormControl>
+                  </PopoverTrigger>
+                  <PopoverContent className='max-w-[300px] p-0 sm:max-h-[500px] max-h-[300px] overflow-y-auto'>
+                    <Command>
+                      <CommandInput placeholder='Buscador de fixtures...' />
+                      <CommandEmpty>No hay coincidencias.</CommandEmpty>
+                      <CommandGroup>
+                        {fixtures.map(fixture => (
+                          <CommandItem
+                            value={fixture.name!}
+                            key={fixture.id}
+                            onSelect={() => {
+                              form.setValue('fixture_id', fixture.id)
+                            }}
+                          >
+                            <>
+                              <Check
+                                className={cn(
+                                  'mr-2 h-4 w-4',
+                                  fixture.id === field.value
+                                    ? 'opacity-100'
+                                    : 'opacity-0'
+                                )}
+                              />
+                              {fixture.name}
+                            </>
+                          </CommandItem>
+                        ))}
+                      </CommandGroup>
+                    </Command>
+                  </PopoverContent>
+                </Popover>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <div className='grid grid-cols-2 gap-1 overflow-hidden'>
+            {/* team 1 */}
+            <FormField
+              control={form.control}
+              name='team_1'
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Equipo 1</FormLabel>
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <FormControl>
+                        <Button
+                          disabled={initialData ? true : false}
+                          variant='outline'
+                          role='combobox'
+                          className={cn(
+                            'w-full justify-between text-xs',
+                            !field.value && 'text-muted-foreground'
+                          )}
                         >
-                          <>
-                            <Check
-                              className={cn(
-                                'mr-2 h-4 w-4',
-                                fixture.id === field.value
-                                  ? 'opacity-100'
-                                  : 'opacity-0'
-                              )}
-                            />
-                            {fixture.name}
-                          </>
-                        </CommandItem>
-                      ))}
-                    </CommandGroup>
-                  </Command>
-                </PopoverContent>
-              </Popover>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+                          {field.value
+                            ? teams.find(team => team.id === field.value)?.name
+                            : 'Elige un equipo'}
+                          <ChevronsUpDown className='ml-2 h-4 w-4 shrink-0 opacity-50' />
+                        </Button>
+                      </FormControl>
+                    </PopoverTrigger>
+                    <PopoverContent className='max-w-[200px] p-0 sm:max-h-[500px] max-h-[300px] overflow-y-auto text-xs'>
+                      <Command>
+                        <CommandInput
+                          className='text-xs'
+                          placeholder='Buscador de equipos...'
+                        />
+                        <CommandEmpty>No hay coincidencias.</CommandEmpty>
+                        <CommandGroup>
+                          {teams.map(team => (
+                            <CommandItem
+                              className={`text-xs ${
+                                form.getValues('team_2') === team.id
+                                  ? 'opacity-50 bg-slate-50'
+                                  : ''
+                              }`}
+                              disabled={form.getValues('team_2') === team.id}
+                              value={team.name!}
+                              key={team.id}
+                              onSelect={() => {
+                                // reseteo walkovers
+                                setToggle1(false)
+                                setToggle2(false)
+                                clearWalkover()
 
-        <div className='grid grid-cols-2 gap-1 overflow-hidden'>
-          {/* team 1 */}
-          <FormField
-            control={form.control}
-            name='team_1'
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Equipo 1</FormLabel>
-                <Popover>
-                  <PopoverTrigger asChild>
-                    <FormControl>
-                      <Button
-                        disabled={initialData ? true : false}
-                        variant='outline'
-                        role='combobox'
-                        className={cn(
-                          'w-full justify-between text-xs',
-                          !field.value && 'text-muted-foreground'
-                        )}
-                      >
-                        {field.value
-                          ? teams.find(team => team.id === field.value)?.name
-                          : 'Elige un equipo'}
-                        <ChevronsUpDown className='ml-2 h-4 w-4 shrink-0 opacity-50' />
-                      </Button>
-                    </FormControl>
-                  </PopoverTrigger>
-                  <PopoverContent className='max-w-[200px] p-0 sm:max-h-[500px] max-h-[300px] overflow-y-auto text-xs'>
-                    <Command>
-                      <CommandInput
-                        className='text-xs'
-                        placeholder='Buscador de equipos...'
-                      />
-                      <CommandEmpty>No hay coincidencias.</CommandEmpty>
-                      <CommandGroup>
-                        {teams.map(team => (
-                          <CommandItem
-                            className={`text-xs ${
-                              form.getValues('team_2') === team.id
-                                ? 'opacity-50 bg-slate-50'
-                                : ''
-                            }`}
-                            disabled={form.getValues('team_2') === team.id}
-                            value={team.name!}
-                            key={team.id}
-                            onSelect={() => {
-                              // reseteo walkovers
-                              setToggle1(false)
-                              setToggle2(false)
-                              clearWalkover()
+                                form.setValue('team_1', team.id)
 
-                              form.setValue('team_1', team.id)
+                                const filtered = players
+                                  .filter(player => player.team_id === team.id)
+                                  .map(players => ({
+                                    ...players,
+                                    goals: 0,
+                                    yellow_cards: 0,
+                                    red_cards: false,
+                                    motivo: ''
+                                  }))
 
-                              const filtered = players
-                                .filter(player => player.team_id === team.id)
-                                .map(players => ({
-                                  ...players,
-                                  goals: 0,
-                                  yellow_cards: 0,
-                                  red_cards: false,
-                                  motivo: ''
-                                }))
-
-                              setPlayersTeam_1(filtered)
-                              setFilteredPlayersTeam_1(filtered)
-                            }}
-                          >
-                            <>
-                              <Check
-                                className={cn(
-                                  'mr-2 h-4 w-4',
-                                  team.id === field.value
-                                    ? 'opacity-100'
-                                    : 'opacity-0'
-                                )}
-                              />
-                              {team.image_url?.length ? (
-                                <Image
-                                  src={team.image_url}
-                                  width={30}
-                                  height={30}
-                                  alt='team logo'
-                                  className='mr-2'
+                                setPlayersTeam_1(filtered)
+                                setFilteredPlayersTeam_1(filtered)
+                              }}
+                            >
+                              <>
+                                <Check
+                                  className={cn(
+                                    'mr-2 h-4 w-4',
+                                    team.id === field.value
+                                      ? 'opacity-100'
+                                      : 'opacity-0'
+                                  )}
                                 />
-                              ) : (
-                                <Shield className='mr-2' size={30} />
-                              )}
-                              {team.name}
-                            </>
-                          </CommandItem>
-                        ))}
-                      </CommandGroup>
-                    </Command>
-                  </PopoverContent>
-                </Popover>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          {/* team 2 */}
-          <FormField
-            control={form.control}
-            name='team_2'
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Equipo 2</FormLabel>
-                <Popover>
-                  <PopoverTrigger asChild>
-                    <FormControl>
-                      <Button
-                        disabled={initialData ? true : false}
-                        variant='outline'
-                        role='combobox'
-                        className={cn(
-                          'w-full justify-between text-xs',
-                          !field.value && 'text-muted-foreground'
-                        )}
-                      >
-                        {field.value
-                          ? teams.find(team => team.id === field.value)?.name
-                          : 'Elige un equipo'}
-                        <ChevronsUpDown className='ml-2 h-4 w-4 shrink-0 opacity-50' />
-                      </Button>
-                    </FormControl>
-                  </PopoverTrigger>
-                  <PopoverContent className='max-w-[200px] p-0 sm:max-h-[500px] max-h-[300px] overflow-y-auto'>
-                    <Command>
-                      <CommandInput
-                        className='text-xs'
-                        placeholder='Buscador de equipos...'
-                      />
-                      <CommandEmpty>No hay coincidencias.</CommandEmpty>
-                      <CommandGroup>
-                        {teams.map(team => (
-                          <CommandItem
-                            className={`tex t-xs ${
-                              form.getValues('team_1') === team.id
-                                ? 'opacity-50 bg-slate-50'
-                                : ''
-                            }`}
-                            disabled={form.getValues('team_1') === team.id}
-                            value={team.name!}
-                            key={team.id}
-                            onSelect={() => {
-                              // reseteo walkovers
-                              setToggle1(false)
-                              setToggle2(false)
-                              clearWalkover()
-
-                              form.setValue('team_2', team.id)
-
-                              const filtered = players
-                                .filter(player => player.team_id === team.id)
-                                .map(players => ({
-                                  ...players,
-                                  goals: 0,
-                                  yellow_cards: 0,
-                                  red_cards: false,
-                                  motivo: ''
-                                }))
-
-                              setPlayersTeam_2(filtered)
-                              setFilteredPlayersTeam_2(filtered)
-                            }}
-                          >
-                            <>
-                              <Check
-                                className={cn(
-                                  'mr-2 h-4 w-4',
-                                  team.id === field.value
-                                    ? 'opacity-100'
-                                    : 'opacity-0'
+                                {team.image_url?.length ? (
+                                  <Image
+                                    src={team.image_url}
+                                    width={30}
+                                    height={30}
+                                    alt='team logo'
+                                    className='mr-2'
+                                  />
+                                ) : (
+                                  <Shield className='mr-2' size={30} />
                                 )}
-                              />
-                              {team.image_url?.length ? (
-                                <Image
-                                  src={team.image_url}
-                                  width={30}
-                                  height={30}
-                                  alt='team logo'
-                                  className='mr-2'
-                                />
-                              ) : (
-                                <Shield className='mr-2' size={30} />
-                              )}
-                              {team.name}
-                            </>
-                          </CommandItem>
-                        ))}
-                      </CommandGroup>
-                    </Command>
-                  </PopoverContent>
-                </Popover>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-        </div>
+                                {team.name}
+                              </>
+                            </CommandItem>
+                          ))}
+                        </CommandGroup>
+                      </Command>
+                    </PopoverContent>
+                  </Popover>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            {/* team 2 */}
+            <FormField
+              control={form.control}
+              name='team_2'
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Equipo 2</FormLabel>
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <FormControl>
+                        <Button
+                          disabled={initialData ? true : false}
+                          variant='outline'
+                          role='combobox'
+                          className={cn(
+                            'w-full justify-between text-xs',
+                            !field.value && 'text-muted-foreground'
+                          )}
+                        >
+                          {field.value
+                            ? teams.find(team => team.id === field.value)?.name
+                            : 'Elige un equipo'}
+                          <ChevronsUpDown className='ml-2 h-4 w-4 shrink-0 opacity-50' />
+                        </Button>
+                      </FormControl>
+                    </PopoverTrigger>
+                    <PopoverContent className='max-w-[200px] p-0 sm:max-h-[500px] max-h-[300px] overflow-y-auto'>
+                      <Command>
+                        <CommandInput
+                          className='text-xs'
+                          placeholder='Buscador de equipos...'
+                        />
+                        <CommandEmpty>No hay coincidencias.</CommandEmpty>
+                        <CommandGroup>
+                          {teams.map(team => (
+                            <CommandItem
+                              className={`tex t-xs ${
+                                form.getValues('team_1') === team.id
+                                  ? 'opacity-50 bg-slate-50'
+                                  : ''
+                              }`}
+                              disabled={form.getValues('team_1') === team.id}
+                              value={team.name!}
+                              key={team.id}
+                              onSelect={() => {
+                                // reseteo walkovers
+                                setToggle1(false)
+                                setToggle2(false)
+                                clearWalkover()
 
-        <div className='flex w-full gap-1'>
-          {/* Date */}
-          <FormField
-            control={form.control}
-            name='date'
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Fecha y Hora</FormLabel>
-                <Popover>
-                  <PopoverTrigger asChild>
-                    <FormControl>
-                      <Button
-                        variant={'outline'}
-                        className={cn(
-                          'w-full pl-3 text-left font-normal',
-                          !field.value && 'text-muted-foreground'
-                        )}
-                      >
-                        {field.value ? (
-                          format(field.value!, 'PP | HH:mm', {
-                            locale: es
-                          })
-                        ) : (
-                          <span>Elige una fecha</span>
-                        )}
-                        <CalendarIcon className='ml-auto h-4 w-4 opacity-50' />
-                      </Button>
-                    </FormControl>
-                  </PopoverTrigger>
-                  <PopoverContent className='w-auto p-0' align='start'>
-                    <Calendar
-                      mode='single'
-                      selected={field.value}
-                      onSelect={e => {
-                        field.onChange(
-                          set(e!, {
-                            hours: hour.length ? +hour.split(':')[0] : 0,
-                            minutes: hour.length ? +hour.split(':')[1] : 0
-                          })
-                        )
-                      }}
-                      disabled={date => date < subDays(new Date(), 1)}
-                      initialFocus
-                      locale={es}
-                    />
-                    <div className='flex justify-center items-center pb-4 px-20'>
-                      <Input
-                        className='shadow-md text-xl font-semibold'
-                        type='time'
-                        defaultValue={
-                          field.value ? format(field.value, 'HH:mm') : undefined
-                        }
-                        onChange={e => {
-                          setHour(e.target.value) // keeps the time when date changes
+                                form.setValue('team_2', team.id)
+
+                                const filtered = players
+                                  .filter(player => player.team_id === team.id)
+                                  .map(players => ({
+                                    ...players,
+                                    goals: 0,
+                                    yellow_cards: 0,
+                                    red_cards: false,
+                                    motivo: ''
+                                  }))
+
+                                setPlayersTeam_2(filtered)
+                                setFilteredPlayersTeam_2(filtered)
+                              }}
+                            >
+                              <>
+                                <Check
+                                  className={cn(
+                                    'mr-2 h-4 w-4',
+                                    team.id === field.value
+                                      ? 'opacity-100'
+                                      : 'opacity-0'
+                                  )}
+                                />
+                                {team.image_url?.length ? (
+                                  <Image
+                                    src={team.image_url}
+                                    width={30}
+                                    height={30}
+                                    alt='team logo'
+                                    className='mr-2'
+                                  />
+                                ) : (
+                                  <Shield className='mr-2' size={30} />
+                                )}
+                                {team.name}
+                              </>
+                            </CommandItem>
+                          ))}
+                        </CommandGroup>
+                      </Command>
+                    </PopoverContent>
+                  </Popover>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </div>
+
+          <div className='flex w-full gap-1'>
+            {/* Date */}
+            <FormField
+              control={form.control}
+              name='date'
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Fecha y Hora</FormLabel>
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <FormControl>
+                        <Button
+                          variant={'outline'}
+                          className={cn(
+                            'w-full pl-3 text-left font-normal',
+                            !field.value && 'text-muted-foreground'
+                          )}
+                        >
+                          {field.value ? (
+                            format(field.value!, 'PP | HH:mm', {
+                              locale: es
+                            })
+                          ) : (
+                            <span>Elige una fecha</span>
+                          )}
+                          <CalendarIcon className='ml-auto h-4 w-4 opacity-50' />
+                        </Button>
+                      </FormControl>
+                    </PopoverTrigger>
+                    <PopoverContent className='w-auto p-0' align='start'>
+                      <Calendar
+                        mode='single'
+                        selected={field.value}
+                        onSelect={e => {
                           field.onChange(
-                            set(field.value ? field.value : new Date(), {
-                              hours: +e.target.value.split(':')[0],
-                              minutes: +e.target.value.split(':')[1]
+                            set(e!, {
+                              hours: hour.length ? +hour.split(':')[0] : 0,
+                              minutes: hour.length ? +hour.split(':')[1] : 0
                             })
                           )
                         }}
+                        disabled={date => date < subDays(new Date(), 1)}
+                        initialFocus
+                        locale={es}
                       />
-                    </div>
-                  </PopoverContent>
-                </Popover>
-                <FormMessage />
-              </FormItem>
+                      <div className='flex justify-center items-center pb-4 px-20'>
+                        <Input
+                          className='shadow-md text-xl font-semibold'
+                          type='time'
+                          defaultValue={
+                            field.value
+                              ? format(field.value, 'HH:mm')
+                              : undefined
+                          }
+                          onChange={e => {
+                            console.log(field.value)
+                            setHour(e.target.value) // keeps the time when date changes
+                            field.onChange(
+                              set(field.value ? field.value : new Date(), {
+                                hours: +e.target.value.split(':')[0],
+                                minutes: +e.target.value.split(':')[1]
+                              })
+                            )
+                          }}
+                        />
+                      </div>
+                    </PopoverContent>
+                  </Popover>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            {/* Cancha nro */}
+            <FormField
+              control={form.control}
+              name='cancha_nro'
+              render={({ field }) => (
+                <FormItem className='rounded bg-white w-[75px] shrink-0'>
+                  <FormLabel>Cancha N°</FormLabel>
+                  <FormControl>
+                    <Input
+                      className={`font-semibold text-center ${
+                        field.value !== undefined && field.value > 0
+                          ? ''
+                          : 'text-muted-foreground'
+                      }`}
+                      type='number'
+                      min={1}
+                      {...field}
+                      onClick={e => e.currentTarget.select()}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </div>
+
+          {/* Table */}
+          <div className='w-full relative overflow-hidden'>
+            {playersTeam_1 && (
+              <>
+                <div
+                  className={`w-full flex justify-center items-center gap-2 text-xs relative z-10`}
+                >
+                  {playersTeam_1?.length > 0 ? (
+                    <>
+                      <Separator />
+                      <span
+                        className={`flex flex-col items-center relative ${
+                          filteredPlayersTeam_1 && 'top-5'
+                        }`}
+                      >
+                        <Toggle
+                          variant={'outline'}
+                          size={'sm'}
+                          pressed={toggle1}
+                          className='left-0 top-0 h-5 text-muted-foreground'
+                          onPressedChange={e => {
+                            setToggle1(!toggle1)
+                            setModifiedRows([])
+                            hideTeamsToggle_1(e, walkoverTeam2)
+                          }}
+                        >
+                          Walkover
+                        </Toggle>
+                        {getTeamLogo(playersTeam_1, 1)}
+                      </span>
+                      <Separator />
+                    </>
+                  ) : (
+                    <p className='bg-pink-600 px-2 py-1 text-white rounded relative top-3 animate-pulse'>
+                      Equipo aún no tiene jugadores cargados
+                    </p>
+                  )}
+                </div>
+                {filteredPlayersTeam_1 && (
+                  <DataTable
+                    columns={Columns}
+                    intialValues={filteredPlayersTeam_1 || []}
+                    addModifiedRows={addModifiedRows}
+                  />
+                )}
+              </>
             )}
-          />
-          {/* Cancha nro */}
+          </div>
+
+          <div className='w-full relative overflow-hidden'>
+            {playersTeam_2 && (
+              <>
+                <div
+                  className={`w-full flex justify-center items-center gap-2 text-xs relative z-10`}
+                >
+                  {playersTeam_2?.length > 0 ? (
+                    <>
+                      <Separator />
+                      <span
+                        className={`flex flex-col items-center relative ${
+                          filteredPlayersTeam_2 && 'top-5'
+                        }`}
+                      >
+                        <Toggle
+                          variant={'outline'}
+                          size={'sm'}
+                          pressed={toggle2}
+                          className='left-0 top-0 h-5 text-muted-foreground'
+                          onPressedChange={e => {
+                            setToggle2(!toggle2)
+                            setModifiedRows([])
+                            hideTeamsToggle_2(e, walkoverTeam1)
+                          }}
+                        >
+                          Walkover
+                        </Toggle>
+                        {getTeamLogo(playersTeam_2, 2)}
+                      </span>
+                      <Separator />
+                    </>
+                  ) : (
+                    <p className='bg-pink-600 px-2 py-1 text-white rounded relative top-3 animate-pulse'>
+                      Equipo aún no tiene jugadores cargados
+                    </p>
+                  )}
+                </div>
+                {filteredPlayersTeam_2 && (
+                  <DataTable
+                    columns={Columns}
+                    intialValues={filteredPlayersTeam_2 || []}
+                    addModifiedRows={addModifiedRows}
+                  />
+                )}
+              </>
+            )}
+          </div>
+
+          {/* Resultado */}
+          <div className='flex justify-center items-center overflow-hidden w-full'>
+            <div
+              className={`w-full flex justify-center items-center gap-2 text-xs relative`}
+            >
+              {getTeamLogo(playersTeam_1 ?? playersTeam_1, 1)}
+            </div>
+            <h2 className='text-4xl text-muted-foreground text-center flex-none'>
+              {playersTeam_1?.length &&
+                goals !== undefined &&
+                goals.filter(item => item.id === playersTeam_1[0].team_id!)
+                  .length &&
+                goals.filter(item => item.id === playersTeam_1[0].team_id!)[0]
+                  .goals}
+              -
+              {playersTeam_2?.length &&
+                goals !== undefined &&
+                goals.filter(item => item.id === playersTeam_2[0].team_id!)
+                  .length &&
+                goals.filter(item => item.id === playersTeam_2[0].team_id!)[0]
+                  .goals}
+            </h2>
+            <div
+              className={`w-full flex justify-center items-center gap-2 text-xs relative `}
+            >
+              {getTeamLogo(playersTeam_2 ?? playersTeam_2, 2)}
+            </div>
+          </div>
+
+          {/* Goals */}
           <FormField
             control={form.control}
-            name='cancha_nro'
+            name='goals'
             render={({ field }) => (
-              <FormItem className='rounded bg-white w-[75px] shrink-0'>
-                <FormLabel>Cancha N°</FormLabel>
-                <FormControl>
-                  <Input
-                    className={`font-semibold text-center ${
-                      field.value !== undefined && field.value > 0
-                        ? ''
-                        : 'text-muted-foreground'
-                    }`}
-                    type='number'
-                    min={1}
-                    {...field}
-                    onClick={e => e.currentTarget.select()}
-                  />
-                </FormControl>
+              <FormItem className='rounded bg-white'>
                 <FormMessage />
               </FormItem>
             )}
           />
-        </div>
 
-        {/* Table */}
-        <div className='w-full relative overflow-hidden'>
-          {playersTeam_1 && (
-            <>
-              <div
-                className={`w-full flex justify-center items-center gap-2 text-xs relative z-10`}
-              >
-                {playersTeam_1?.length > 0 ? (
-                  <>
-                    <Separator />
-                    <span
-                      className={`flex flex-col items-center relative ${
-                        filteredPlayersTeam_1 && 'top-5'
-                      }`}
-                    >
-                      <Toggle
-                        variant={'outline'}
-                        size={'sm'}
-                        pressed={toggle1}
-                        className='left-0 top-0 h-5 text-muted-foreground'
-                        onPressedChange={e => {
-                          setToggle1(!toggle1)
-                          setModifiedRows([])
-                          hideTeamsToggle_1(e, walkoverTeam2)
-                        }}
-                      >
-                        Walkover
-                      </Toggle>
-                      {getTeamLogo(playersTeam_1, 1)}
-                    </span>
-                    <Separator />
-                  </>
-                ) : (
-                  <p className='bg-pink-600 px-2 py-1 text-white rounded relative top-3 animate-pulse'>
-                    Equipo aún no tiene jugadores cargados
-                  </p>
-                )}
-              </div>
-              {filteredPlayersTeam_1 && (
-                <DataTable
-                  columns={Columns}
-                  intialValues={filteredPlayersTeam_1 || []}
-                  addModifiedRows={addModifiedRows}
-                />
-              )}
-            </>
-          )}
-        </div>
+          {/* Walkovers */}
+          <FormField
+            control={form.control}
+            name='walkover_team_1'
+            render={({ field }) => (
+              <FormItem className='rounded bg-white w-full text-center'>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
 
-        <div className='w-full relative overflow-hidden'>
-          {playersTeam_2 && (
-            <>
-              <div
-                className={`w-full flex justify-center items-center gap-2 text-xs relative z-10`}
-              >
-                {playersTeam_2?.length > 0 ? (
-                  <>
-                    <Separator />
-                    <span
-                      className={`flex flex-col items-center relative ${
-                        filteredPlayersTeam_2 && 'top-5'
-                      }`}
-                    >
-                      <Toggle
-                        variant={'outline'}
-                        size={'sm'}
-                        pressed={toggle2}
-                        className='left-0 top-0 h-5 text-muted-foreground'
-                        onPressedChange={e => {
-                          setToggle2(!toggle2)
-                          setModifiedRows([])
-                          hideTeamsToggle_2(e, walkoverTeam1)
-                        }}
-                      >
-                        Walkover
-                      </Toggle>
-                      {getTeamLogo(playersTeam_2, 2)}
-                    </span>
-                    <Separator />
-                  </>
-                ) : (
-                  <p className='bg-pink-600 px-2 py-1 text-white rounded relative top-3 animate-pulse'>
-                    Equipo aún no tiene jugadores cargados
-                  </p>
-                )}
-              </div>
-              {filteredPlayersTeam_2 && (
-                <DataTable
-                  columns={Columns}
-                  intialValues={filteredPlayersTeam_2 || []}
-                  addModifiedRows={addModifiedRows}
-                />
-              )}
-            </>
-          )}
-        </div>
-
-        {/* Resultado */}
-        <div className='flex justify-center items-center overflow-hidden w-full'>
-          <div
-            className={`w-full flex justify-center items-center gap-2 text-xs relative`}
-          >
-            {getTeamLogo(playersTeam_1 ?? playersTeam_1, 1)}
+          <div className='w-full'>
+            <Button
+              type='submit'
+              variant={'default'}
+              className='w-full'
+              disabled={loading}
+              onClick={() => {
+                form.setValue('goals', goals!)
+                form.setValue('walkover_team_1', walkoverTeam1)
+                form.setValue('walkover_team_2', walkoverTeam2)
+              }}
+            >
+              {action}
+            </Button>
           </div>
-          <h2 className='text-4xl text-muted-foreground text-center flex-none'>
-            {playersTeam_1?.length &&
-              goals !== undefined &&
-              goals.filter(item => item.id === playersTeam_1[0].team_id!)
-                .length &&
-              goals.filter(item => item.id === playersTeam_1[0].team_id!)[0]
-                .goals}
-            -
-            {playersTeam_2?.length &&
-              goals !== undefined &&
-              goals.filter(item => item.id === playersTeam_2[0].team_id!)
-                .length &&
-              goals.filter(item => item.id === playersTeam_2[0].team_id!)[0]
-                .goals}
-          </h2>
-          <div
-            className={`w-full flex justify-center items-center gap-2 text-xs relative `}
-          >
-            {getTeamLogo(playersTeam_2 ?? playersTeam_2, 2)}
-          </div>
-        </div>
-
-        {/* Goals */}
-        <FormField
-          control={form.control}
-          name='goals'
-          render={({ field }) => (
-            <FormItem className='rounded bg-white'>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        {/* Walkovers */}
-        <FormField
-          control={form.control}
-          name='walkover'
-          render={({ field }) => (
-            <FormItem className='rounded bg-white'>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        <div className='w-full'>
-          <Button
-            type='submit'
-            variant={'default'}
-            className='w-full'
-            disabled={loading}
-            onClick={() => {
-              form.setValue('goals', goals!)
-              form.setValue('walkover', walkover!)
-            }}
-          >
-            {action}
-          </Button>
-        </div>
-      </form>
-    </Form>
+        </form>
+      </Form>{' '}
+    </>
   )
 }
 
