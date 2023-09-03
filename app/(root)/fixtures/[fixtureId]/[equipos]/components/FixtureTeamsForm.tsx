@@ -248,8 +248,6 @@ const FixtureTeamsForm = ({
   }
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
-    console.log({ values })
-
     try {
       setLoading(true)
       const {
@@ -537,13 +535,13 @@ const FixtureTeamsForm = ({
       setLoading(false)
 
       // limpiamos los datos modificados
-      setModifiedRows([])
-      clearWalkover()
-      setPlayersTeam_1(undefined)
-      setPlayersTeam_2(undefined)
-      form.reset()
-      router.refresh()
       router.back()
+      router.refresh()
+      // form.reset()
+      // setModifiedRows([])
+      // setPlayersTeam_1(undefined)
+      // setPlayersTeam_2(undefined)
+      // clearWalkover()
       toast.success(toastMessage)
     } catch (error) {
       toast.error('Hubo un error')
