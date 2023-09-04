@@ -552,19 +552,57 @@ const FixtureTeamsForm = ({
 
   const onDelete = async () => {
     try {
-      // setLoading(true)
-      // const { error } = await supabase
-      //   .from('players')
-      //   .delete()
-      //   .eq('id', +params.jugadorId)
-      // if (error) {
-      //   console.log(error)
-      //   setLoading(false)
-      //   return toast.error(`No se pudo borrar`)
-      // }
-      // router.refresh()
-      // router.push('/jugadores')
-      // toast.success('Borrado con éxito')
+      setLoading(true)
+
+      const { error } = await supabase.rpc('delete_versus', {
+        fixture: +params.fixtureId,
+        team_one:  initialData.team_1,
+        team_two:  initialData.team_2,
+      })
+
+       // clear all tables
+       const { error: deleteGoalsError } = await supabase.rpc(
+        'delete_goals',
+        {
+          fixture:  +params.fixtureId,
+          team_1 :  initialData.team_1,
+          team_2:  initialData.team_2,
+        }
+      )
+      const { error: deleteYellowCardsError } = await supabase.rpc(
+        'delete_yellow_cards',
+        {
+          fixture:  +params.fixtureId,
+          team_1 :  initialData.team_1,
+          team_2:  initialData.team_2,
+        }
+      )
+      const { error: deleteRedCardsError } = await supabase.rpc(
+        'delete_red_cards',
+        {
+          fixture:  +params.fixtureId,
+          team_1 :  initialData.team_1,
+          team_2:  initialData.team_2,
+        }
+      )
+      // delete previous walkover
+      const { data, error: deleteWalkoversError } = await supabase.rpc(
+        'delete_walkovers',
+        {
+          fixture:  +params.fixtureId,
+          team_1 :  initialData.team_1,
+          team_2:  initialData.team_2,
+        }
+      )
+
+      if (error) {
+        console.log(error)
+        setLoading(false)
+        return toast.error(`No se pudo borrar`)
+      }
+      router.refresh()
+      router.back()
+      toast.success('Borrado con éxito')
     } catch (error) {
       toast.error('Hubo un error')
     } finally {

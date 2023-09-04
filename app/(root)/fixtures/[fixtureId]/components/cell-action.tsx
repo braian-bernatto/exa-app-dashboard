@@ -40,8 +40,6 @@ const CellAction = ({ data }: CellActionProps) => {
         team_two: data.team_2.id
       })
 
-      console.log({ data })
-
       if (error) {
         console.log(error)
         setLoading(false)

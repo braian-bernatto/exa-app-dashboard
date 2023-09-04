@@ -20,8 +20,6 @@ const FixutrePage = async ({
 
   // TODO: revisar porque se refresca 6 veces el dom
 
-  console.log(params.equipos.split('-vs-'))
-
   const supabase = createClient()
   const { data: fixtureDetails } = await supabase
     .from('fixture_details')
