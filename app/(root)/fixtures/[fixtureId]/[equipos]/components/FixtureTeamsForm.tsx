@@ -48,6 +48,7 @@ import { Toggle } from '../../../../../../components/ui/toggle'
 import { toast } from 'react-hot-toast'
 import { FixtureDetailsColumn } from '@/app/(root)/fixtures/[fixtureId]/components/columns'
 import { AlertModal } from '@/components/modals/AlertModal'
+import Spinner from '@/components/Spinner'
 
 interface FixtureTeamsFormProps {
   initialData: FixtureDetailsColumn | undefined
@@ -812,10 +813,12 @@ const FixtureTeamsForm = ({
           }
         })
     )
+
     return result
   }
 
   const setPlayers = async () => {
+    setLoading(true)
     const players_1 = await getPlayersDetails(initialData.team_1)
     const players_2 = await getPlayersDetails(initialData.team_2)
     setModifiedRows([...players_1, ...players_2])
@@ -823,16 +826,18 @@ const FixtureTeamsForm = ({
     setPlayersTeam_2(players_2)
     setFilteredPlayersTeam_1(players_1)
     setFilteredPlayersTeam_2(players_2)
+    setLoading(false)
   }
 
   const setTeamWalkover = async () => {
+    setLoading(true)
     const team_1 = await getTeamWalkover(initialData.team_1)
     const team_2 = await getTeamWalkover(initialData.team_2)
-
     setToggle1(team_1)
     setToggle2(team_2)
     hideTeamsToggle_1(team_1, team_2)
     hideTeamsToggle_2(team_2, team_1)
+    setLoading(false)
   }
 
   useEffect(() => {
@@ -853,6 +858,7 @@ const FixtureTeamsForm = ({
 
   return (
     <>
+      {loading && <Spinner />}
       <AlertModal
         isOpen={open}
         onClose={() => setOpen(false)}
