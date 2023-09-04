@@ -1,5 +1,5 @@
 import { FixtureDetailsColumn } from './columns'
-import { LocateFixed, MapPin, Navigation } from 'lucide-react'
+import { LocateFixed } from 'lucide-react'
 
 interface CellCanchaProps {
   data: FixtureDetailsColumn
