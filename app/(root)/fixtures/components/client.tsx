@@ -29,8 +29,8 @@ const FixtureClient = ({ data }: FixtureClientProps) => {
       <DataTable
         columns={columns}
         data={data}
-        filterLabel='Nombre'
-        filterKey='name'
+        filterLabel='Torneo'
+        filterKey='torneos.name'
       />
     </>
   )

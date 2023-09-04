@@ -15,6 +15,7 @@ export const columns: ColumnDef<FixtureColumn>[] = [
     header: 'Nombre'
   },
   {
+    id:'torneos.name',
     accessorKey: 'torneos.name',
     header: 'Torneo',
     cell: ({ row }) => <CellTorneoImage data={row.original} />

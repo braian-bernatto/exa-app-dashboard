@@ -29,7 +29,7 @@ export default async function RootLayout({
 
   return (
     <html lang='es'>
-      <body className={inter.className}>
+      <body className={inter.className}>        
         <ToasterProvider />
         <SupabaseProvider>
           <SupabaseAuthProvider serverSession={session}>

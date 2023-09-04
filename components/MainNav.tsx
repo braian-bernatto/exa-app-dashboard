@@ -2,14 +2,13 @@
 
 import { cn } from '@/lib/utils'
 import Link from 'next/link'
-import { useParams, usePathname } from 'next/navigation'
+import { usePathname } from 'next/navigation'
 
 const MainNav = ({
   className,
   ...props
 }: React.HtmlHTMLAttributes<HTMLElement>) => {
   const pathname = usePathname()
-  const params = useParams()
   const routes = [
     {
       href: `/exas`,
