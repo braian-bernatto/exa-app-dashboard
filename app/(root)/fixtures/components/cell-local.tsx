@@ -7,10 +7,12 @@ interface CellLocalProps {
 
 const CellLocal = ({ data }: CellLocalProps) => {
   return (
-    <span className="flex gap-2">
+    <span className="flex gap-2 items-center">
       {data.locations ? (
         <>
-          <MapPin className="text-muted-foreground" />
+          <span className="flex-none">
+            <MapPin className="text-muted-foreground" />
+          </span>
           {data.locations.name}
         </>
       ) : (

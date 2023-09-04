@@ -21,8 +21,8 @@ const CellTorneoImage = ({ data }: CellTorneoImageProps) => {
   }
 
   return (
-    <div className='flex gap-2'>
-      <div className='w-[30px] h-[30px] relative shadow rounded-full overflow-hidden border flex-none'>
+    <div className="flex gap-2 items-center">
+      <div className="w-[30px] h-[30px] relative shadow rounded-full overflow-hidden border flex-none">
         {!imageError && (
           <Image
             src={url}
@@ -30,8 +30,8 @@ const CellTorneoImage = ({ data }: CellTorneoImageProps) => {
               setImageError(true)
             }}
             fill
-            alt='logo de torneo'
-            className='object-contain'
+            alt="logo de torneo"
+            className="object-contain"
           />
         )}
       </div>

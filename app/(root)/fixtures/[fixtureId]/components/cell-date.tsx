@@ -8,9 +8,12 @@ interface CellDateProps {
 
 const CellDate = ({ data }: CellDateProps) => {
   return (
-    <span className="flex gap-1">
-      {format(parseISO(data.date), 'dd/MM/yyyy | HH:mm')}
-      <Clock3 width={18} className="text-muted-foreground" />
+    <span className="flex gap-2 items-center">
+      {format(parseISO(data.date), 'dd/MM/yyyy')}
+      <span className="bg-white flex flex-col justify-center items-center shadow px-2 rounded border">
+        {format(parseISO(data.date), 'HH:mm')}
+        <Clock3 width={18} className="text-muted-foreground" />
+      </span>
     </span>
   )
 }
