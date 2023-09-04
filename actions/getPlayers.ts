@@ -3,7 +3,7 @@ import { createClient } from '@/utils/supabaseServer'
 
 const getPlayers = async (): Promise<Players[]> => {
   const supabase = createClient()
-  const { data, error } = await supabase.from('players').select('*')
+  const { data, error } = await supabase.from('players').select().order('id')
 
   if (error) {
     console.log(error)
