@@ -144,7 +144,7 @@ const FixtureTeamsForm = ({
       walkover_team_2: z.boolean()
     })
     .refine(
-      val => {
+      (val) => {
         if (val.team_1 !== val.team_2) return true
       },
       {
@@ -153,7 +153,7 @@ const FixtureTeamsForm = ({
       }
     )
     .refine(
-      async val => {
+      async (val) => {
         if (initialData) return true
         const { data } = await supabase
           .from('fixture_details')
@@ -172,7 +172,7 @@ const FixtureTeamsForm = ({
       }
     )
     .refine(
-      async val => {
+      async (val) => {
         if (initialData) return true
         const { data } = await supabase
           .from('fixture_details')
@@ -191,7 +191,7 @@ const FixtureTeamsForm = ({
       }
     )
     .refine(
-      val => {
+      (val) => {
         const bothWalkover = val.walkover_team_1 && val.walkover_team_2
 
         // if none of the teams are in walkover omit this refine
@@ -204,7 +204,7 @@ const FixtureTeamsForm = ({
 
         if (bothWalkover && goals[0].goals > 0 && goals[1].goals > 0)
           return true
-        if (val.walkover_team_1 && goals[0].goals > 0) return true
+        if (val.walkover_team_1 && goals[1].goals > 0) return true
         if (val.walkover_team_2 && goals[0].goals > 0) return true
       },
       {
@@ -230,7 +230,7 @@ const FixtureTeamsForm = ({
   const addModifiedRows = (data: any) => {
     let exists = false
 
-    const newData = modifiedRows?.map(item => {
+    const newData = modifiedRows?.map((item) => {
       if (item.id === data.id) {
         exists = true
         return {
@@ -321,8 +321,8 @@ const FixtureTeamsForm = ({
 
           // goals
           const goalsArray = modifiedRows
-            .filter(player => player.goals > 0)
-            .map(player => ({
+            .filter((player) => player.goals > 0)
+            .map((player) => ({
               fixture_id,
               player_id: player.id,
               quantity: player.goals
@@ -341,8 +341,8 @@ const FixtureTeamsForm = ({
           }
           // yellow cards
           const yellowCardsArray = modifiedRows
-            .filter(player => player.yellow_cards > 0)
-            .map(player => ({
+            .filter((player) => player.yellow_cards > 0)
+            .map((player) => ({
               fixture_id,
               player_id: player.id,
               quantity: player.yellow_cards
@@ -359,8 +359,8 @@ const FixtureTeamsForm = ({
           }
           // red cards
           const redCardsArray = modifiedRows
-            .filter(player => player.red_cards)
-            .map(player => ({
+            .filter((player) => player.red_cards)
+            .map((player) => ({
               fixture_id,
               player_id: player.id,
               motivo: player.motivo
@@ -437,8 +437,8 @@ const FixtureTeamsForm = ({
         if (modifiedRows.length) {
           // goals
           const goalsArray = modifiedRows
-            .filter(player => player.goals > 0)
-            .map(player => ({
+            .filter((player) => player.goals > 0)
+            .map((player) => ({
               fixture_id,
               player_id: player.id,
               quantity: player.goals
@@ -457,8 +457,8 @@ const FixtureTeamsForm = ({
           }
           // yellow cards
           const yellowCardsArray = modifiedRows
-            .filter(player => player.yellow_cards > 0)
-            .map(player => ({
+            .filter((player) => player.yellow_cards > 0)
+            .map((player) => ({
               fixture_id,
               player_id: player.id,
               quantity: player.yellow_cards
@@ -475,8 +475,8 @@ const FixtureTeamsForm = ({
           }
           // red cards
           const redCardsArray = modifiedRows
-            .filter(player => player.red_cards)
-            .map(player => ({
+            .filter((player) => player.red_cards)
+            .map((player) => ({
               fixture_id,
               player_id: player.id,
               motivo: player.motivo
@@ -556,42 +556,39 @@ const FixtureTeamsForm = ({
 
       const { error } = await supabase.rpc('delete_versus', {
         fixture: +params.fixtureId,
-        team_one:  initialData.team_1,
-        team_two:  initialData.team_2,
+        team_one: initialData.team_1,
+        team_two: initialData.team_2
       })
 
-       // clear all tables
-       const { error: deleteGoalsError } = await supabase.rpc(
-        'delete_goals',
-        {
-          fixture:  +params.fixtureId,
-          team_1 :  initialData.team_1,
-          team_2:  initialData.team_2,
-        }
-      )
+      // clear all tables
+      const { error: deleteGoalsError } = await supabase.rpc('delete_goals', {
+        fixture: +params.fixtureId,
+        team_1: initialData.team_1,
+        team_2: initialData.team_2
+      })
       const { error: deleteYellowCardsError } = await supabase.rpc(
         'delete_yellow_cards',
         {
-          fixture:  +params.fixtureId,
-          team_1 :  initialData.team_1,
-          team_2:  initialData.team_2,
+          fixture: +params.fixtureId,
+          team_1: initialData.team_1,
+          team_2: initialData.team_2
         }
       )
       const { error: deleteRedCardsError } = await supabase.rpc(
         'delete_red_cards',
         {
-          fixture:  +params.fixtureId,
-          team_1 :  initialData.team_1,
-          team_2:  initialData.team_2,
+          fixture: +params.fixtureId,
+          team_1: initialData.team_1,
+          team_2: initialData.team_2
         }
       )
       // delete previous walkover
       const { data, error: deleteWalkoversError } = await supabase.rpc(
         'delete_walkovers',
         {
-          fixture:  +params.fixtureId,
-          team_1 :  initialData.team_1,
-          team_2:  initialData.team_2,
+          fixture: +params.fixtureId,
+          team_1: initialData.team_1,
+          team_2: initialData.team_2
         }
       )
 
@@ -614,17 +611,17 @@ const FixtureTeamsForm = ({
   const getTeamLogo = (filteredPlayers?: Players[], teamNumber?: number) => {
     if (filteredPlayers && filteredPlayers.length > 0) {
       const url = teams.filter(
-        team => team.id === filteredPlayers[0].team_id
+        (team) => team.id === filteredPlayers[0].team_id
       )[0].image_url
 
       if (url) {
-        return <Image src={url} width={50} height={50} alt='team logo' />
+        return <Image src={url} width={50} height={50} alt="team logo" />
       }
     }
     return (
-      <div className='flex items-center justify-center relative'>
-        <Shield strokeWidth={1} size={50} className='bg-white' />
-        <h2 className='text-xl font-semibold absolute text-emerald-700'>
+      <div className="flex items-center justify-center relative">
+        <Shield strokeWidth={1} size={50} className="bg-white" />
+        <h2 className="text-xl font-semibold absolute text-emerald-700">
           {teamNumber}
         </h2>
       </div>
@@ -642,7 +639,7 @@ const FixtureTeamsForm = ({
     // filtramos los jugadores del equipo contrario
     teamWalkover
       ? setVsTeamPlayers(
-          vsTeamPlayers.filter(player => player.position_id === 'POR')
+          vsTeamPlayers.filter((player) => player.position_id === 'POR')
         )
       : vsTeamWalkover
       ? setVsTeamPlayers(undefined)
@@ -651,7 +648,7 @@ const FixtureTeamsForm = ({
     // filtramos equipo en walkover si el otro equipo tambien esta sancionado
     vsTeamWalkover
       ? setTeamPlayers(
-          teamPlayers.filter(player => player.position_id === 'POR')
+          teamPlayers.filter((player) => player.position_id === 'POR')
         )
       : teamWalkover
       ? setTeamPlayers(undefined)
@@ -760,7 +757,7 @@ const FixtureTeamsForm = ({
   }
 
   const filterModifiedRows = (id: number) => {
-    const filteredData = modifiedRows.filter(team => team.team_id !== id)
+    const filteredData = modifiedRows.filter((team) => team.team_id !== id)
     setModifiedRows(filteredData)
   }
 
@@ -802,8 +799,8 @@ const FixtureTeamsForm = ({
     //filtro los jugadores del equipo seleccionado y agrego los detalles de cada uno
     const result = await Promise.all(
       players
-        .filter(player => player.team_id === id)
-        .map(async players => {
+        .filter((player) => player.team_id === id)
+        .map(async (players) => {
           const redData = await getPlayerRedCard(players.id)
 
           return {
@@ -865,12 +862,12 @@ const FixtureTeamsForm = ({
       <Form {...form}>
         <form
           onSubmit={form.handleSubmit(onSubmit)}
-          className='flex flex-col w-full max-w-xs sm:max-w-[800px] rounded bg-white py-3 px-4 shadow gap-5 justify-center'
+          className="flex flex-col w-full max-w-xs sm:max-w-[800px] rounded bg-white py-3 px-4 shadow gap-5 justify-center"
         >
-          <div className='flex items-center gap-2'>
-            <span className='bg-gradient-to-r from-emerald-300 to-emerald-700 rounded-full p-2 flex items-center justify-center'>
+          <div className="flex items-center gap-2">
+            <span className="bg-gradient-to-r from-emerald-300 to-emerald-700 rounded-full p-2 flex items-center justify-center">
               <Swords
-                className='text-white'
+                className="text-white"
                 size={30}
                 onClick={() =>
                   console.log({
@@ -882,18 +879,18 @@ const FixtureTeamsForm = ({
                 }
               />
             </span>
-            <h1 className='text-xl font-semibold flex items-center justify-between w-full gap-2'>
+            <h1 className="text-xl font-semibold flex items-center justify-between w-full gap-2">
               {title}
               {initialData && (
                 <Button
-                  type='button'
-                  className='ml-auto'
+                  type="button"
+                  className="ml-auto"
                   disabled={loading}
-                  variant='destructive'
-                  size='icon'
+                  variant="destructive"
+                  size="icon"
                   onClick={() => setOpen(true)}
                 >
-                  <Trash className='h-4 w-4' />
+                  <Trash className="h-4 w-4" />
                 </Button>
               )}
             </h1>
@@ -902,36 +899,37 @@ const FixtureTeamsForm = ({
           {/* fixture */}
           <FormField
             control={form.control}
-            name='fixture_id'
+            name="fixture_id"
             render={({ field }) => (
-              <FormItem className='rounded bg-white'>
+              <FormItem className="rounded bg-white">
                 <FormLabel>Fixture</FormLabel>
                 <Popover>
                   <PopoverTrigger asChild>
                     <FormControl>
                       <Button
                         disabled={true}
-                        variant='outline'
-                        role='combobox'
+                        variant="outline"
+                        role="combobox"
                         className={cn(
                           'w-full justify-between',
                           !field.value && 'text-muted-foreground'
                         )}
                       >
                         {field.value
-                          ? fixtures.find(fixture => fixture.id === field.value)
-                              ?.name
+                          ? fixtures.find(
+                              (fixture) => fixture.id === field.value
+                            )?.name
                           : 'Elige un fixture'}
-                        <ChevronsUpDown className='ml-2 h-4 w-4 shrink-0 opacity-50' />
+                        <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                       </Button>
                     </FormControl>
                   </PopoverTrigger>
-                  <PopoverContent className='max-w-[300px] p-0 sm:max-h-[500px] max-h-[300px] overflow-y-auto'>
+                  <PopoverContent className="max-w-[300px] p-0 sm:max-h-[500px] max-h-[300px] overflow-y-auto">
                     <Command>
-                      <CommandInput placeholder='Buscador de fixtures...' />
+                      <CommandInput placeholder="Buscador de fixtures..." />
                       <CommandEmpty>No hay coincidencias.</CommandEmpty>
                       <CommandGroup>
-                        {fixtures.map(fixture => (
+                        {fixtures.map((fixture) => (
                           <CommandItem
                             value={fixture.name!}
                             key={fixture.id}
@@ -961,11 +959,11 @@ const FixtureTeamsForm = ({
             )}
           />
 
-          <div className='grid grid-cols-2 gap-1 overflow-hidden'>
+          <div className="grid grid-cols-2 gap-1 overflow-hidden">
             {/* team 1 */}
             <FormField
               control={form.control}
-              name='team_1'
+              name="team_1"
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Equipo 1</FormLabel>
@@ -974,29 +972,30 @@ const FixtureTeamsForm = ({
                       <FormControl>
                         <Button
                           disabled={initialData ? true : false}
-                          variant='outline'
-                          role='combobox'
+                          variant="outline"
+                          role="combobox"
                           className={cn(
                             'w-full justify-between text-xs',
                             !field.value && 'text-muted-foreground'
                           )}
                         >
                           {field.value
-                            ? teams.find(team => team.id === field.value)?.name
+                            ? teams.find((team) => team.id === field.value)
+                                ?.name
                             : 'Elige un equipo'}
-                          <ChevronsUpDown className='ml-2 h-4 w-4 shrink-0 opacity-50' />
+                          <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                         </Button>
                       </FormControl>
                     </PopoverTrigger>
-                    <PopoverContent className='max-w-[200px] p-0 sm:max-h-[500px] max-h-[300px] overflow-y-auto text-xs'>
+                    <PopoverContent className="max-w-[200px] p-0 sm:max-h-[500px] max-h-[300px] overflow-y-auto text-xs">
                       <Command>
                         <CommandInput
-                          className='text-xs'
-                          placeholder='Buscador de equipos...'
+                          className="text-xs"
+                          placeholder="Buscador de equipos..."
                         />
                         <CommandEmpty>No hay coincidencias.</CommandEmpty>
                         <CommandGroup>
-                          {teams.map(team => (
+                          {teams.map((team) => (
                             <CommandItem
                               className={`text-xs ${
                                 form.getValues('team_2') === team.id
@@ -1016,8 +1015,10 @@ const FixtureTeamsForm = ({
                                 form.setValue('team_1', team.id)
 
                                 const filtered = players
-                                  .filter(player => player.team_id === team.id)
-                                  .map(players => ({
+                                  .filter(
+                                    (player) => player.team_id === team.id
+                                  )
+                                  .map((players) => ({
                                     ...players,
                                     goals: 0,
                                     yellow_cards: 0,
@@ -1043,11 +1044,11 @@ const FixtureTeamsForm = ({
                                     src={team.image_url}
                                     width={30}
                                     height={30}
-                                    alt='team logo'
-                                    className='mr-2'
+                                    alt="team logo"
+                                    className="mr-2"
                                   />
                                 ) : (
-                                  <Shield className='mr-2' size={30} />
+                                  <Shield className="mr-2" size={30} />
                                 )}
                                 {team.name}
                               </>
@@ -1064,7 +1065,7 @@ const FixtureTeamsForm = ({
             {/* team 2 */}
             <FormField
               control={form.control}
-              name='team_2'
+              name="team_2"
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Equipo 2</FormLabel>
@@ -1073,29 +1074,30 @@ const FixtureTeamsForm = ({
                       <FormControl>
                         <Button
                           disabled={initialData ? true : false}
-                          variant='outline'
-                          role='combobox'
+                          variant="outline"
+                          role="combobox"
                           className={cn(
                             'w-full justify-between text-xs',
                             !field.value && 'text-muted-foreground'
                           )}
                         >
                           {field.value
-                            ? teams.find(team => team.id === field.value)?.name
+                            ? teams.find((team) => team.id === field.value)
+                                ?.name
                             : 'Elige un equipo'}
-                          <ChevronsUpDown className='ml-2 h-4 w-4 shrink-0 opacity-50' />
+                          <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                         </Button>
                       </FormControl>
                     </PopoverTrigger>
-                    <PopoverContent className='max-w-[200px] p-0 sm:max-h-[500px] max-h-[300px] overflow-y-auto'>
+                    <PopoverContent className="max-w-[200px] p-0 sm:max-h-[500px] max-h-[300px] overflow-y-auto">
                       <Command>
                         <CommandInput
-                          className='text-xs'
-                          placeholder='Buscador de equipos...'
+                          className="text-xs"
+                          placeholder="Buscador de equipos..."
                         />
                         <CommandEmpty>No hay coincidencias.</CommandEmpty>
                         <CommandGroup>
-                          {teams.map(team => (
+                          {teams.map((team) => (
                             <CommandItem
                               className={`tex t-xs ${
                                 form.getValues('team_1') === team.id
@@ -1115,8 +1117,10 @@ const FixtureTeamsForm = ({
                                 form.setValue('team_2', team.id)
 
                                 const filtered = players
-                                  .filter(player => player.team_id === team.id)
-                                  .map(players => ({
+                                  .filter(
+                                    (player) => player.team_id === team.id
+                                  )
+                                  .map((players) => ({
                                     ...players,
                                     goals: 0,
                                     yellow_cards: 0,
@@ -1142,11 +1146,11 @@ const FixtureTeamsForm = ({
                                     src={team.image_url}
                                     width={30}
                                     height={30}
-                                    alt='team logo'
-                                    className='mr-2'
+                                    alt="team logo"
+                                    className="mr-2"
                                   />
                                 ) : (
-                                  <Shield className='mr-2' size={30} />
+                                  <Shield className="mr-2" size={30} />
                                 )}
                                 {team.name}
                               </>
@@ -1162,11 +1166,11 @@ const FixtureTeamsForm = ({
             />
           </div>
 
-          <div className='flex w-full gap-1'>
+          <div className="flex w-full gap-1">
             {/* Date */}
             <FormField
               control={form.control}
-              name='date'
+              name="date"
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Fecha y Hora</FormLabel>
@@ -1187,15 +1191,15 @@ const FixtureTeamsForm = ({
                           ) : (
                             <span>Elige una fecha</span>
                           )}
-                          <CalendarIcon className='ml-auto h-4 w-4 opacity-50' />
+                          <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
                         </Button>
                       </FormControl>
                     </PopoverTrigger>
-                    <PopoverContent className='w-auto p-0' align='start'>
+                    <PopoverContent className="w-auto p-0" align="start">
                       <Calendar
-                        mode='single'
+                        mode="single"
                         selected={field.value}
-                        onSelect={e => {
+                        onSelect={(e) => {
                           field.onChange(
                             set(e!, {
                               hours: hour.length ? +hour.split(':')[0] : 0,
@@ -1203,20 +1207,20 @@ const FixtureTeamsForm = ({
                             })
                           )
                         }}
-                        disabled={date => date < subDays(new Date(), 1)}
+                        disabled={(date) => date < subDays(new Date(), 1)}
                         initialFocus
                         locale={es}
                       />
-                      <div className='flex justify-center items-center pb-4 px-20'>
+                      <div className="flex justify-center items-center pb-4 px-20">
                         <Input
-                          className='shadow-md text-xl font-semibold'
-                          type='time'
+                          className="shadow-md text-xl font-semibold"
+                          type="time"
                           defaultValue={
                             field.value
                               ? format(field.value, 'HH:mm')
                               : undefined
                           }
-                          onChange={e => {
+                          onChange={(e) => {
                             console.log(field.value)
                             setHour(e.target.value) // keeps the time when date changes
                             field.onChange(
@@ -1237,9 +1241,9 @@ const FixtureTeamsForm = ({
             {/* Cancha nro */}
             <FormField
               control={form.control}
-              name='cancha_nro'
+              name="cancha_nro"
               render={({ field }) => (
-                <FormItem className='rounded bg-white w-[75px] shrink-0'>
+                <FormItem className="rounded bg-white w-[75px] shrink-0">
                   <FormLabel>Cancha N°</FormLabel>
                   <FormControl>
                     <Input
@@ -1248,10 +1252,10 @@ const FixtureTeamsForm = ({
                           ? ''
                           : 'text-muted-foreground'
                       }`}
-                      type='number'
+                      type="number"
                       min={1}
                       {...field}
-                      onClick={e => e.currentTarget.select()}
+                      onClick={(e) => e.currentTarget.select()}
                     />
                   </FormControl>
                   <FormMessage />
@@ -1261,7 +1265,7 @@ const FixtureTeamsForm = ({
           </div>
 
           {/* Table */}
-          <div className='w-full relative overflow-hidden'>
+          <div className="w-full relative overflow-hidden">
             {playersTeam_1 && (
               <>
                 <div
@@ -1279,8 +1283,8 @@ const FixtureTeamsForm = ({
                           variant={'outline'}
                           size={'sm'}
                           pressed={toggle1}
-                          className='left-0 top-0 h-5 text-muted-foreground'
-                          onPressedChange={e => {
+                          className="left-0 top-0 h-5 text-muted-foreground"
+                          onPressedChange={(e) => {
                             setToggle1(!toggle1)
                             setModifiedRows([])
                             hideTeamsToggle_1(e, walkoverTeam2)
@@ -1293,7 +1297,7 @@ const FixtureTeamsForm = ({
                       <Separator />
                     </>
                   ) : (
-                    <p className='bg-pink-600 px-2 py-1 text-white rounded relative top-3 animate-pulse'>
+                    <p className="bg-pink-600 px-2 py-1 text-white rounded relative top-3 animate-pulse">
                       Equipo aún no tiene jugadores cargados
                     </p>
                   )}
@@ -1309,7 +1313,7 @@ const FixtureTeamsForm = ({
             )}
           </div>
 
-          <div className='w-full relative overflow-hidden'>
+          <div className="w-full relative overflow-hidden">
             {playersTeam_2 && (
               <>
                 <div
@@ -1327,8 +1331,8 @@ const FixtureTeamsForm = ({
                           variant={'outline'}
                           size={'sm'}
                           pressed={toggle2}
-                          className='left-0 top-0 h-5 text-muted-foreground'
-                          onPressedChange={e => {
+                          className="left-0 top-0 h-5 text-muted-foreground"
+                          onPressedChange={(e) => {
                             setToggle2(!toggle2)
                             setModifiedRows([])
                             hideTeamsToggle_2(e, walkoverTeam1)
@@ -1341,7 +1345,7 @@ const FixtureTeamsForm = ({
                       <Separator />
                     </>
                   ) : (
-                    <p className='bg-pink-600 px-2 py-1 text-white rounded relative top-3 animate-pulse'>
+                    <p className="bg-pink-600 px-2 py-1 text-white rounded relative top-3 animate-pulse">
                       Equipo aún no tiene jugadores cargados
                     </p>
                   )}
@@ -1358,25 +1362,25 @@ const FixtureTeamsForm = ({
           </div>
 
           {/* Resultado */}
-          <div className='flex justify-center items-center overflow-hidden w-full'>
+          <div className="flex justify-center items-center overflow-hidden w-full">
             <div
               className={`w-full flex justify-center items-center gap-2 text-xs relative`}
             >
               {getTeamLogo(playersTeam_1 ?? playersTeam_1, 1)}
             </div>
-            <h2 className='text-4xl text-muted-foreground text-center flex-none'>
+            <h2 className="text-4xl text-muted-foreground text-center flex-none">
               {playersTeam_1?.length &&
                 goals !== undefined &&
-                goals.filter(item => item.id === playersTeam_1[0].team_id!)
+                goals.filter((item) => item.id === playersTeam_1[0].team_id!)
                   .length &&
-                goals.filter(item => item.id === playersTeam_1[0].team_id!)[0]
+                goals.filter((item) => item.id === playersTeam_1[0].team_id!)[0]
                   .goals}
               -
               {playersTeam_2?.length &&
                 goals !== undefined &&
-                goals.filter(item => item.id === playersTeam_2[0].team_id!)
+                goals.filter((item) => item.id === playersTeam_2[0].team_id!)
                   .length &&
-                goals.filter(item => item.id === playersTeam_2[0].team_id!)[0]
+                goals.filter((item) => item.id === playersTeam_2[0].team_id!)[0]
                   .goals}
             </h2>
             <div
@@ -1389,9 +1393,9 @@ const FixtureTeamsForm = ({
           {/* Goals */}
           <FormField
             control={form.control}
-            name='goals'
+            name="goals"
             render={({ field }) => (
-              <FormItem className='rounded bg-white'>
+              <FormItem className="rounded bg-white">
                 <FormMessage />
               </FormItem>
             )}
@@ -1400,19 +1404,19 @@ const FixtureTeamsForm = ({
           {/* Walkovers */}
           <FormField
             control={form.control}
-            name='walkover_team_1'
+            name="walkover_team_1"
             render={({ field }) => (
-              <FormItem className='rounded bg-white w-full text-center'>
+              <FormItem className="rounded bg-white w-full text-center">
                 <FormMessage />
               </FormItem>
             )}
           />
 
-          <div className='w-full'>
+          <div className="w-full">
             <Button
-              type='submit'
+              type="submit"
               variant={'default'}
-              className='w-full'
+              className="w-full"
               disabled={loading}
               onClick={() => {
                 form.setValue('goals', goals!)
