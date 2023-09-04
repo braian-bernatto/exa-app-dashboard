@@ -4,6 +4,7 @@ import CellAction from './cell-action'
 import CellDate from './cell-date'
 import CellTeamOneImage from './cell-team-one-image'
 import CellTeamTwoImage from './cell-team-two-image'
+import CellCancha from './cell-cancha'
 
 export type FixtureDetailsColumn =
   | {
@@ -23,7 +24,8 @@ export const columns: ColumnDef<FixtureDetailsColumn>[] = [
   },
   {
     accessorKey: 'cancha_nro',
-    header: 'N° Cancha'
+    header: 'N° Cancha',
+    cell: ({ row }) => <CellCancha data={row.original} />
   },
   {
     accessorKey: 'team_1',
