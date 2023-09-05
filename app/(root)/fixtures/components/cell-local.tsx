@@ -1,4 +1,4 @@
-import { LocateFixed, MapPin, MapPinOff } from 'lucide-react'
+import { MapPin, MapPinOff } from 'lucide-react'
 import { FixtureColumn } from './columns'
 
 interface CellLocalProps {
@@ -7,16 +7,16 @@ interface CellLocalProps {
 
 const CellLocal = ({ data }: CellLocalProps) => {
   return (
-    <span className="flex gap-2 items-center">
+    <span className='flex gap-2 items-center'>
       {data.locations ? (
         <>
-          <span className="flex-none">
-            <MapPin className="text-muted-foreground" />
+          <span className='flex-none'>
+            <MapPin className='text-muted-foreground' />
           </span>
           {data.locations.name}
         </>
       ) : (
-        <MapPinOff className="text-muted-foreground" />
+        <MapPinOff className='text-muted-foreground' />
       )}
     </span>
   )

@@ -544,6 +544,12 @@ export interface Database {
         }
         Returns: boolean
       }
+      get_fixture_details: {
+        Args: {
+          fixture: number
+        }
+        Returns: Json
+      }
       get_goals: {
         Args: {
           fixture: number
