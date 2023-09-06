@@ -8,7 +8,6 @@ import { DataTable } from '@/components/ui/data-table'
 import { FixtureDetailsColumn, columns } from './columns'
 import FixtureForm, { FixtureType } from './FixtureForm'
 import { Locations, Torneos } from '@/types'
-import Spinner from '@/components/Spinner'
 
 interface FixtureDetailsClientProps {
   torneos: Torneos[]
@@ -35,8 +34,7 @@ const FixtureDetailsClient = ({
             <Button
               onClick={() =>
                 router.push(`/fixtures/${params.fixtureId}/agregar`)
-              }
-            >
+              }>
               <Plus className='mr-2 h-4 w-4' /> Agregar Versus
             </Button>
           </div>

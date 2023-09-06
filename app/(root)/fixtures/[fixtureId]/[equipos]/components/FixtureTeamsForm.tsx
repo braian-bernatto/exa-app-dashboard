@@ -49,6 +49,8 @@ import { toast } from 'react-hot-toast'
 import { FixtureDetailsColumn } from '@/app/(root)/fixtures/[fixtureId]/components/columns'
 import { AlertModal } from '@/components/modals/AlertModal'
 import Spinner from '@/components/Spinner'
+import { Switch } from '@/components/ui/switch'
+import { Label } from '@/components/ui/label'
 
 interface FixtureTeamsFormProps {
   initialData: FixtureDetailsColumn | undefined
@@ -91,6 +93,7 @@ const FixtureTeamsForm = ({
   const [walkoverTeam2, setWalkoverTeam2] = useState(false)
 
   const [hour, setHour] = useState('')
+  const [allowPreviousDates, setAllowPreviousDates] = useState(false)
   const [goals, setGoals] = useState<
     { id: number; goals: number }[] | undefined
   >(undefined)
@@ -1157,101 +1160,120 @@ const FixtureTeamsForm = ({
             />
           </div>
 
-          <div className='flex w-full gap-1'>
-            {/* Date */}
-            <FormField
-              control={form.control}
-              name='date'
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Fecha y Hora</FormLabel>
-                  <Popover>
-                    <PopoverTrigger asChild>
-                      <FormControl>
-                        <Button
-                          variant={'outline'}
-                          className={cn(
-                            'w-full pl-3 text-left font-normal',
-                            !field.value && 'text-muted-foreground'
-                          )}>
-                          {field.value ? (
-                            format(field.value!, 'PP | HH:mm', {
-                              locale: es
-                            })
-                          ) : (
-                            <span>Elige una fecha</span>
-                          )}
-                          <CalendarIcon className='ml-auto h-4 w-4 opacity-50' />
-                        </Button>
-                      </FormControl>
-                    </PopoverTrigger>
-                    <PopoverContent className='w-auto p-0' align='start'>
-                      <Calendar
-                        mode='single'
-                        selected={field.value}
-                        onSelect={e => {
-                          field.onChange(
-                            set(e!, {
-                              hours: hour.length ? +hour.split(':')[0] : 0,
-                              minutes: hour.length ? +hour.split(':')[1] : 0
-                            })
-                          )
-                        }}
-                        disabled={date => date < subDays(new Date(), 1)}
-                        initialFocus
-                        locale={es}
-                      />
-                      <div className='flex justify-center items-center pb-4 px-20'>
-                        <Input
-                          className='shadow-md text-xl font-semibold'
-                          type='time'
-                          defaultValue={
-                            field.value
-                              ? format(field.value, 'HH:mm')
-                              : undefined
-                          }
-                          onChange={e => {
-                            console.log(field.value)
-                            setHour(e.target.value) // keeps the time when date changes
+          <div className='grid sm:grid-cols-2 w-full gap-4 items-center'>
+            <div className='flex gap-1'>
+              {/* Date */}
+              <FormField
+                control={form.control}
+                name='date'
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Fecha y Hora</FormLabel>
+                    <Popover>
+                      <PopoverTrigger asChild>
+                        <FormControl>
+                          <Button
+                            variant={'outline'}
+                            className={cn(
+                              'w-full pl-3 text-left font-normal',
+                              !field.value && 'text-muted-foreground'
+                            )}>
+                            {field.value ? (
+                              format(field.value!, 'PP | HH:mm', {
+                                locale: es
+                              })
+                            ) : (
+                              <span>Elige una fecha</span>
+                            )}
+                            <CalendarIcon className='ml-auto h-4 w-4 opacity-50' />
+                          </Button>
+                        </FormControl>
+                      </PopoverTrigger>
+                      <PopoverContent className='w-auto p-0' align='start'>
+                        <Calendar
+                          mode='single'
+                          selected={field.value}
+                          onSelect={e => {
                             field.onChange(
-                              set(field.value ? field.value : new Date(), {
-                                hours: +e.target.value.split(':')[0],
-                                minutes: +e.target.value.split(':')[1]
+                              set(e!, {
+                                hours: hour.length ? +hour.split(':')[0] : 0,
+                                minutes: hour.length ? +hour.split(':')[1] : 0
                               })
                             )
                           }}
+                          disabled={
+                            allowPreviousDates
+                              ? undefined
+                              : date => date < subDays(new Date(), 1)
+                          }
+                          initialFocus
+                          locale={es}
                         />
-                      </div>
-                    </PopoverContent>
-                  </Popover>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            {/* Cancha nro */}
-            <FormField
-              control={form.control}
-              name='cancha_nro'
-              render={({ field }) => (
-                <FormItem className='rounded bg-white w-[75px] shrink-0'>
-                  <FormLabel>Cancha N°</FormLabel>
-                  <FormControl>
-                    <Input
-                      className={`font-semibold text-center ${
-                        field.value !== undefined && field.value > 0
-                          ? ''
-                          : 'text-muted-foreground'
-                      }`}
-                      type='number'
-                      min={1}
-                      {...field}
-                      onClick={e => e.currentTarget.select()}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+                        <div className='flex justify-center items-center pb-4 px-20'>
+                          <Input
+                            className='shadow-md text-xl font-semibold'
+                            type='time'
+                            defaultValue={
+                              field.value
+                                ? format(field.value, 'HH:mm')
+                                : undefined
+                            }
+                            onChange={e => {
+                              console.log(field.value)
+                              setHour(e.target.value) // keeps the time when date changes
+                              field.onChange(
+                                set(field.value ? field.value : new Date(), {
+                                  hours: +e.target.value.split(':')[0],
+                                  minutes: +e.target.value.split(':')[1]
+                                })
+                              )
+                            }}
+                          />
+                        </div>
+                      </PopoverContent>
+                    </Popover>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              {/* Cancha nro */}
+              <FormField
+                control={form.control}
+                name='cancha_nro'
+                render={({ field }) => (
+                  <FormItem className='rounded bg-white w-[75px] shrink-0'>
+                    <FormLabel>Cancha N°</FormLabel>
+                    <FormControl>
+                      <Input
+                        className={`font-semibold text-center ${
+                          field.value !== undefined && field.value > 0
+                            ? ''
+                            : 'text-muted-foreground'
+                        }`}
+                        type='number'
+                        min={1}
+                        {...field}
+                        onClick={e => e.currentTarget.select()}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+            {/* Switch Calendar */}
+            <div className='flex items-center justify-center space-x-2'>
+              <Switch
+                id='enable-all-dates'
+                checked={allowPreviousDates}
+                onCheckedChange={() =>
+                  setAllowPreviousDates(!allowPreviousDates)
+                }
+              />
+              <Label htmlFor='enable-all-dates'>
+                Habilitar Fechas Anteriores
+              </Label>
+            </div>
           </div>
 
           {/* Table */}

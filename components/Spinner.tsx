@@ -7,7 +7,7 @@ const Spinner = () => {
       <span className='absolute w-full h-full bg-white opacity-50'></span>
       <div className='relative flex items-center justify-center w-12 h-12 bg-white border rounded-full'>
         <div className='w-12 h-12 rounded-full absolute border-4 border-solid border-gray-200'></div>
-        <Trophy className='text-gray-400 drop-shadow' />
+        <Trophy className='text-gray-400 drop-shadow animate animate-pulse' />
         <div className='w-12 h-12 rounded-full animate-spin absolute border-4 border-solid border-emerald-400 border-t-transparent shadow-md'></div>
       </div>
     </div>

@@ -7,9 +7,9 @@ interface CellCanchaProps {
 
 const CellCancha = ({ data }: CellCanchaProps) => {
   return (
-    <span className="flex gap-2 items-center">
+    <span className='flex gap-2 items-center'>
       {data.cancha_nro}
-      <LocateFixed width={18} className="text-muted-foreground" />
+      <LocateFixed width={18} className='text-muted-foreground' />
     </span>
   )
 }
