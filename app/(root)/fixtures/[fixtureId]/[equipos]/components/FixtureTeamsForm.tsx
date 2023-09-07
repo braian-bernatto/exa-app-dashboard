@@ -31,7 +31,7 @@ import {
 } from '../../../../../../components/ui/popover'
 import { cn } from '@/lib/utils'
 import { Calendar } from '../../../../../../components/ui/calendar'
-import { format, set, subDays } from 'date-fns'
+import { format, isValid, set, subDays } from 'date-fns'
 import { es } from 'date-fns/esm/locale'
 import {
   Command,
@@ -75,13 +75,6 @@ const FixtureTeamsForm = ({
   const router = useRouter()
   const params = useParams()
 
-  if (initialData) {
-    initialData = {
-      ...initialData,
-      date: new Date(initialData.date)
-    }
-  }
-
   const { supabase } = useSupabase()
   const [loading, setLoading] = useState(false)
   const [open, setOpen] = useState(false)
@@ -114,6 +107,13 @@ const FixtureTeamsForm = ({
   const title = initialData ? 'Editar Versus' : 'Agregar Versus'
   const toastMessage = initialData ? 'Versus modificado' : 'Versus agregado'
   const action = initialData ? 'Modificar' : 'Agregar'
+
+  if (initialData) {
+    initialData = {
+      ...initialData,
+      date: new Date(initialData.date)
+    }
+  }
 
   const formSchema = z
     .object({
@@ -846,6 +846,7 @@ const FixtureTeamsForm = ({
   useEffect(() => {
     if (initialData) {
       setPlayers()
+      setHour(format(initialData.date, 'HH:mm'))
     }
   }, [])
 
@@ -879,6 +880,7 @@ const FixtureTeamsForm = ({
                 size={30}
                 onClick={() =>
                   console.log({
+                    hour,
                     modifiedRows,
                     walkoverTeam1,
                     walkoverTeam2,
@@ -1219,14 +1221,15 @@ const FixtureTeamsForm = ({
                                 : undefined
                             }
                             onChange={e => {
-                              console.log(field.value)
-                              setHour(e.target.value) // keeps the time when date changes
-                              field.onChange(
-                                set(field.value ? field.value : new Date(), {
-                                  hours: +e.target.value.split(':')[0],
-                                  minutes: +e.target.value.split(':')[1]
-                                })
-                              )
+                              if (e.target.value) {
+                                setHour(e.target.value) // keeps the time when date changes
+                                field.onChange(
+                                  set(field.value ? field.value : new Date(), {
+                                    hours: +e.target.value.split(':')[0],
+                                    minutes: +e.target.value.split(':')[1]
+                                  })
+                                )
+                              }
                             }}
                           />
                         </div>
