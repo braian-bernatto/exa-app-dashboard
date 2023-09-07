@@ -557,6 +557,12 @@ export interface Database {
         }
         Returns: number
       }
+      get_team_ids_fixture: {
+        Args: {
+          fixture: number
+        }
+        Returns: number[]
+      }
     }
     Enums: {
       continents:

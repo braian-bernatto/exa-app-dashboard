@@ -85,6 +85,8 @@ const FixtureTeamsForm = ({
   const [walkoverTeam1, setWalkoverTeam1] = useState(false)
   const [walkoverTeam2, setWalkoverTeam2] = useState(false)
 
+  const [teamIdsInFixture, setTeamIdsInFixture] = useState<number[]>([])
+
   const [hour, setHour] = useState('')
   const [allowPreviousDates, setAllowPreviousDates] = useState(false)
   const [goals, setGoals] = useState<
@@ -711,6 +713,17 @@ const FixtureTeamsForm = ({
     return false
   }
 
+  const getTeamIdsFixture = async () => {
+    const { data } = await supabase.rpc('get_team_ids_fixture', {
+      fixture: +params.fixtureId
+    })
+    if (data?.length) {
+      setTeamIdsInFixture(data)
+      return
+    }
+    setTeamIdsInFixture([])
+  }
+
   const countGoals = () => {
     const totalCount = modifiedRows.reduce((prev, curr) => {
       // Inicia el array con el primer item
@@ -847,6 +860,8 @@ const FixtureTeamsForm = ({
     if (initialData) {
       setPlayers()
       setHour(format(initialData.date, 'HH:mm'))
+    } else {
+      getTeamIdsFixture()
     }
   }, [])
 
@@ -1002,11 +1017,15 @@ const FixtureTeamsForm = ({
                           {teams.map(team => (
                             <CommandItem
                               className={`text-xs ${
-                                form.getValues('team_2') === team.id
+                                form.getValues('team_2') === team.id ||
+                                teamIdsInFixture.includes(team.id)
                                   ? 'opacity-50 bg-slate-50'
                                   : ''
                               }`}
-                              disabled={form.getValues('team_2') === team.id}
+                              disabled={
+                                form.getValues('team_2') === team.id ||
+                                teamIdsInFixture.includes(team.id)
+                              }
                               value={team.name!}
                               key={team.id}
                               onSelect={() => {
@@ -1099,11 +1118,15 @@ const FixtureTeamsForm = ({
                           {teams.map(team => (
                             <CommandItem
                               className={`tex t-xs ${
-                                form.getValues('team_1') === team.id
+                                form.getValues('team_1') === team.id ||
+                                teamIdsInFixture.includes(team.id)
                                   ? 'opacity-50 bg-slate-50'
                                   : ''
                               }`}
-                              disabled={form.getValues('team_1') === team.id}
+                              disabled={
+                                form.getValues('team_1') === team.id ||
+                                teamIdsInFixture.includes(team.id)
+                              }
                               value={team.name!}
                               key={team.id}
                               onSelect={() => {
