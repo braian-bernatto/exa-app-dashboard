@@ -1196,12 +1196,14 @@ const FixtureTeamsForm = ({
                           mode='single'
                           selected={field.value}
                           onSelect={e => {
-                            field.onChange(
-                              set(e!, {
-                                hours: hour.length ? +hour.split(':')[0] : 0,
-                                minutes: hour.length ? +hour.split(':')[1] : 0
-                              })
-                            )
+                            if (e) {
+                              field.onChange(
+                                set(e, {
+                                  hours: hour.length ? +hour.split(':')[0] : 0,
+                                  minutes: hour.length ? +hour.split(':')[1] : 0
+                                })
+                              )
+                            }
                           }}
                           disabled={
                             allowPreviousDates
