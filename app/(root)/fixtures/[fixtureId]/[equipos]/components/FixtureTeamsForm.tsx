@@ -1,4 +1,5 @@
 'use client'
+
 import { useSupabase } from '@/providers/SupabaseProvider'
 import { Fixtures, Players, Teams } from '@/types'
 import { useEffect, useState } from 'react'
@@ -31,7 +32,7 @@ import {
 } from '../../../../../../components/ui/popover'
 import { cn } from '@/lib/utils'
 import { Calendar } from '../../../../../../components/ui/calendar'
-import { format, isValid, set, subDays } from 'date-fns'
+import { format, set, subDays } from 'date-fns'
 import { es } from 'date-fns/esm/locale'
 import {
   Command,
@@ -233,6 +234,209 @@ const FixtureTeamsForm = ({
     }
   })
 
+  const getTeamLogo = (filteredPlayers?: Players[], teamNumber?: number) => {
+    if (filteredPlayers && filteredPlayers.length > 0) {
+      const url = teams.filter(
+        team => team.id === filteredPlayers[0].team_id
+      )[0].image_url
+
+      if (url) {
+        return <Image src={url} width={50} height={50} alt='team logo' />
+      }
+    }
+    return (
+      <div className='flex items-center justify-center relative'>
+        <Shield strokeWidth={1} size={50} className='bg-white' />
+        <h2 className='text-xl font-semibold absolute text-emerald-700'>
+          {teamNumber}
+        </h2>
+      </div>
+    )
+  }
+
+  const getPlayerGoals = async (id: number) => {
+    const { data } = await supabase
+      .from('goals')
+      .select()
+      .eq('fixture_id', +params.fixtureId)
+      .eq('player_id', id)
+
+    if (data?.length) {
+      return data[0].quantity
+    }
+    return 0
+  }
+
+  const getPlayerYellowCards = async (id: number) => {
+    const { data } = await supabase
+      .from('yellow_cards')
+      .select()
+      .eq('fixture_id', +params.fixtureId)
+      .eq('player_id', id)
+
+    if (data?.length) {
+      return data[0].quantity
+    }
+    return 0
+  }
+
+  const getPlayerRedCard = async (id: number) => {
+    const { data } = await supabase
+      .from('red_cards')
+      .select()
+      .eq('fixture_id', +params.fixtureId)
+      .eq('player_id', id)
+
+    if (data?.length) {
+      return data[0]
+    }
+    return false
+  }
+
+  const getTeamWalkover = async (id: number) => {
+    const { data } = await supabase
+      .from('walkover')
+      .select()
+      .eq('fixture_id', +params.fixtureId)
+      .eq('team_id', id)
+
+    if (data?.length) {
+      return true
+    }
+    return false
+  }
+
+  const getTeamIdsFixture = async () => {
+    const { data } = await supabase.rpc('get_team_ids_fixture', {
+      fixture: +params.fixtureId
+    })
+    if (data?.length) {
+      setTeamIdsInFixture(data)
+      return
+    }
+    setTeamIdsInFixture([])
+  }
+
+  const getPlayersDetails = async (id: number) => {
+    //filtro los jugadores del equipo seleccionado y agrego los detalles de cada uno
+    const result = await Promise.all(
+      players
+        .filter(player => player.team_id === id)
+        .map(async players => {
+          const redData = await getPlayerRedCard(players.id)
+
+          return {
+            ...players,
+            goals: await getPlayerGoals(players.id),
+            yellow_cards: await getPlayerYellowCards(players.id),
+            red_cards: redData ? true : false,
+            motivo: redData ? redData.motivo! : ''
+          }
+        })
+    )
+
+    return result
+  }
+
+  const setPlayers = async () => {
+    setLoading(true)
+    const players_1 = await getPlayersDetails(initialData.team_1)
+    const players_2 = await getPlayersDetails(initialData.team_2)
+    setModifiedRows([...players_1, ...players_2])
+    setPlayersTeam_1(players_1)
+    setPlayersTeam_2(players_2)
+    setFilteredPlayersTeam_1(players_1)
+    setFilteredPlayersTeam_2(players_2)
+    setLoading(false)
+  }
+
+  const setTeamWalkover = async () => {
+    setLoading(true)
+    const team_1 = await getTeamWalkover(initialData.team_1)
+    const team_2 = await getTeamWalkover(initialData.team_2)
+    setToggle1(team_1)
+    setToggle2(team_2)
+    hideTeamsToggle_1(team_1, team_2)
+    hideTeamsToggle_2(team_2, team_1)
+    setLoading(false)
+  }
+
+  const countGoals = () => {
+    const totalCount = modifiedRows.reduce((prev, curr) => {
+      // Inicia el array con el primer item
+      if (!prev.length) {
+        prev.push({
+          id: curr.team_id,
+          goals: +curr.goals
+        })
+        return prev
+      }
+
+      // Busca si existe el item en el array y suma los goles
+      const teamIndex = prev.findIndex(
+        (team: any) => +team.id === +curr.team_id
+      )
+
+      if (teamIndex !== -1) {
+        const filteredList = prev.filter(
+          (team: any) => team.id !== curr.team_id
+        )
+        const foundItem = prev.filter((team: any) => team.id === curr.team_id)
+
+        prev = [
+          ...filteredList,
+          { id: foundItem[0].id, goals: +foundItem[0].goals + +curr.goals }
+        ]
+        return prev
+      } else {
+        // Si no encontro el dato en el array entonces se agrega como nuevo
+        prev = [
+          ...prev,
+          {
+            id: curr.team_id,
+            goals: +curr.goals
+          }
+        ]
+      }
+
+      return prev
+    }, [])
+
+    setGoals(totalCount)
+  }
+
+  const clearWalkover = () => {
+    setWalkoverTeam1(false)
+    setWalkoverTeam2(false)
+  }
+
+  const updatePlayersList = (
+    teamWalkover: boolean,
+    teamPlayers: PlayersFixture[],
+    setTeamPlayers: (list: PlayersFixture[] | undefined) => void,
+    vsTeamWalkover: boolean,
+    vsTeamPlayers: PlayersFixture[],
+    setVsTeamPlayers: (list: PlayersFixture[] | undefined) => void
+  ) => {
+    // filtramos los jugadores del equipo contrario
+    teamWalkover
+      ? setVsTeamPlayers(
+          vsTeamPlayers.filter(player => player.position_id === 'POR')
+        )
+      : vsTeamWalkover
+      ? setVsTeamPlayers(undefined)
+      : setVsTeamPlayers(vsTeamPlayers)
+
+    // filtramos equipo en walkover si el otro equipo tambien esta sancionado
+    vsTeamWalkover
+      ? setTeamPlayers(
+          teamPlayers.filter(player => player.position_id === 'POR')
+        )
+      : teamWalkover
+      ? setTeamPlayers(undefined)
+      : setTeamPlayers(teamPlayers)
+  }
+
   const addModifiedRows = (data: any) => {
     let exists = false
 
@@ -253,26 +457,44 @@ const FixtureTeamsForm = ({
     }
   }
 
-  //test
-  const test = () => {
-    const notGoalsArray = modifiedRows.filter(player => player.goals === 0)
-
-    const notYellowCardsArray = modifiedRows.filter(
-      player => player.yellow_cards === 0
-    )
-
-    const notRedCardsArray = modifiedRows.filter(player => !player.red_cards)
-
-    const goalsArray = modifiedRows.filter(player => player.goals > 0)
-
-    console.log({
-      notGoalsArray,
-      notYellowCardsArray,
-      notRedCardsArray,
-      goalsArray
-    })
+  const filterModifiedRows = (id: number) => {
+    const filteredData = modifiedRows.filter(team => team.team_id !== id)
+    setModifiedRows(filteredData)
   }
-  //test
+
+  const hideTeamsToggle_1 = (e: boolean, vs: boolean) => {
+    if (playersTeam_1) {
+      // agregamos el id del equipo en el array de walkover
+      setWalkoverTeam1(e)
+
+      // filtramos el listado del otro equipo a solo porteros
+      updatePlayersList(
+        e,
+        playersTeam_1,
+        setFilteredPlayersTeam_1,
+        vs,
+        playersTeam_2!,
+        setFilteredPlayersTeam_2
+      )
+    }
+  }
+
+  const hideTeamsToggle_2 = (e: boolean, vs: boolean) => {
+    if (playersTeam_2) {
+      // agregamos el id del equipo en el array de walkover
+      setWalkoverTeam2(e)
+
+      // filtramos el listado del otro equipo a solo porteros
+      updatePlayersList(
+        e,
+        playersTeam_2,
+        setFilteredPlayersTeam_2,
+        vs,
+        playersTeam_1!,
+        setFilteredPlayersTeam_1
+      )
+    }
+  }
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     try {
@@ -645,248 +867,6 @@ const FixtureTeamsForm = ({
     }
   }
 
-  const getTeamLogo = (filteredPlayers?: Players[], teamNumber?: number) => {
-    if (filteredPlayers && filteredPlayers.length > 0) {
-      const url = teams.filter(
-        team => team.id === filteredPlayers[0].team_id
-      )[0].image_url
-
-      if (url) {
-        return <Image src={url} width={50} height={50} alt='team logo' />
-      }
-    }
-    return (
-      <div className='flex items-center justify-center relative'>
-        <Shield strokeWidth={1} size={50} className='bg-white' />
-        <h2 className='text-xl font-semibold absolute text-emerald-700'>
-          {teamNumber}
-        </h2>
-      </div>
-    )
-  }
-
-  const updatePlayersList = (
-    teamWalkover: boolean,
-    teamPlayers: PlayersFixture[],
-    setTeamPlayers: (list: PlayersFixture[] | undefined) => void,
-    vsTeamWalkover: boolean,
-    vsTeamPlayers: PlayersFixture[],
-    setVsTeamPlayers: (list: PlayersFixture[] | undefined) => void
-  ) => {
-    // filtramos los jugadores del equipo contrario
-    teamWalkover
-      ? setVsTeamPlayers(
-          vsTeamPlayers.filter(player => player.position_id === 'POR')
-        )
-      : vsTeamWalkover
-      ? setVsTeamPlayers(undefined)
-      : setVsTeamPlayers(vsTeamPlayers)
-
-    // filtramos equipo en walkover si el otro equipo tambien esta sancionado
-    vsTeamWalkover
-      ? setTeamPlayers(
-          teamPlayers.filter(player => player.position_id === 'POR')
-        )
-      : teamWalkover
-      ? setTeamPlayers(undefined)
-      : setTeamPlayers(teamPlayers)
-  }
-
-  const getPlayerGoals = async (id: number) => {
-    const { data } = await supabase
-      .from('goals')
-      .select()
-      .eq('fixture_id', +params.fixtureId)
-      .eq('player_id', id)
-
-    if (data?.length) {
-      return data[0].quantity
-    }
-    return 0
-  }
-
-  const getPlayerYellowCards = async (id: number) => {
-    const { data } = await supabase
-      .from('yellow_cards')
-      .select()
-      .eq('fixture_id', +params.fixtureId)
-      .eq('player_id', id)
-
-    if (data?.length) {
-      return data[0].quantity
-    }
-    return 0
-  }
-
-  const getPlayerRedCard = async (id: number) => {
-    const { data } = await supabase
-      .from('red_cards')
-      .select()
-      .eq('fixture_id', +params.fixtureId)
-      .eq('player_id', id)
-
-    if (data?.length) {
-      return data[0]
-    }
-    return false
-  }
-
-  const getTeamWalkover = async (id: number) => {
-    const { data } = await supabase
-      .from('walkover')
-      .select()
-      .eq('fixture_id', +params.fixtureId)
-      .eq('team_id', id)
-
-    if (data?.length) {
-      return true
-    }
-    return false
-  }
-
-  const getTeamIdsFixture = async () => {
-    const { data } = await supabase.rpc('get_team_ids_fixture', {
-      fixture: +params.fixtureId
-    })
-    if (data?.length) {
-      setTeamIdsInFixture(data)
-      return
-    }
-    setTeamIdsInFixture([])
-  }
-
-  const countGoals = () => {
-    const totalCount = modifiedRows.reduce((prev, curr) => {
-      // Inicia el array con el primer item
-      if (!prev.length) {
-        prev.push({
-          id: curr.team_id,
-          goals: +curr.goals
-        })
-        return prev
-      }
-
-      // Busca si existe el item en el array y suma los goles
-      const teamIndex = prev.findIndex(
-        (team: any) => +team.id === +curr.team_id
-      )
-
-      if (teamIndex !== -1) {
-        const filteredList = prev.filter(
-          (team: any) => team.id !== curr.team_id
-        )
-        const foundItem = prev.filter((team: any) => team.id === curr.team_id)
-
-        prev = [
-          ...filteredList,
-          { id: foundItem[0].id, goals: +foundItem[0].goals + +curr.goals }
-        ]
-        return prev
-      } else {
-        // Si no encontro el dato en el array entonces se agrega como nuevo
-        prev = [
-          ...prev,
-          {
-            id: curr.team_id,
-            goals: +curr.goals
-          }
-        ]
-      }
-
-      return prev
-    }, [])
-
-    setGoals(totalCount)
-  }
-
-  const clearWalkover = () => {
-    setWalkoverTeam1(false)
-    setWalkoverTeam2(false)
-  }
-
-  const filterModifiedRows = (id: number) => {
-    const filteredData = modifiedRows.filter(team => team.team_id !== id)
-    setModifiedRows(filteredData)
-  }
-
-  const hideTeamsToggle_1 = (e: boolean, vs: boolean) => {
-    if (playersTeam_1) {
-      // agregamos el id del equipo en el array de walkover
-      setWalkoverTeam1(e)
-
-      // filtramos el listado del otro equipo a solo porteros
-      updatePlayersList(
-        e,
-        playersTeam_1,
-        setFilteredPlayersTeam_1,
-        vs,
-        playersTeam_2!,
-        setFilteredPlayersTeam_2
-      )
-    }
-  }
-
-  const hideTeamsToggle_2 = (e: boolean, vs: boolean) => {
-    if (playersTeam_2) {
-      // agregamos el id del equipo en el array de walkover
-      setWalkoverTeam2(e)
-
-      // filtramos el listado del otro equipo a solo porteros
-      updatePlayersList(
-        e,
-        playersTeam_2,
-        setFilteredPlayersTeam_2,
-        vs,
-        playersTeam_1!,
-        setFilteredPlayersTeam_1
-      )
-    }
-  }
-
-  const getPlayersDetails = async (id: number) => {
-    //filtro los jugadores del equipo seleccionado y agrego los detalles de cada uno
-    const result = await Promise.all(
-      players
-        .filter(player => player.team_id === id)
-        .map(async players => {
-          const redData = await getPlayerRedCard(players.id)
-
-          return {
-            ...players,
-            goals: await getPlayerGoals(players.id),
-            yellow_cards: await getPlayerYellowCards(players.id),
-            red_cards: redData ? true : false,
-            motivo: redData ? redData.motivo! : ''
-          }
-        })
-    )
-
-    return result
-  }
-
-  const setPlayers = async () => {
-    setLoading(true)
-    const players_1 = await getPlayersDetails(initialData.team_1)
-    const players_2 = await getPlayersDetails(initialData.team_2)
-    setModifiedRows([...players_1, ...players_2])
-    setPlayersTeam_1(players_1)
-    setPlayersTeam_2(players_2)
-    setFilteredPlayersTeam_1(players_1)
-    setFilteredPlayersTeam_2(players_2)
-    setLoading(false)
-  }
-
-  const setTeamWalkover = async () => {
-    setLoading(true)
-    const team_1 = await getTeamWalkover(initialData.team_1)
-    const team_2 = await getTeamWalkover(initialData.team_2)
-    setToggle1(team_1)
-    setToggle2(team_2)
-    hideTeamsToggle_1(team_1, team_2)
-    hideTeamsToggle_2(team_2, team_1)
-    setLoading(false)
-  }
-
   useEffect(() => {
     if (initialData) {
       setPlayers()
@@ -925,7 +905,6 @@ const FixtureTeamsForm = ({
                 className='text-white'
                 size={30}
                 onClick={() => {
-                  test()
                   console.log({
                     modifiedRows,
                     walkoverTeam1,
@@ -1216,6 +1195,7 @@ const FixtureTeamsForm = ({
             />
           </div>
 
+          {/* date - time - cancha */}
           <div className='grid sm:grid-cols-2 w-full gap-4 items-center'>
             <div className='flex gap-1'>
               {/* Date */}
@@ -1335,7 +1315,7 @@ const FixtureTeamsForm = ({
             </div>
           </div>
 
-          {/* Table */}
+          {/* players team 1 table */}
           <div className='w-full relative overflow-hidden'>
             {playersTeam_1 && (
               <>
@@ -1355,7 +1335,7 @@ const FixtureTeamsForm = ({
                           className='left-0 top-0 h-5 text-muted-foreground'
                           onPressedChange={e => {
                             setToggle1(!toggle1)
-                            setModifiedRows([])
+                            initialData ? '' : setModifiedRows([])
                             hideTeamsToggle_1(e, walkoverTeam2)
                           }}>
                           Walkover
@@ -1380,7 +1360,7 @@ const FixtureTeamsForm = ({
               </>
             )}
           </div>
-
+          {/* players team 2 table */}
           <div className='w-full relative overflow-hidden'>
             {playersTeam_2 && (
               <>
@@ -1400,7 +1380,7 @@ const FixtureTeamsForm = ({
                           className='left-0 top-0 h-5 text-muted-foreground'
                           onPressedChange={e => {
                             setToggle2(!toggle2)
-                            setModifiedRows([])
+                            initialData ? '' : setModifiedRows([])
                             hideTeamsToggle_2(e, walkoverTeam1)
                           }}>
                           Walkover
@@ -1426,7 +1406,7 @@ const FixtureTeamsForm = ({
             )}
           </div>
 
-          {/* Resultado */}
+          {/* resultado */}
           <div className='flex justify-center items-center overflow-hidden w-full'>
             <div
               className={`w-full flex justify-center items-center gap-2 text-xs relative`}>
@@ -1453,7 +1433,7 @@ const FixtureTeamsForm = ({
             </div>
           </div>
 
-          {/* Goals */}
+          {/* goals */}
           <FormField
             control={form.control}
             name='goals'
@@ -1464,7 +1444,7 @@ const FixtureTeamsForm = ({
             )}
           />
 
-          {/* Walkovers */}
+          {/* walkovers */}
           <FormField
             control={form.control}
             name='walkover_team_1'
@@ -1490,7 +1470,7 @@ const FixtureTeamsForm = ({
             </Button>
           </div>
         </form>
-      </Form>{' '}
+      </Form>
     </>
   )
 }
