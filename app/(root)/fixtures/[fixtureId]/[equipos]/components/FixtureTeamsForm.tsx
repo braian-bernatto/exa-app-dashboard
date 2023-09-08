@@ -253,6 +253,27 @@ const FixtureTeamsForm = ({
     }
   }
 
+  //test
+  const test = () => {
+    const notGoalsArray = modifiedRows.filter(player => player.goals === 0)
+
+    const notYellowCardsArray = modifiedRows.filter(
+      player => player.yellow_cards === 0
+    )
+
+    const notRedCardsArray = modifiedRows.filter(player => !player.red_cards)
+
+    const goalsArray = modifiedRows.filter(player => player.goals > 0)
+
+    console.log({
+      notGoalsArray,
+      notYellowCardsArray,
+      notRedCardsArray,
+      goalsArray
+    })
+  }
+  //test
+
   async function onSubmit(values: z.infer<typeof formSchema>) {
     try {
       setLoading(true)
@@ -290,31 +311,41 @@ const FixtureTeamsForm = ({
 
         // cargamos datos si es que se modificaron datos de las tablas
         if (modifiedRows.length) {
+          const notGoalsArray = modifiedRows
+            .filter(player => player.goals === 0)
+            .map(player => player.id)
+
+          const notYellowCardsArray = modifiedRows
+            .filter(player => player.yellow_cards === 0)
+            .map(player => player.id)
+
+          const notRedCardsArray = modifiedRows
+            .filter(player => !player.red_cards)
+            .map(player => player.id)
+
           // clear all tables
           const { error: deleteGoalsError } = await supabase.rpc(
-            'delete_goals',
+            'delete_not_goals',
             {
               fixture: fixture_id,
-              team_1,
-              team_2
+              player_ids: notGoalsArray
             }
           )
           const { error: deleteYellowCardsError } = await supabase.rpc(
-            'delete_yellow_cards',
+            'delete_not_yellow_cards_array',
             {
               fixture: fixture_id,
-              team_1,
-              team_2
+              player_ids: notYellowCardsArray
             }
           )
           const { error: deleteRedCardsError } = await supabase.rpc(
-            'delete_red_cards',
+            'delete_not_red_cards',
             {
               fixture: fixture_id,
-              team_1,
-              team_2
+              player_ids: notRedCardsArray
             }
           )
+
           // delete previous walkover
           const { data, error: deleteWalkoversError } = await supabase.rpc(
             'delete_walkovers',
@@ -325,7 +356,7 @@ const FixtureTeamsForm = ({
             }
           )
 
-          // goals
+          // upsert goals
           const goalsArray = modifiedRows
             .filter(player => player.goals > 0)
             .map(player => ({
@@ -893,15 +924,15 @@ const FixtureTeamsForm = ({
               <Swords
                 className='text-white'
                 size={30}
-                onClick={() =>
+                onClick={() => {
+                  test()
                   console.log({
-                    hour,
                     modifiedRows,
                     walkoverTeam1,
                     walkoverTeam2,
                     goals
                   })
-                }
+                }}
               />
             </span>
             <h1 className='text-xl font-semibold flex items-center justify-between w-full gap-2'>

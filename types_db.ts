@@ -487,6 +487,27 @@ export interface Database {
         }
         Returns: boolean
       }
+      delete_not_goals: {
+        Args: {
+          fixture: number
+          player_ids: number[]
+        }
+        Returns: boolean
+      }
+      delete_not_red_cards: {
+        Args: {
+          fixture: number
+          player_ids: number[]
+        }
+        Returns: boolean
+      }
+      delete_not_yellow_cards_array: {
+        Args: {
+          fixture: number
+          player_ids: number[]
+        }
+        Returns: boolean
+      }
       delete_player_image: {
         Args: {
           image_url: string
