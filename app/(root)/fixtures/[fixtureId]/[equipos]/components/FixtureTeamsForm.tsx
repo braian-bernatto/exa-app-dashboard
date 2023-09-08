@@ -338,6 +338,20 @@ const FixtureTeamsForm = ({
     return result
   }
 
+  const getResetedPlayersDetails = (id: number) => {
+    const filtered = players
+      .filter(player => player.team_id === id)
+      .map(players => ({
+        ...players,
+        goals: 0,
+        yellow_cards: 0,
+        red_cards: false,
+        motivo: ''
+      }))
+
+    return filtered
+  }
+
   const setPlayers = async () => {
     setLoading(true)
     const players_1 = await getPlayersDetails(initialData.team_1)
@@ -418,11 +432,32 @@ const FixtureTeamsForm = ({
     vsTeamPlayers: PlayersFixture[],
     setVsTeamPlayers: (list: PlayersFixture[] | undefined) => void
   ) => {
+    const resetPlayers_1 = getResetedPlayersDetails(teamPlayers[0].team_id)
+    // setTeamPlayers(resetPlayers_1)
+
+    const resetPlayers_2 = getResetedPlayersDetails(vsTeamPlayers[0].team_id)
+    // setVsTeamPlayers(resetPlayers_2)
+
+    let actualTeam
+    let vsTeam
+
+    if (teamWalkover && initialData) {
+      vsTeam = resetPlayers_2
+      setModifiedRows([])
+    } else {
+      vsTeam = vsTeamPlayers
+    }
+
+    if (vsTeamWalkover && initialData) {
+      actualTeam = resetPlayers_1
+      setModifiedRows([])
+    } else {
+      actualTeam = teamPlayers
+    }
+
     // filtramos los jugadores del equipo contrario
     teamWalkover
-      ? setVsTeamPlayers(
-          vsTeamPlayers.filter(player => player.position_id === 'POR')
-        )
+      ? setVsTeamPlayers(vsTeam.filter(player => player.position_id === 'POR'))
       : vsTeamWalkover
       ? setVsTeamPlayers(undefined)
       : setVsTeamPlayers(vsTeamPlayers)
@@ -430,7 +465,7 @@ const FixtureTeamsForm = ({
     // filtramos equipo en walkover si el otro equipo tambien esta sancionado
     vsTeamWalkover
       ? setTeamPlayers(
-          teamPlayers.filter(player => player.position_id === 'POR')
+          actualTeam.filter(player => player.position_id === 'POR')
         )
       : teamWalkover
       ? setTeamPlayers(undefined)
@@ -906,6 +941,8 @@ const FixtureTeamsForm = ({
                 size={30}
                 onClick={() => {
                   console.log({
+                    filteredPlayersTeam_1,
+                    filteredPlayersTeam_2,
                     modifiedRows,
                     walkoverTeam1,
                     walkoverTeam2,
@@ -1047,16 +1084,9 @@ const FixtureTeamsForm = ({
 
                                 form.setValue('team_1', team.id)
 
-                                const filtered = players
-                                  .filter(player => player.team_id === team.id)
-                                  .map(players => ({
-                                    ...players,
-                                    goals: 0,
-                                    yellow_cards: 0,
-                                    red_cards: false,
-                                    motivo: ''
-                                  }))
-
+                                const filtered = getResetedPlayersDetails(
+                                  team.id
+                                )
                                 setPlayersTeam_1(filtered)
                                 setFilteredPlayersTeam_1(filtered)
                               }}>
@@ -1148,15 +1178,9 @@ const FixtureTeamsForm = ({
 
                                 form.setValue('team_2', team.id)
 
-                                const filtered = players
-                                  .filter(player => player.team_id === team.id)
-                                  .map(players => ({
-                                    ...players,
-                                    goals: 0,
-                                    yellow_cards: 0,
-                                    red_cards: false,
-                                    motivo: ''
-                                  }))
+                                const filtered = getResetedPlayersDetails(
+                                  team.id
+                                )
 
                                 setPlayersTeam_2(filtered)
                                 setFilteredPlayersTeam_2(filtered)
@@ -1335,8 +1359,22 @@ const FixtureTeamsForm = ({
                           className='left-0 top-0 h-5 text-muted-foreground'
                           onPressedChange={e => {
                             setToggle1(!toggle1)
-                            initialData ? '' : setModifiedRows([])
                             hideTeamsToggle_1(e, walkoverTeam2)
+                            // if (e && initialData) {
+                            //   const resetPlayers = getResetedPlayersDetails(
+                            //     playersTeam_1[0].team_id
+                            //   )
+                            //   setFilteredPlayersTeam_1(resetPlayers)
+
+                            //   if (playersTeam_2?.length) {
+                            //     const resetPlayers2 = getResetedPlayersDetails(
+                            //       playersTeam_2[0].team_id
+                            //     )
+                            //     setFilteredPlayersTeam_2(resetPlayers2)
+                            //   }
+                            // } else {
+                            //   setModifiedRows([])
+                            // }
                           }}>
                           Walkover
                         </Toggle>
@@ -1380,8 +1418,22 @@ const FixtureTeamsForm = ({
                           className='left-0 top-0 h-5 text-muted-foreground'
                           onPressedChange={e => {
                             setToggle2(!toggle2)
-                            initialData ? '' : setModifiedRows([])
                             hideTeamsToggle_2(e, walkoverTeam1)
+                            // if (e && initialData) {
+                            //   const resetPlayers = getResetedPlayersDetails(
+                            //     playersTeam_2[0].team_id
+                            //   )
+                            //   setFilteredPlayersTeam_2(resetPlayers)
+
+                            //   if (playersTeam_1?.length) {
+                            //     const resetPlayers = getResetedPlayersDetails(
+                            //       playersTeam_1[0].team_id
+                            //     )
+                            //     setFilteredPlayersTeam_1(resetPlayers)
+                            //   }
+                            // } else {
+                            //   setModifiedRows([])
+                            // }
                           }}>
                           Walkover
                         </Toggle>
