@@ -39,10 +39,9 @@ const MainNav = ({
   return (
     <nav
       className={cn(
-        'flex flex-wrap items-center space-x-4 lg:space-x-6',
+        'flex items-center gap-4 w-[400px] sm:w-auto overflow-y-auto px-2',
         className
-      )}
-    >
+      )}>
       {routes.map(route => (
         <Link
           key={route.href}
@@ -52,8 +51,7 @@ const MainNav = ({
             route.active
               ? 'text-black dark:text-white'
               : 'text-muted-foreground'
-          )}
-        >
+          )}>
           {route.label}
         </Link>
       ))}
