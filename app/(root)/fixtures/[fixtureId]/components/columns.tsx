@@ -5,6 +5,8 @@ import CellDate from './cell-date'
 import CellTeamOneImage from './cell-team-one-image'
 import CellTeamTwoImage from './cell-team-two-image'
 import CellCancha from './cell-cancha'
+import { Button } from '@/components/ui/button'
+import { ArrowUpDown } from 'lucide-react'
 
 export type FixtureDetailsColumn =
   | {
@@ -19,12 +21,30 @@ export type FixtureDetailsColumn =
 export const columns: ColumnDef<FixtureDetailsColumn>[] = [
   {
     accessorKey: 'date',
-    header: 'Fecha',
+    header: ({ column }) => {
+      return (
+        <Button
+          variant='ghost'
+          onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}>
+          Fecha
+          <ArrowUpDown className='ml-2 h-4 w-4' />
+        </Button>
+      )
+    },
     cell: ({ row }) => <CellDate data={row.original} />
   },
   {
     accessorKey: 'cancha_nro',
-    header: 'N° Cancha',
+    header: ({ column }) => {
+      return (
+        <Button
+          variant='ghost'
+          onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}>
+          N° Cancha
+          <ArrowUpDown className='ml-2 h-4 w-4' />
+        </Button>
+      )
+    },
     cell: ({ row }) => <CellCancha data={row.original} />
   },
   {

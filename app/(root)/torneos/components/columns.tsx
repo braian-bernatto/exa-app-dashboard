@@ -4,6 +4,8 @@ import { Torneos } from '@/types'
 import { ColumnDef } from '@tanstack/react-table'
 import CellAction from './cell-action'
 import CellImage from './cell-image'
+import { Button } from '@/components/ui/button'
+import { ArrowUpDown } from 'lucide-react'
 
 export type TorneoColumn = Torneos
 
@@ -15,11 +17,29 @@ export const columns: ColumnDef<TorneoColumn>[] = [
   },
   {
     accessorKey: 'name',
-    header: 'Nombre'
+    header: ({ column }) => {
+      return (
+        <Button
+          variant='ghost'
+          onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}>
+          Nombre
+          <ArrowUpDown className='ml-2 h-4 w-4' />
+        </Button>
+      )
+    }
   },
   {
     accessorKey: 'created_at',
-    header: 'Fecha Creación'
+    header: ({ column }) => {
+      return (
+        <Button
+          variant='ghost'
+          onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}>
+          Fecha Creación
+          <ArrowUpDown className='ml-2 h-4 w-4' />
+        </Button>
+      )
+    }
   },
   {
     id: 'actions',

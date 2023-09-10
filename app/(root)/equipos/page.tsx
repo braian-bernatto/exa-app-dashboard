@@ -10,7 +10,7 @@ export default async function EquiposPage() {
   const { data } = await supabase
     .from('teams')
     .select('*, exas(id, name, image_url)')
-    .order('created_at', { ascending: false })
+    .order('created_at', { ascending: true })
 
   const formattedTeams: TeamColumn[] | undefined = data?.map(item => ({
     id: item.id,

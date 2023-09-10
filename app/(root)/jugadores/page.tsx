@@ -10,7 +10,7 @@ export default async function JugadoresPage() {
     .select(
       '*, teams(id, name, image_url), positions(id, name), foot(id, name)'
     )
-    .order('created_at', { ascending: true })
+    .order('created_at', { ascending: false })
 
   const formattedPlayers: PlayerColumn[] | undefined = data?.map(item => ({
     id: item.id,

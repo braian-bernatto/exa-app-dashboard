@@ -5,6 +5,8 @@ import { ColumnDef } from '@tanstack/react-table'
 import CellAction from './cell-action'
 import CellTorneoImage from './cell-torneo-image'
 import CellLocal from './cell-local'
+import { Button } from '@/components/ui/button'
+import { ArrowUpDown } from 'lucide-react'
 
 export type FixtureColumn = Fixtures & {
   torneos: { name: string | null; image_url: string | null } | null
@@ -19,7 +21,16 @@ export const columns: ColumnDef<FixtureColumn>[] = [
   {
     id: 'torneos.name',
     accessorKey: 'torneos.name',
-    header: 'Torneo',
+    header: ({ column }) => {
+      return (
+        <Button
+          variant='ghost'
+          onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}>
+          Torneo
+          <ArrowUpDown className='ml-2 h-4 w-4' />
+        </Button>
+      )
+    },
     cell: ({ row }) => <CellTorneoImage data={row.original} />
   },
   {
