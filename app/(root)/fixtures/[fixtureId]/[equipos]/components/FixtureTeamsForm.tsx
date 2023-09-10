@@ -100,11 +100,11 @@ const FixtureTeamsForm = ({
     PlayersFixture[] | undefined
   >(undefined)
   const [filteredPlayersTeam_1, setFilteredPlayersTeam_1] = useState<
-    PlayersFixture[] | undefined
-  >(undefined)
+    PlayersFixture[] | []
+  >([])
   const [filteredPlayersTeam_2, setFilteredPlayersTeam_2] = useState<
-    PlayersFixture[] | undefined
-  >(undefined)
+    PlayersFixture[] | []
+  >([])
   const [modifiedRows, setModifiedRows] = useState<any[]>([])
 
   const title = initialData ? 'Editar Versus' : 'Agregar Versus'
@@ -209,9 +209,9 @@ const FixtureTeamsForm = ({
         if (goals?.length === 0) return false
         if (bothWalkover && goals?.length < 2) return false
 
-        if (bothWalkover && goals[0].goals > 0 && goals[1].goals > 0)
-          return true
-        if (val.walkover_team_1 && goals[1].goals > 0) return true
+        if (bothWalkover && (goals[0].goals === 0 || goals[1].goals === 0))
+          return false
+        if (val.walkover_team_1 && goals[0].goals > 0) return true
         if (val.walkover_team_2 && goals[0].goals > 0) return true
       },
       {
@@ -342,11 +342,11 @@ const FixtureTeamsForm = ({
     setLoading(true)
     const players_1 = await getPlayersDetails(initialData.team_1)
     const players_2 = await getPlayersDetails(initialData.team_2)
-    setModifiedRows([...players_1, ...players_2])
     setPlayersTeam_1(players_1)
     setPlayersTeam_2(players_2)
     setFilteredPlayersTeam_1(players_1)
     setFilteredPlayersTeam_2(players_2)
+    setModifiedRows([...players_1, ...players_2])
     setLoading(false)
   }
 
@@ -413,27 +413,30 @@ const FixtureTeamsForm = ({
   const updatePlayersList = (
     teamWalkover: boolean,
     teamPlayers: PlayersFixture[],
-    setTeamPlayers: (list: PlayersFixture[] | undefined) => void,
+    setTeamPlayers: (list: PlayersFixture[] | []) => void,
     vsTeamWalkover: boolean,
     vsTeamPlayers: PlayersFixture[],
-    setVsTeamPlayers: (list: PlayersFixture[] | undefined) => void
+    setVsTeamPlayers: (list: PlayersFixture[] | []) => void
   ) => {
+    const vsTeamPorteros = vsTeamPlayers.filter(
+      player => player.position_id === 'POR'
+    )
+    const teamPorteros = teamPlayers.filter(
+      player => player.position_id === 'POR'
+    )
+
     // filtramos los jugadores del equipo contrario
     teamWalkover
-      ? setVsTeamPlayers(
-          vsTeamPlayers.filter(player => player.position_id === 'POR')
-        )
+      ? setVsTeamPlayers(vsTeamPorteros)
       : vsTeamWalkover
-      ? setVsTeamPlayers(undefined)
+      ? setVsTeamPlayers([])
       : setVsTeamPlayers(vsTeamPlayers)
 
     // filtramos equipo en walkover si el otro equipo tambien esta sancionado
     vsTeamWalkover
-      ? setTeamPlayers(
-          teamPlayers.filter(player => player.position_id === 'POR')
-        )
+      ? setTeamPlayers(teamPorteros)
       : teamWalkover
-      ? setTeamPlayers(undefined)
+      ? setTeamPlayers([])
       : setTeamPlayers(teamPlayers)
   }
 
@@ -533,17 +536,40 @@ const FixtureTeamsForm = ({
 
         // cargamos datos si es que se modificaron datos de las tablas
         if (modifiedRows.length) {
-          const notGoalsArray = modifiedRows
-            .filter(player => player.goals === 0)
+          const playerIds = modifiedRows.map(player => player.id)
+
+          const notGoalsArray = [...playersTeam_1!, ...playersTeam_2!]
+            .filter(player => playerIds.indexOf(player.id) === -1)
+            .filter(player => player.goals && player.goals > 0)
             .map(player => player.id)
 
-          const notYellowCardsArray = modifiedRows
-            .filter(player => player.yellow_cards === 0)
+          notGoalsArray.push(
+            ...modifiedRows
+              .filter(player => player.goals === 0)
+              .map(player => player.id)
+          )
+
+          const notYellowCardsArray = [...playersTeam_1!, ...playersTeam_2!]
+            .filter(player => playerIds.indexOf(player.id) === -1)
+            .filter(player => player.yellow_cards && player.yellow_cards > 0)
             .map(player => player.id)
 
-          const notRedCardsArray = modifiedRows
-            .filter(player => !player.red_cards)
+          notYellowCardsArray.push(
+            ...modifiedRows
+              .filter(player => player.yellow_cards === 0)
+              .map(player => player.id)
+          )
+
+          const notRedCardsArray = [...playersTeam_1!, ...playersTeam_2!]
+            .filter(player => playerIds.indexOf(player.id) === -1)
+            .filter(player => player.red_cards)
             .map(player => player.id)
+
+          notRedCardsArray.push(
+            ...modifiedRows
+              .filter(player => !player.red_cards)
+              .map(player => player.id)
+          )
 
           // clear all tables
           const { error: deleteGoalsError } = await supabase.rpc(
@@ -885,6 +911,10 @@ const FixtureTeamsForm = ({
   useEffect(() => {
     countGoals()
   }, [modifiedRows])
+
+  useEffect(() => {
+    setModifiedRows([...filteredPlayersTeam_1, ...filteredPlayersTeam_2])
+  }, [filteredPlayersTeam_1, filteredPlayersTeam_2])
 
   return (
     <>
@@ -1326,7 +1356,7 @@ const FixtureTeamsForm = ({
                       <Separator />
                       <span
                         className={`flex flex-col items-center relative ${
-                          filteredPlayersTeam_1 && 'top-5'
+                          filteredPlayersTeam_1.length > 0 && 'top-5'
                         }`}>
                         <Toggle
                           variant={'outline'}
@@ -1350,7 +1380,7 @@ const FixtureTeamsForm = ({
                     </p>
                   )}
                 </div>
-                {filteredPlayersTeam_1 && (
+                {filteredPlayersTeam_1.length > 0 && (
                   <DataTable
                     columns={Columns}
                     intialValues={filteredPlayersTeam_1 || []}
@@ -1371,7 +1401,7 @@ const FixtureTeamsForm = ({
                       <Separator />
                       <span
                         className={`flex flex-col items-center relative ${
-                          filteredPlayersTeam_2 && 'top-5'
+                          filteredPlayersTeam_2.length > 0 && 'top-5'
                         }`}>
                         <Toggle
                           variant={'outline'}
@@ -1395,7 +1425,7 @@ const FixtureTeamsForm = ({
                     </p>
                   )}
                 </div>
-                {filteredPlayersTeam_2 && (
+                {filteredPlayersTeam_2.length > 0 && (
                   <DataTable
                     columns={Columns}
                     intialValues={filteredPlayersTeam_2 || []}
