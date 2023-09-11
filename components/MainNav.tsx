@@ -39,7 +39,7 @@ const MainNav = ({
   return (
     <nav
       className={cn(
-        'flex items-center gap-4 w-[400px] sm:w-auto overflow-y-auto px-2',
+        'flex items-center gap-4 w-[400px] sm:w-auto overflow-y-auto p-2',
         className
       )}>
       {routes.map(route => (
