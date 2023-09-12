@@ -623,6 +623,7 @@ const FixtureTeamsForm = ({
             .filter(player => player.goals > 0)
             .map(player => ({
               fixture_id,
+              team_id: player.team_id,
               player_id: player.id,
               quantity: player.goals
             }))
@@ -643,6 +644,7 @@ const FixtureTeamsForm = ({
             .filter(player => player.yellow_cards > 0)
             .map(player => ({
               fixture_id,
+              team_id: player.team_id,
               player_id: player.id,
               quantity: player.yellow_cards
             }))
@@ -661,6 +663,7 @@ const FixtureTeamsForm = ({
             .filter(player => player.red_cards)
             .map(player => ({
               fixture_id,
+              team_id: player.team_id,
               player_id: player.id,
               motivo: player.motivo
             }))
@@ -739,6 +742,7 @@ const FixtureTeamsForm = ({
             .filter(player => player.goals > 0)
             .map(player => ({
               fixture_id,
+              team_id: player.team_id,
               player_id: player.id,
               quantity: player.goals
             }))
@@ -759,6 +763,7 @@ const FixtureTeamsForm = ({
             .filter(player => player.yellow_cards > 0)
             .map(player => ({
               fixture_id,
+              team_id: player.team_id,
               player_id: player.id,
               quantity: player.yellow_cards
             }))
@@ -777,6 +782,7 @@ const FixtureTeamsForm = ({
             .filter(player => player.red_cards)
             .map(player => ({
               fixture_id,
+              team_id: player.team_id,
               player_id: player.id,
               motivo: player.motivo
             }))
