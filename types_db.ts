@@ -157,19 +157,19 @@ export interface Database {
           fixture_id: number
           player_id: number
           quantity: number
-          team_id: number | null
+          team_id: number
         }
         Insert: {
           fixture_id: number
           player_id: number
           quantity: number
-          team_id?: number | null
+          team_id: number
         }
         Update: {
           fixture_id?: number
           player_id?: number
           quantity?: number
-          team_id?: number | null
+          team_id?: number
         }
         Relationships: [
           {
@@ -340,19 +340,19 @@ export interface Database {
           fixture_id: number
           motivo: string | null
           player_id: number
-          team_id: number | null
+          team_id: number
         }
         Insert: {
           fixture_id: number
           motivo?: string | null
           player_id: number
-          team_id?: number | null
+          team_id: number
         }
         Update: {
           fixture_id?: number
           motivo?: string | null
           player_id?: number
-          team_id?: number | null
+          team_id?: number
         }
         Relationships: [
           {
@@ -470,19 +470,19 @@ export interface Database {
           fixture_id: number
           player_id: number
           quantity: number
-          team_id: number | null
+          team_id: number
         }
         Insert: {
           fixture_id: number
           player_id: number
           quantity: number
-          team_id?: number | null
+          team_id: number
         }
         Update: {
           fixture_id?: number
           player_id?: number
           quantity?: number
-          team_id?: number | null
+          team_id?: number
         }
         Relationships: [
           {
@@ -607,6 +607,20 @@ export interface Database {
           fixture: number
         }
         Returns: Json
+      }
+      get_fixtures_by_torneo: {
+        Args: {
+          torneo_id: number
+        }
+        Returns: {
+          id: number
+          created_at: string
+          name: string
+          location_id: number
+          torneo_id: number
+          date: string
+          location: string
+        }[]
       }
       get_goals: {
         Args: {
