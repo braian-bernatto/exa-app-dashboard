@@ -73,7 +73,6 @@ const FixtureTeamsForm = ({
   teams,
   players
 }: FixtureTeamsFormProps) => {
-  console.log({ teams })
   const router = useRouter()
   const params = useParams()
 
