@@ -5,7 +5,7 @@ export default async function FixturesPage() {
   const supabase = createClient()
   const { data } = await supabase
     .from('fixtures')
-    .select('*, torneos(name, image_url), locations(name)')
+    .select('*, torneos(name, image_url, exas(name)), locations(name)')
     .order('created_at', { ascending: true })
 
   return (

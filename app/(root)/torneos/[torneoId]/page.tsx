@@ -1,5 +1,6 @@
 import { createClient } from '@/utils/supabaseServer'
 import TorneoForm from './components/TorneoForm'
+import getExas from '@/actions/getExas'
 
 export const revalidate = 0
 
@@ -13,9 +14,11 @@ const TorneoPage = async ({
   const supabase = createClient()
   const { data: torneo } = await supabase
     .from('torneos')
-    .select('name, image_url')
+    .select()
     .eq('id', params.torneoId)
     .single()
+
+  const exas = await getExas()
 
   let data
 
@@ -31,7 +34,7 @@ const TorneoPage = async ({
 
   return (
     <div className='flex flex-col items-center'>
-      <TorneoForm initialData={data} />
+      <TorneoForm initialData={data} exas={exas} />
     </div>
   )
 }

@@ -1,9 +1,12 @@
-import { Players } from '@/types'
+import { Teams } from '@/types'
 import { createClient } from '@/utils/supabaseServer'
 
-const getPlayers = async (): Promise<Players[]> => {
+
+const getTeamsByExa = async (id: number): Promise<Teams[]> => {
   const supabase = createClient()
-  const { data, error } = await supabase.from('players').select().order('id')
+  const { data, error } = await supabase.rpc('get_teams_by_exa_id', {
+    exa_id:id
+  })
 
   if (error) {
     console.log(error)
@@ -12,7 +15,7 @@ const getPlayers = async (): Promise<Players[]> => {
   const dataWithImage = data?.map(data => {
     if (data.image_url?.length) {
       const { data: imageData } = supabase.storage
-        .from('players')
+        .from('teams')
         .getPublicUrl(data.image_url!)
       return { ...data, image_url: imageData.publicUrl }
     }
@@ -22,4 +25,4 @@ const getPlayers = async (): Promise<Players[]> => {
   return (dataWithImage as any) || []
 }
 
-export default getPlayers
+export default getTeamsByExa

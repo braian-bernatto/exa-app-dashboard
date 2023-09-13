@@ -9,10 +9,11 @@ export default async function TorneosPage() {
   const supabase = createClient()
   const { data, error } = await supabase
     .from('torneos')
-    .select()
+    .select('*, exas(id, name, image_url)')
     .order('created_at', { ascending: false })
 
   const formattedTorneos: Torneos[] | undefined = data?.map(item => ({
+    ...item,
     id: item.id,
     name: item.name,
     image_url: item.image_url || '',

@@ -1,8 +1,8 @@
 import FixtureTeamsForm from '@/app/(root)/fixtures/[fixtureId]/[equipos]/components/FixtureTeamsForm'
 import getFixtures from '@/actions/getFixtures'
-import getTeams from '@/actions/getTeams'
-import getPlayers from '@/actions/getPlayers'
 import { createClient } from '@/utils/supabaseServer'
+import getTeamsByExa from '@/actions/getTeamsByExa'
+import getPlayersByExa from '@/actions/getPlayersByExa'
 
 export const revalidate = 0
 
@@ -14,13 +14,22 @@ const FixutrePage = async ({
     equipos: string
   }
 }) => {
+  const supabase = createClient()
+
+  const { data: fixture } = await supabase
+    .from('fixtures')
+    .select('torneos(exas(id))')
+    .eq('id', +params.fixtureId)
+    .single()
+
   const fixtures = await getFixtures()
-  const teams = await getTeams()
-  const players = await getPlayers()
+  //@ts-ignore
+  const teams = await getTeamsByExa(fixture?.torneos?.exas.id)
+  //@ts-ignore
+  const players = await getPlayersByExa(fixture?.torneos?.exas.id)
 
   // TODO: revisar porque se refresca 6 veces el dom
 
-  const supabase = createClient()
   const { data: fixtureDetails } = await supabase
     .from('fixture_details')
     .select()

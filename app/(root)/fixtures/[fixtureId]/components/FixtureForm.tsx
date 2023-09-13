@@ -170,8 +170,7 @@ const FixtureForm = ({ initialData, torneos, locations }: FixtureFormProps) => {
       <Form {...form}>
         <form
           onSubmit={form.handleSubmit(onSubmit)}
-          className='flex flex-col w-full max-w-xs rounded bg-white py-3 px-4 shadow gap-5 justify-center self-center'
-        >
+          className='flex flex-col w-full max-w-xs rounded bg-white py-3 px-4 shadow gap-5 justify-center self-center'>
           <div className='flex gap-2'>
             <span className='bg-gradient-to-r from-emerald-300 to-emerald-700 rounded-full p-2 flex items-center justify-center'>
               <Swords className='text-white' size={30} />
@@ -186,8 +185,7 @@ const FixtureForm = ({ initialData, torneos, locations }: FixtureFormProps) => {
                 disabled={loading}
                 variant='destructive'
                 size='icon'
-                onClick={() => setOpen(true)}
-              >
+                onClick={() => setOpen(true)}>
                 <Trash className='h-4 w-4' />
               </Button>
             )}
@@ -218,13 +216,13 @@ const FixtureForm = ({ initialData, torneos, locations }: FixtureFormProps) => {
                   <PopoverTrigger asChild>
                     <FormControl>
                       <Button
+                        disabled={initialData ? true : false}
                         variant='outline'
                         role='combobox'
                         className={cn(
                           'w-full justify-between',
                           !field.value && 'text-muted-foreground'
-                        )}
-                      >
+                        )}>
                         {field.value
                           ? torneos.find(torneo => torneo.id === field.value)
                               ?.name
@@ -244,8 +242,7 @@ const FixtureForm = ({ initialData, torneos, locations }: FixtureFormProps) => {
                             key={torneo.id}
                             onSelect={() => {
                               form.setValue('torneo_id', torneo.id)
-                            }}
-                          >
+                            }}>
                             <>
                               <Check
                                 className={cn(
@@ -295,8 +292,7 @@ const FixtureForm = ({ initialData, torneos, locations }: FixtureFormProps) => {
                         className={cn(
                           'w-full justify-between',
                           !field.value && 'text-muted-foreground'
-                        )}
-                      >
+                        )}>
                         <MapPin className='mr-2 shrink-0 opacity-50' />
                         {field.value
                           ? locations.find(
@@ -318,8 +314,7 @@ const FixtureForm = ({ initialData, torneos, locations }: FixtureFormProps) => {
                             key={location.id}
                             onSelect={() => {
                               form.setValue('location_id', location.id)
-                            }}
-                          >
+                            }}>
                             <Check
                               className={cn(
                                 'mr-2 h-4 w-4',
@@ -345,8 +340,7 @@ const FixtureForm = ({ initialData, torneos, locations }: FixtureFormProps) => {
               type='submit'
               variant={'default'}
               className='w-full'
-              disabled={loading}
-            >
+              disabled={loading}>
               {action}
             </Button>
           </div>

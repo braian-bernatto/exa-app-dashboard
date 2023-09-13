@@ -4,13 +4,13 @@ import { Button } from '@/components/ui/button'
 import { DataTable } from '@/components/ui/data-table'
 import { Heading } from '@/components/ui/heading'
 import { Separator } from '@/components/ui/separator'
-import { Torneos } from '@/types'
+import { Exas, Torneos } from '@/types'
 import { Plus } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import { columns } from './columns'
 
 interface TorneosClientProps {
-  data: Torneos[]
+  data: (Torneos & Exas)[]
 }
 
 const TorneosClient = ({ data }: TorneosClientProps) => {

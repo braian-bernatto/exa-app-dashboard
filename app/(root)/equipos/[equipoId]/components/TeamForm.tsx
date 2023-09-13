@@ -197,8 +197,7 @@ const TeamForm = ({ initialData, exas }: TeamFormProps) => {
       <Form {...form}>
         <form
           onSubmit={form.handleSubmit(onSubmit)}
-          className='flex flex-col w-full max-w-xs rounded bg-white py-3 px-4 shadow gap-5 justify-center'
-        >
+          className='flex flex-col w-full max-w-xs rounded bg-white py-3 px-4 shadow gap-5 justify-center'>
           <div className='flex gap-2'>
             <span className='bg-gradient-to-r from-emerald-300 to-emerald-700 rounded-full p-2 flex items-center justify-center'>
               <Shield className='text-white' size={30} />
@@ -213,8 +212,7 @@ const TeamForm = ({ initialData, exas }: TeamFormProps) => {
                 disabled={loading}
                 variant='destructive'
                 size='icon'
-                onClick={() => setOpen(true)}
-              >
+                onClick={() => setOpen(true)}>
                 <Trash className='h-4 w-4' />
               </Button>
             )}
@@ -272,13 +270,13 @@ const TeamForm = ({ initialData, exas }: TeamFormProps) => {
                   <PopoverTrigger asChild>
                     <FormControl>
                       <Button
+                        disabled={initialData ? true : false}
                         variant='outline'
                         role='combobox'
                         className={cn(
                           'w-full justify-between',
                           !field.value && 'text-muted-foreground'
-                        )}
-                      >
+                        )}>
                         {field.value && exas
                           ? exas.find(exa => exa.id === field.value)?.name
                           : 'Elige un exa'}
@@ -298,8 +296,7 @@ const TeamForm = ({ initialData, exas }: TeamFormProps) => {
                               key={exa.id}
                               onSelect={() => {
                                 form.setValue('exa_id', exa.id)
-                              }}
-                            >
+                              }}>
                               <>
                                 <Check
                                   className={cn(
@@ -337,8 +334,7 @@ const TeamForm = ({ initialData, exas }: TeamFormProps) => {
               type='submit'
               variant={'default'}
               className='w-full'
-              disabled={loading}
-            >
+              disabled={loading}>
               {action}
             </Button>
           </div>

@@ -1,8 +1,7 @@
 'use client'
 import React, { useState } from 'react'
 import { Input } from '../../../../../components/ui/input'
-import PreviewImage from '../../../../../components/PreviewImageFile'
-import { Trash, Trophy } from 'lucide-react'
+import { Check, ChevronsUpDown, Shield, Trash, Trophy } from 'lucide-react'
 import { Button } from '../../../../../components/ui/button'
 
 import { useForm } from 'react-hook-form'
@@ -20,10 +19,24 @@ import uniqid from 'uniqid'
 import { toast } from 'react-hot-toast'
 import { useSupabase } from '@/providers/SupabaseProvider'
 import { useParams, useRouter } from 'next/navigation'
-import { Torneos } from '@/types'
+import { Exas, Torneos } from '@/types'
 import { AlertModal } from '@/components/modals/AlertModal'
 import PreviewImageUrl from '@/components/PreviewImageUrl'
 import PreviewImageFile from '../../../../../components/PreviewImageFile'
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger
+} from '@/components/ui/popover'
+import { cn } from '@/lib/utils'
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem
+} from '@/components/ui/command'
+import Image from 'next/image'
 
 const MAX_FILE_SIZE = 5 * 1024 * 1024
 const ACCEPTED_IMAGE_TYPES = [
@@ -43,7 +56,8 @@ const formSchema = z.object({
       'Sólo se aceptan los formatos .jpg .jpeg .png .webp'
     )
     .or(z.string())
-    .optional()
+    .optional(),
+  exa_id: z.coerce.number({ invalid_type_error: 'Obligatorio' })
 })
 
 type TorneoType = Pick<Torneos, 'name' | 'image_url'> & {
@@ -52,9 +66,10 @@ type TorneoType = Pick<Torneos, 'name' | 'image_url'> & {
 
 interface TorneoFormProps {
   initialData: TorneoType | undefined
+  exas: Exas[]
 }
 
-const TorneoForm = ({ initialData }: TorneoFormProps) => {
+const TorneoForm = ({ initialData, exas }: TorneoFormProps) => {
   const router = useRouter()
   const params = useParams()
 
@@ -75,7 +90,7 @@ const TorneoForm = ({ initialData }: TorneoFormProps) => {
     try {
       setLoading(true)
 
-      const { name, image_url } = values
+      const { name, image_url, exa_id } = values
       if (!name) {
         return toast.error('Faltan datos')
       }
@@ -117,7 +132,8 @@ const TorneoForm = ({ initialData }: TorneoFormProps) => {
         //insert
         const { error: supabaseError } = await supabase.from('torneos').insert({
           name,
-          image_url: imagePath
+          image_url: imagePath,
+          exa_id
         })
         if (supabaseError) {
           console.log(supabaseError)
@@ -173,8 +189,7 @@ const TorneoForm = ({ initialData }: TorneoFormProps) => {
       <Form {...form}>
         <form
           onSubmit={form.handleSubmit(onSubmit)}
-          className='flex flex-col w-full max-w-xs rounded bg-white py-3 px-4 shadow gap-5 justify-center'
-        >
+          className='flex flex-col w-full max-w-xs rounded bg-white py-3 px-4 shadow gap-5 justify-center'>
           <div className='flex gap-2'>
             <span className='bg-gradient-to-r from-emerald-300 to-emerald-700 rounded-full p-2 flex items-center justify-center'>
               <Trophy className='text-white' size={30} />
@@ -189,8 +204,7 @@ const TorneoForm = ({ initialData }: TorneoFormProps) => {
                 disabled={loading}
                 variant='destructive'
                 size='icon'
-                onClick={() => setOpen(true)}
-              >
+                onClick={() => setOpen(true)}>
                 <Trash className='h-4 w-4' />
               </Button>
             )}
@@ -237,13 +251,83 @@ const TorneoForm = ({ initialData }: TorneoFormProps) => {
               </FormItem>
             )}
           />
+
+          {/* Exa */}
+          <FormField
+            control={form.control}
+            name='exa_id'
+            render={({ field }) => (
+              <FormItem className='rounded bg-white'>
+                <FormLabel>Exa</FormLabel>
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <FormControl>
+                      <Button
+                        disabled={initialData ? true : false}
+                        variant='outline'
+                        role='combobox'
+                        className={cn(
+                          'w-full justify-between',
+                          !field.value && 'text-muted-foreground'
+                        )}>
+                        {field.value && exas
+                          ? exas.find(exa => exa.id === field.value)?.name
+                          : 'Elige un exa'}
+                        <ChevronsUpDown className='ml-2 h-4 w-4 shrink-0 opacity-50' />
+                      </Button>
+                    </FormControl>
+                  </PopoverTrigger>
+                  <PopoverContent className='max-w-[300px] p-0 sm:max-h-[500px] max-h-[300px] overflow-y-auto'>
+                    <Command>
+                      <CommandInput placeholder='Buscador de equipos...' />
+                      <CommandEmpty>No hay coincidencias.</CommandEmpty>
+                      <CommandGroup>
+                        {exas &&
+                          exas.map(exa => (
+                            <CommandItem
+                              value={exa.name!}
+                              key={exa.id}
+                              onSelect={() => {
+                                form.setValue('exa_id', exa.id)
+                              }}>
+                              <>
+                                <Check
+                                  className={cn(
+                                    'mr-2 h-4 w-4',
+                                    exa.id === field.value
+                                      ? 'opacity-100'
+                                      : 'opacity-0'
+                                  )}
+                                />
+                                {exa.image_url?.length ? (
+                                  <Image
+                                    src={exa.image_url}
+                                    width={30}
+                                    height={30}
+                                    alt='exa logo'
+                                    className='mr-2'
+                                  />
+                                ) : (
+                                  <Shield className='mr-2' size={30} />
+                                )}
+                                {exa.name}
+                              </>
+                            </CommandItem>
+                          ))}
+                      </CommandGroup>
+                    </Command>
+                  </PopoverContent>
+                </Popover>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
           <div className='w-full'>
             <Button
               type='submit'
               variant={'default'}
               className='w-full'
-              disabled={loading}
-            >
+              disabled={loading}>
               {action}
             </Button>
           </div>

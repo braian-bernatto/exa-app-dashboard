@@ -13,6 +13,7 @@ interface FixtureClientProps {
 }
 
 const FixtureClient = ({ data }: FixtureClientProps) => {
+  console.log(data)
   const router = useRouter()
   return (
     <>
