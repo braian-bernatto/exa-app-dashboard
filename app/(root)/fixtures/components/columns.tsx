@@ -9,7 +9,10 @@ import { Button } from '@/components/ui/button'
 import { ArrowUpDown } from 'lucide-react'
 
 export type FixtureColumn = Fixtures & {
-  torneos: { name: string | null; image_url: string | null } | null
+  torneo_fase: {
+    torneos: { name: string | null; image_url: string | null } | null
+    fases: { name: string | null } | null
+  } | null
   locations: { name: string | null } | null
 }
 
@@ -19,21 +22,21 @@ export const columns: ColumnDef<FixtureColumn>[] = [
     header: 'Nombre'
   },
   {
-    accessorKey: 'torneos.exas.name',
+    accessorKey: 'torneo_fase.fases.name',
     header: ({ column }) => {
       return (
         <Button
           variant='ghost'
           onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}>
-          Torneo
+          Fase
           <ArrowUpDown className='ml-2 h-4 w-4' />
         </Button>
       )
     }
   },
   {
-    id: 'torneos.name',
-    accessorKey: 'torneos.name',
+    id: 'torneo_fase.torneos.name',
+    accessorKey: 'torneo_fase.torneos.name',
     header: ({ column }) => {
       return (
         <Button

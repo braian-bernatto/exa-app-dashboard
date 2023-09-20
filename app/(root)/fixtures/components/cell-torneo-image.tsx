@@ -13,16 +13,16 @@ const CellTorneoImage = ({ data }: CellTorneoImageProps) => {
 
   let url = ''
 
-  if (data.torneos!.image_url) {
+  if (data.torneo_fase!.torneos!.image_url) {
     const { data: storage } = supabase.storage
       .from('torneos')
-      .getPublicUrl(data.torneos!.image_url)
+      .getPublicUrl(data.torneo_fase!.torneos!.image_url)
     url = storage.publicUrl
   }
 
   return (
-    <div className="flex gap-2 items-center">
-      <div className="w-[30px] h-[30px] relative shadow rounded-full overflow-hidden border flex-none">
+    <div className='flex gap-2 items-center'>
+      <div className='w-[30px] h-[30px] relative shadow rounded-full overflow-hidden border flex-none'>
         {!imageError && (
           <Image
             src={url}
@@ -30,12 +30,12 @@ const CellTorneoImage = ({ data }: CellTorneoImageProps) => {
               setImageError(true)
             }}
             fill
-            alt="logo de torneo"
-            className="object-contain"
+            alt='logo de torneo'
+            className='object-contain'
           />
         )}
       </div>
-      {data.torneos!.name}
+      {data.torneo_fase!.torneos!.name}
     </div>
   )
 }
