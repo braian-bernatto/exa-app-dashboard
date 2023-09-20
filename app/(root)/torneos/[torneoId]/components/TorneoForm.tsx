@@ -10,6 +10,7 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import {
   Form,
   FormControl,
+  FormDescription,
   FormField,
   FormItem,
   FormLabel,
@@ -19,7 +20,7 @@ import uniqid from 'uniqid'
 import { toast } from 'react-hot-toast'
 import { useSupabase } from '@/providers/SupabaseProvider'
 import { useParams, useRouter } from 'next/navigation'
-import { Exas, Torneos } from '@/types'
+import { Exas, Fases, Torneos } from '@/types'
 import { AlertModal } from '@/components/modals/AlertModal'
 import PreviewImageUrl from '@/components/PreviewImageUrl'
 import PreviewImageFile from '../../../../../components/PreviewImageFile'
@@ -37,6 +38,8 @@ import {
   CommandItem
 } from '@/components/ui/command'
 import Image from 'next/image'
+import { Checkbox } from '@/components/ui/checkbox'
+import { Separator } from '@/components/ui/separator'
 
 const MAX_FILE_SIZE = 5 * 1024 * 1024
 const ACCEPTED_IMAGE_TYPES = [
@@ -48,6 +51,7 @@ const ACCEPTED_IMAGE_TYPES = [
 
 const formSchema = z.object({
   name: z.string().min(1, { message: 'Obligatorio' }),
+  exa_id: z.coerce.number({ invalid_type_error: 'Obligatorio' }),
   image_url: z
     .any()
     .refine(files => files?.size <= MAX_FILE_SIZE, `Límite de tamaño es 5MB.`)
@@ -58,19 +62,23 @@ const formSchema = z.object({
     .or(z.string())
     .optional()
     .nullable(),
-  exa_id: z.coerce.number({ invalid_type_error: 'Obligatorio' })
+  fases: z.array(z.number()).refine(value => value.some(item => item), {
+    message: 'Selecciona al menos una opción.'
+  }),
+  points_victory: z.coerce.number().optional(),
+  points_tie: z.coerce.number().optional(),
+  points_defeat: z.coerce.number().optional()
 })
 
-type TorneoType = Pick<Torneos, 'name' | 'image_url'> & {
-  public_image_url: string
-}
+type TorneoType = Torneos & { fases: number[]; public_image_url: string }
 
 interface TorneoFormProps {
   initialData: TorneoType | undefined
   exas: Exas[]
+  fases: Fases[] | []
 }
 
-const TorneoForm = ({ initialData, exas }: TorneoFormProps) => {
+const TorneoForm = ({ initialData, exas, fases }: TorneoFormProps) => {
   const router = useRouter()
   const params = useParams()
 
@@ -84,16 +92,31 @@ const TorneoForm = ({ initialData, exas }: TorneoFormProps) => {
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
-    defaultValues: initialData || { name: '', image_url: '' }
+    defaultValues: initialData || {
+      name: '',
+      image_url: '',
+      fases: [],
+      points_victory: 3,
+      points_tie: 1,
+      points_defeat: 0
+    }
   })
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     try {
       setLoading(true)
 
-      const { name, image_url, exa_id } = values
+      const {
+        name,
+        image_url,
+        exa_id,
+        fases,
+        points_victory,
+        points_tie,
+        points_defeat
+      } = values
 
-      if (!name) {
+      if (!name || !exa_id || !fases.length) {
         return toast.error('Faltan datos')
       }
 
@@ -121,7 +144,10 @@ const TorneoForm = ({ initialData, exas }: TorneoFormProps) => {
           .from('torneos')
           .update({
             name,
-            image_url: imagePath || image_url
+            image_url: imagePath || image_url,
+            points_victory,
+            points_tie,
+            points_defeat
           })
           .eq('id', params.torneoId)
 
@@ -135,7 +161,10 @@ const TorneoForm = ({ initialData, exas }: TorneoFormProps) => {
         const { error: supabaseError } = await supabase.from('torneos').insert({
           name,
           image_url: imagePath,
-          exa_id
+          exa_id,
+          points_victory,
+          points_tie,
+          points_defeat
         })
         if (supabaseError) {
           console.log(supabaseError)
@@ -229,35 +258,6 @@ const TorneoForm = ({ initialData, exas }: TorneoFormProps) => {
               </FormItem>
             )}
           />
-          {/* Logo */}
-          <FormField
-            control={form.control}
-            name='image_url'
-            render={({ field }) => (
-              <FormItem className='rounded bg-white'>
-                <FormLabel>Logo</FormLabel>
-                <FormControl>
-                  <div className='flex flex-col items-center gap-2'>
-                    <Input
-                      type='file'
-                      accept='image/*'
-                      onChange={e => {
-                        field.onChange(e.target.files?.[0])
-                      }}
-                    />
-                    {typeof field.value === 'string' &&
-                    initialData?.public_image_url.length ? (
-                      <PreviewImageUrl url={initialData?.public_image_url} />
-                    ) : (
-                      <PreviewImageFile file={field.value} />
-                    )}
-                  </div>
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
           {/* Exa */}
           <FormField
             control={form.control}
@@ -328,6 +328,156 @@ const TorneoForm = ({ initialData, exas }: TorneoFormProps) => {
               </FormItem>
             )}
           />
+          {/* Logo */}
+          <FormField
+            control={form.control}
+            name='image_url'
+            render={({ field }) => (
+              <FormItem className='rounded bg-white'>
+                <FormLabel>Logo</FormLabel>
+                <FormControl>
+                  <div className='flex flex-col items-center gap-2'>
+                    <Input
+                      type='file'
+                      accept='image/*'
+                      onChange={e => {
+                        field.onChange(e.target.files?.[0])
+                      }}
+                    />
+                    {typeof field.value === 'string' &&
+                    initialData?.public_image_url.length ? (
+                      <PreviewImageUrl url={initialData?.public_image_url} />
+                    ) : (
+                      <PreviewImageFile file={field.value} />
+                    )}
+                  </div>
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          {/* Fases */}
+          <FormField
+            control={form.control}
+            name='fases'
+            render={() => (
+              <FormItem>
+                <div className='mb-2'>
+                  <FormLabel className='text-base'>Fases</FormLabel>
+                  <FormDescription>
+                    Selecciona una o varias opciones
+                  </FormDescription>
+                </div>
+                {fases.map(item => (
+                  <FormField
+                    key={item.id}
+                    control={form.control}
+                    name='fases'
+                    render={({ field }) => {
+                      return (
+                        <FormItem
+                          key={item.id}
+                          className='flex flex-row items-start space-x-3 space-y-0'>
+                          <FormControl>
+                            <Checkbox
+                              checked={field.value?.includes(item.id)}
+                              onCheckedChange={checked => {
+                                return checked
+                                  ? field.onChange([...field.value, item.id])
+                                  : field.onChange(
+                                      field.value?.filter(
+                                        value => value !== item.id
+                                      )
+                                    )
+                              }}
+                            />
+                          </FormControl>
+                          <FormLabel className='font-normal'>
+                            {item.name}
+                          </FormLabel>
+                        </FormItem>
+                      )
+                    }}
+                  />
+                ))}
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          {/* Puntos */}
+          <div className='grid grid-cols-3 gap-2'>
+            <div className='col-span-3 flex justify-center items-center gap-2 overflow-hidden text-xs text-neutral-400'>
+              <Separator />
+              Puntos
+              <Separator />
+            </div>
+            <FormField
+              control={form.control}
+              name='points_victory'
+              render={({ field }) => (
+                <FormItem className='rounded bg-white'>
+                  <FormLabel>Victoria</FormLabel>
+                  <FormControl>
+                    <Input
+                      type='number'
+                      min={0}
+                      {...field}
+                      onClick={e => e.currentTarget.select()}
+                      value={field.value === null ? 0 : field.value}
+                      onBlur={e => {
+                        form.setValue('points_victory', +e.target.value)
+                      }}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name='points_tie'
+              render={({ field }) => (
+                <FormItem className='rounded bg-white'>
+                  <FormLabel>Empate</FormLabel>
+                  <FormControl>
+                    <Input
+                      type='number'
+                      min={0}
+                      {...field}
+                      onClick={e => e.currentTarget.select()}
+                      value={field.value === null ? 0 : field.value}
+                      onBlur={e => {
+                        form.setValue('points_tie', +e.target.value)
+                      }}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name='points_defeat'
+              render={({ field }) => (
+                <FormItem className='rounded bg-white'>
+                  <FormLabel>Derrota</FormLabel>
+                  <FormControl>
+                    <Input
+                      type='number'
+                      min={0}
+                      {...field}
+                      onClick={e => e.currentTarget.select()}
+                      value={field.value === null ? 0 : field.value}
+                      onBlur={e => {
+                        form.setValue('points_defeat', +e.target.value)
+                      }}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </div>
           <div className='w-full'>
             <Button
               type='submit'

@@ -19,6 +19,13 @@ const TorneoPage = async ({
     .single()
 
   const exas = await getExas()
+  const { data: fases } = await supabase.from('fases').select()
+
+  //torneo_fase update
+  const { data: torneo_fase } = await supabase
+    .from('torneo_fase')
+    .select('fase_id')
+    .eq('torneo_id', params.torneoId)
 
   let data
 
@@ -27,14 +34,21 @@ const TorneoPage = async ({
       .from('torneos')
       .getPublicUrl(torneo.image_url!)
 
+    data = { ...torneo, public_image_url: '', fases: [] }
+
     if (storage) {
-      data = { ...torneo, public_image_url: storage.publicUrl }
+      data = { ...data, public_image_url: storage.publicUrl }
     }
+  }
+
+  if (torneo && torneo_fase) {
+    const ids = torneo_fase.map(fase => fase.fase_id)
+    data = { ...data, fases: [...ids] }
   }
 
   return (
     <div className='flex flex-col items-center'>
-      <TorneoForm initialData={data} exas={exas} />
+      <TorneoForm initialData={data} exas={exas} fases={fases || []} />
     </div>
   )
 }

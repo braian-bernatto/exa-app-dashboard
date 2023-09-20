@@ -444,34 +444,34 @@ export interface Database {
       torneo_fase: {
         Row: {
           fase_id: number
-          tipo_partido_id: number
+          tipo_partido_id: number | null
           torneo_id: string
         }
         Insert: {
           fase_id: number
-          tipo_partido_id: number
+          tipo_partido_id?: number | null
           torneo_id: string
         }
         Update: {
           fase_id?: number
-          tipo_partido_id?: number
+          tipo_partido_id?: number | null
           torneo_id?: string
         }
         Relationships: [
           {
-            foreignKeyName: "fases_torneo_fase_fk"
+            foreignKeyName: "torneo_fase_fase_id_fkey"
             columns: ["fase_id"]
             referencedRelation: "fases"
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "tipo_partido_torneo_fase_fk"
+            foreignKeyName: "torneo_fase_tipo_partido_id_fkey"
             columns: ["tipo_partido_id"]
             referencedRelation: "tipo_partido"
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "torneos_torneo_fase_fk"
+            foreignKeyName: "torneo_fase_torneo_id_fkey"
             columns: ["torneo_id"]
             referencedRelation: "torneos"
             referencedColumns: ["id"]
