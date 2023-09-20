@@ -48,6 +48,27 @@ export const columns: ColumnDef<PlayerColumn>[] = [
     cell: ({ row }) => <CellTeamImage data={row.original} />
   },
   {
+    accessorKey: 'active',
+    header: ({ column }) => {
+      return (
+        <Button
+          variant='ghost'
+          onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}>
+          Estado
+          <ArrowUpDown className='ml-2 h-4 w-4' />
+        </Button>
+      )
+    },
+    cell: ({ row }) => (
+      <span
+        className={`rounded-full shadow px-2 text-white font-semibold ${
+          row.original.active ? 'bg-emerald-500' : 'bg-pink-700'
+        }`}>
+        {row.original.active ? 'Activo' : 'Inactivo'}
+      </span>
+    )
+  },
+  {
     accessorKey: 'position_name',
     header: ({ column }) => {
       return (

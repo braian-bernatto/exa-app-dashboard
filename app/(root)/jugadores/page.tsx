@@ -5,12 +5,17 @@ import { format, parseISO } from 'date-fns'
 
 export default async function JugadoresPage() {
   const supabase = createClient()
-  const { data } = await supabase
+  const { data, error } = await supabase
     .from('players')
     .select(
       '*, teams(id, name, image_url), positions(id, name), foot(id, name)'
     )
     .order('created_at', { ascending: false })
+
+  if (error) {
+    console.log(error)
+    return <p>Hubo un error en el servidor</p>
+  }
 
   const formattedPlayers: PlayerColumn[] | undefined = data?.map(item => ({
     id: item.id,
@@ -30,6 +35,7 @@ export default async function JugadoresPage() {
     reg: item.reg,
     def: item.def,
     fis: item.fis,
+    active: item.active,
     country_iso2: item.country_iso2,
     created_at: format(parseISO(item.created_at!), 'dd/MM/yyyy')
   }))

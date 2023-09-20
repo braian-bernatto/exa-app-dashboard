@@ -10,7 +10,9 @@ import { useRouter } from 'next/navigation'
 import { columns } from './columns'
 
 interface TorneosClientProps {
-  data: (Torneos & Exas)[]
+  data: (Torneos & {
+    exas: Pick<Exas, 'id' | 'name' | 'image_url'> | null
+  })[]
 }
 
 const TorneosClient = ({ data }: TorneosClientProps) => {

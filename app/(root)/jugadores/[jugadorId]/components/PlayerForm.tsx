@@ -41,6 +41,7 @@ import { useParams, useRouter } from 'next/navigation'
 import PreviewImageUrl from '@/components/PreviewImageUrl'
 import PreviewImageFile from '../../../../../components/PreviewImageFile'
 import { AlertModal } from '@/components/modals/AlertModal'
+import { Switch } from '@/components/ui/switch'
 
 const MAX_FILE_SIZE = 5 * 1024 * 1024
 const ACCEPTED_IMAGE_TYPES = [
@@ -64,6 +65,7 @@ type PlayerType = Pick<
   | 'pas'
   | 'reg'
   | 'tir'
+  | 'active'
   | 'country_iso2'
 > & {
   public_image_url: string
@@ -111,6 +113,7 @@ const PlayerForm = ({
     position_id: z.string(),
     rating: z.coerce.number().nullable(),
     foot_id: z.coerce.number().nullable(),
+    active: z.coerce.boolean(),
     rit: z.coerce.number().nullable(),
     tir: z.coerce.number().nullable(),
     pas: z.coerce.number().nullable(),
@@ -134,7 +137,8 @@ const PlayerForm = ({
       pas: 0,
       reg: 0,
       def: 0,
-      fis: 0
+      fis: 0,
+      active: true
     }
   })
 
@@ -152,7 +156,8 @@ const PlayerForm = ({
       pas,
       reg,
       def,
-      fis
+      fis,
+      active
     } = values
     try {
       setLoading(true)
@@ -250,7 +255,8 @@ const PlayerForm = ({
             pas: pas,
             reg: reg,
             def: def,
-            fis: fis
+            fis: fis,
+            active
           })
           .eq('id', +params.jugadorId)
 
@@ -274,7 +280,8 @@ const PlayerForm = ({
           pas: pas,
           reg: reg,
           def: def,
-          fis: fis
+          fis: fis,
+          active
         })
 
         if (supabaseError) {
@@ -330,8 +337,7 @@ const PlayerForm = ({
       <Form {...form}>
         <form
           onSubmit={form.handleSubmit(onSubmit)}
-          className='flex flex-col w-full max-w-xs rounded bg-white py-3 px-4 shadow gap-5 justify-center'
-        >
+          className='flex flex-col w-full max-w-xs rounded bg-white py-3 px-4 shadow gap-5 justify-center'>
           <div className='flex gap-2'>
             <span className='bg-gradient-to-r from-emerald-300 to-emerald-700 rounded-full p-2 flex items-center justify-center'>
               <UserPlus className='text-white' size={30} />
@@ -346,8 +352,7 @@ const PlayerForm = ({
                 disabled={loading}
                 variant='destructive'
                 size='icon'
-                onClick={() => setOpen(true)}
-              >
+                onClick={() => setOpen(true)}>
                 <Trash className='h-4 w-4' />
               </Button>
             )}
@@ -382,8 +387,7 @@ const PlayerForm = ({
                         className={cn(
                           'w-full justify-between',
                           !field.value && 'text-muted-foreground'
-                        )}
-                      >
+                        )}>
                         {field.value
                           ? teams.find(team => team.id === field.value)?.name
                           : 'Elige un equipo'}
@@ -402,8 +406,7 @@ const PlayerForm = ({
                             key={team.id}
                             onSelect={() => {
                               form.setValue('team_id', team.id)
-                            }}
-                          >
+                            }}>
                             <>
                               <Check
                                 className={cn(
@@ -432,6 +435,25 @@ const PlayerForm = ({
                     </Command>
                   </PopoverContent>
                 </Popover>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          {/* Active */}
+          <FormField
+            control={form.control}
+            name='active'
+            render={({ field }) => (
+              <FormItem className='rounded bg-white'>
+                <FormLabel>Activo</FormLabel>
+                <FormControl>
+                  <div className='flex items-center'>
+                    <Switch
+                      checked={field.value}
+                      onCheckedChange={field.onChange}
+                    />
+                  </div>
+                </FormControl>
                 <FormMessage />
               </FormItem>
             )}
@@ -480,8 +502,7 @@ const PlayerForm = ({
                         className={cn(
                           'w-full justify-between',
                           !field.value && 'text-muted-foreground'
-                        )}
-                      >
+                        )}>
                         {field.value
                           ? positions.find(
                               position => position.id === field.value
@@ -502,8 +523,7 @@ const PlayerForm = ({
                             key={position.id}
                             onSelect={() => {
                               form.setValue('position_id', position.id)
-                            }}
-                          >
+                            }}>
                             <Check
                               className={cn(
                                 'mr-2 h-4 w-4',
@@ -539,8 +559,7 @@ const PlayerForm = ({
                         className={cn(
                           'w-full justify-between',
                           !field.value && 'text-muted-foreground'
-                        )}
-                      >
+                        )}>
                         {field.value
                           ? countries.find(
                               country => country.iso2 === field.value
@@ -561,8 +580,7 @@ const PlayerForm = ({
                             key={country.id}
                             onSelect={() => {
                               form.setValue('country_iso2', country.iso2)
-                            }}
-                          >
+                            }}>
                             <>
                               <Check
                                 className={cn(
@@ -602,13 +620,11 @@ const PlayerForm = ({
                   <RadioGroup
                     onValueChange={field.onChange}
                     defaultValue={field.value?.toString()}
-                    className='flex flex-col space-y-1'
-                  >
+                    className='flex flex-col space-y-1'>
                     {foot.map(f => (
                       <FormItem
                         className='flex items-center space-x-3 space-y-0'
-                        key={f.id}
-                      >
+                        key={f.id}>
                         <FormControl>
                           <RadioGroupItem value={f.id.toString()} />
                         </FormControl>
@@ -796,8 +812,7 @@ const PlayerForm = ({
               type='submit'
               variant={'default'}
               className='w-full'
-              disabled={loading}
-            >
+              disabled={loading}>
               {action}
             </Button>
           </div>
