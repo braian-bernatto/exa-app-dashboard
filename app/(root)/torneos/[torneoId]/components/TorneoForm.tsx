@@ -56,7 +56,8 @@ const formSchema = z.object({
       'Sólo se aceptan los formatos .jpg .jpeg .png .webp'
     )
     .or(z.string())
-    .optional(),
+    .optional()
+    .nullable(),
   exa_id: z.coerce.number({ invalid_type_error: 'Obligatorio' })
 })
 
@@ -91,6 +92,7 @@ const TorneoForm = ({ initialData, exas }: TorneoFormProps) => {
       setLoading(true)
 
       const { name, image_url, exa_id } = values
+
       if (!name) {
         return toast.error('Faltan datos')
       }
@@ -121,7 +123,7 @@ const TorneoForm = ({ initialData, exas }: TorneoFormProps) => {
             name,
             image_url: imagePath || image_url
           })
-          .eq('id', +params.torneoId)
+          .eq('id', params.torneoId)
 
         if (supabaseError) {
           console.log(supabaseError)
@@ -159,7 +161,7 @@ const TorneoForm = ({ initialData, exas }: TorneoFormProps) => {
       const { error } = await supabase
         .from('torneos')
         .delete()
-        .eq('id', +params.torneoId)
+        .eq('id', params.torneoId)
 
       if (error) {
         console.log(error)
@@ -192,7 +194,11 @@ const TorneoForm = ({ initialData, exas }: TorneoFormProps) => {
           className='flex flex-col w-full max-w-xs rounded bg-white py-3 px-4 shadow gap-5 justify-center'>
           <div className='flex gap-2'>
             <span className='bg-gradient-to-r from-emerald-300 to-emerald-700 rounded-full p-2 flex items-center justify-center'>
-              <Trophy className='text-white' size={30} />
+              <Trophy
+                className='text-white'
+                size={30}
+                onClick={() => console.log(form.getValues())}
+              />
             </span>
             <h1 className='text-xl font-semibold flex items-center gap-2'>
               {title}
