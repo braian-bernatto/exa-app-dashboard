@@ -39,11 +39,11 @@ const TorneoPage = async ({
     if (storage) {
       data = { ...data, public_image_url: storage.publicUrl }
     }
-  }
 
-  if (torneo && torneo_fase) {
-    const ids = torneo_fase.map(fase => fase.fase_id)
-    data = { ...data, fases: [...ids] }
+    if (torneo_fase) {
+      const ids = torneo_fase.map(fase => fase.fase_id)
+      data = { ...data, fases: [...ids] }
+    }
   }
 
   return (

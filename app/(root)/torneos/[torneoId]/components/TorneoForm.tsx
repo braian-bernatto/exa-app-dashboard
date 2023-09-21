@@ -140,7 +140,7 @@ const TorneoForm = ({ initialData, exas, fases }: TorneoFormProps) => {
 
       if (initialData) {
         //update
-        const { error: supabaseError } = await supabase
+        const { error } = await supabase
           .from('torneos')
           .update({
             name,
@@ -151,25 +151,94 @@ const TorneoForm = ({ initialData, exas, fases }: TorneoFormProps) => {
           })
           .eq('id', params.torneoId)
 
-        if (supabaseError) {
-          console.log(supabaseError)
+        if (error) {
+          console.log(error)
           setLoading(false)
           return toast.error(`No se pudo ${action}`)
         }
-      } else {
-        //insert
-        const { error: supabaseError } = await supabase.from('torneos').insert({
-          name,
-          image_url: imagePath,
-          exa_id,
-          points_victory,
-          points_tie,
-          points_defeat
+
+        // update torneo fase
+        // check if a fase was deleted
+        const deletedFase = initialData.fases.filter(fase => {
+          if (!fases.includes(fase)) {
+            return fase
+          }
         })
-        if (supabaseError) {
-          console.log(supabaseError)
+
+        if (deletedFase.length) {
+          const { error } = await supabase
+            .from('torneo_fase')
+            .delete()
+            .eq('torneo_id', params.torneoId)
+            .eq('fase_id', deletedFase)
+
+          if (error) {
+            console.log(error)
+            setLoading(false)
+            return toast.error(`No se pudo borrar fase`)
+          }
+        }
+
+        // check if new fase was added
+        const newFase = fases.filter(fase => {
+          if (!initialData.fases.includes(fase)) {
+            return fase
+          }
+        })
+
+        //insert torneos fase
+        if (newFase.length > 0) {
+          const fasesFormatted = fases.map(fase => ({
+            torneo_id: initialData.id,
+            fase_id: fase
+          }))
+
+          const { error: supabaseError } = await supabase
+            .from('torneo_fase')
+            .upsert(fasesFormatted)
+
+          if (supabaseError) {
+            console.log(supabaseError)
+            setLoading(false)
+            return toast.error(`No se pudo ${action} en Torneo Fase`)
+          }
+        }
+      } else {
+        //insert torneos
+        const { data, error } = await supabase
+          .from('torneos')
+          .insert({
+            name,
+            image_url: imagePath,
+            exa_id,
+            points_victory,
+            points_tie,
+            points_defeat
+          })
+          .select()
+
+        if (error) {
+          console.log(error)
           setLoading(false)
           return toast.error(`No se pudo ${action}`)
+        }
+
+        //insert torneos fase
+        if (data && fases.length > 0) {
+          const fasesFormatted = fases.map(fase => ({
+            torneo_id: data[0].id,
+            fase_id: fase
+          }))
+
+          const { error: supabaseError } = await supabase
+            .from('torneo_fase')
+            .insert(fasesFormatted)
+
+          if (supabaseError) {
+            console.log(supabaseError)
+            setLoading(false)
+            return toast.error(`No se pudo ${action} en Torneo Fase`)
+          }
         }
       }
 
