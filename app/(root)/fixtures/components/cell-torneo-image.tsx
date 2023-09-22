@@ -13,10 +13,10 @@ const CellTorneoImage = ({ data }: CellTorneoImageProps) => {
 
   let url = ''
 
-  if (data.torneo_fase!.torneos!.image_url) {
+  if (data.torneo_image_url) {
     const { data: storage } = supabase.storage
       .from('torneos')
-      .getPublicUrl(data.torneo_fase!.torneos!.image_url)
+      .getPublicUrl(data.torneo_image_url)
     url = storage.publicUrl
   }
 
@@ -35,7 +35,7 @@ const CellTorneoImage = ({ data }: CellTorneoImageProps) => {
           />
         )}
       </div>
-      {data.torneo_fase!.torneos!.name}
+      {data.torneo}
     </div>
   )
 }

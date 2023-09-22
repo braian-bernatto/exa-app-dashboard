@@ -8,12 +8,12 @@ interface CellLocalProps {
 const CellLocal = ({ data }: CellLocalProps) => {
   return (
     <span className='flex gap-2 items-center'>
-      {data.locations ? (
+      {data.location_name ? (
         <>
           <span className='flex-none'>
             <MapPin className='text-muted-foreground' />
           </span>
-          {data.locations.name}
+          {data.location_name}
         </>
       ) : (
         <MapPinOff className='text-muted-foreground' />

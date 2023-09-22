@@ -459,6 +459,12 @@ export interface Database {
         }
         Relationships: [
           {
+            foreignKeyName: "fases_torneo_fase_fk"
+            columns: ["fase_id"]
+            referencedRelation: "fases"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "torneo_fase_fase_id_fkey"
             columns: ["fase_id"]
             referencedRelation: "fases"
@@ -472,6 +478,12 @@ export interface Database {
           },
           {
             foreignKeyName: "torneo_fase_torneo_id_fkey"
+            columns: ["torneo_id"]
+            referencedRelation: "torneos"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "torneos_torneo_fase_fk"
             columns: ["torneo_id"]
             referencedRelation: "torneos"
             referencedColumns: ["id"]
@@ -617,6 +629,22 @@ export interface Database {
           fixture: number
         }
         Returns: Json
+      }
+      get_fixtures: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          fixture_id: string
+          torneo_id: string
+          fase_id: number
+          name: string
+          location_id: number
+          location_name: string
+          exa: string
+          torneo: string
+          torneo_image_url: string
+          fase: string
+          tipo: string
+        }[]
       }
       get_fixtures_by_torneo: {
         Args: {

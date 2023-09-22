@@ -1,6 +1,6 @@
 'use client'
 
-import { Fixtures } from '@/types'
+import { GetFixtures } from '@/types'
 import { ColumnDef } from '@tanstack/react-table'
 import CellAction from './cell-action'
 import CellTorneoImage from './cell-torneo-image'
@@ -8,13 +8,7 @@ import CellLocal from './cell-local'
 import { Button } from '@/components/ui/button'
 import { ArrowUpDown } from 'lucide-react'
 
-export type FixtureColumn = Fixtures & {
-  torneo_fase: {
-    torneos: { name: string | null; image_url: string | null } | null
-    fases: { name: string | null } | null
-  } | null
-  locations: { name: string | null } | null
-}
+export type FixtureColumn = GetFixtures[0]
 
 export const columns: ColumnDef<FixtureColumn>[] = [
   {
@@ -22,7 +16,7 @@ export const columns: ColumnDef<FixtureColumn>[] = [
     header: 'Nombre'
   },
   {
-    accessorKey: 'torneo_fase.fases.name',
+    accessorKey: 'fase',
     header: ({ column }) => {
       return (
         <Button
@@ -35,8 +29,7 @@ export const columns: ColumnDef<FixtureColumn>[] = [
     }
   },
   {
-    id: 'torneo_fase.torneos.name',
-    accessorKey: 'torneo_fase.torneos.name',
+    accessorKey: 'torneo',
     header: ({ column }) => {
       return (
         <Button
@@ -50,7 +43,7 @@ export const columns: ColumnDef<FixtureColumn>[] = [
     cell: ({ row }) => <CellTorneoImage data={row.original} />
   },
   {
-    accessorKey: 'locations.name',
+    accessorKey: 'location_name',
     header: 'Local',
     cell: ({ row }) => <CellLocal data={row.original} />
   },
