@@ -3,9 +3,7 @@ import { createClient } from '@/utils/supabaseServer'
 
 export default async function FixturesPage() {
   const supabase = createClient()
-  const { data, error } = await supabase
-    .rpc('get_fixtures')
-    .order('fixture_id', { ascending: true })
+  const { data, error } = await supabase.rpc('get_fixtures')
 
   if (error) {
     console.log(error)

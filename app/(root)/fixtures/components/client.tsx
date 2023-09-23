@@ -30,7 +30,7 @@ const FixtureClient = ({ data }: FixtureClientProps) => {
         columns={columns}
         data={data}
         filterLabel='Torneo'
-        filterKey='torneos.name'
+        filterKey='torneo'
       />
     </>
   )

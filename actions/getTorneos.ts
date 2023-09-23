@@ -6,7 +6,7 @@ const getTorneos = async (): Promise<Torneos[]> => {
   const { data, error } = await supabase
     .from('torneos')
     .select()
-    .order('created_at', { ascending: false })
+    .order('id', { ascending: false })
 
   if (error) {
     console.log(error)

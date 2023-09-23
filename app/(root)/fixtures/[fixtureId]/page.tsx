@@ -17,9 +17,8 @@ const FixutrePage = async ({
   const locations = await getLocations()
 
   const { data: fixture } = await supabase
-    .from('fixtures')
-    .select('*, torneos(name, image_url)')
-    .eq('id', +params.fixtureId)
+    .rpc('get_fixtures')
+    .eq('id', params.fixtureId)
     .single()
 
   let data
@@ -27,7 +26,7 @@ const FixutrePage = async ({
   if (fixture) {
     const { data: storage } = supabase.storage
       .from('torneos')
-      .getPublicUrl(fixture.torneos?.image_url!)
+      .getPublicUrl(fixture.torneo_image_url)
     if (storage) {
       data = { ...fixture, torneo_public_image_url: storage.publicUrl }
     }
@@ -39,10 +38,16 @@ const FixutrePage = async ({
     .eq('fixture_id', +params.fixtureId)
     .order('date', { ascending: true })
 
+  const { data: tipos_partido } = await supabase
+    .from('tipo_partido')
+    .select()
+    .order('id', { ascending: true })
+
   return (
     <div className='flex flex-col gap-5'>
       <FixtureDetailsClient
         torneos={torneos}
+        tiposPartido={tipos_partido || []}
         locations={locations}
         data={data}
         fixtureDetails={fixtureDetails || []}

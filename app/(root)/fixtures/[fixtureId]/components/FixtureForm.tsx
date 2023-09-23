@@ -1,6 +1,6 @@
 'use client'
 import { useSupabase } from '@/providers/SupabaseProvider'
-import { Fixtures, Locations, Torneos } from '@/types'
+import { GetFixtures, Locations, TiposPartido, Torneos } from '@/types'
 import { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import * as z from 'zod'
@@ -41,26 +41,34 @@ import {
 import Image from 'next/image'
 import { toast } from 'react-hot-toast'
 import { AlertModal } from '@/components/modals/AlertModal'
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
 
 export const revalidate = 0
 
-export type FixtureType = Fixtures & {
+export type FixtureType = GetFixtures[0] & {
   torneo_public_image_url: string
 }
 
 interface FixtureFormProps {
   initialData: FixtureType | undefined
   torneos: Torneos[]
+  tiposPartido: TiposPartido[] | []
   locations: Locations[]
 }
 
-const FixtureForm = ({ initialData, torneos, locations }: FixtureFormProps) => {
+const FixtureForm = ({
+  initialData,
+  torneos,
+  tiposPartido,
+  locations
+}: FixtureFormProps) => {
   const router = useRouter()
   const params = useParams()
 
   const { supabase } = useSupabase()
   const [loading, setLoading] = useState(false)
   const [open, setOpen] = useState(false)
+  const [fases, setFases] = useState<{ id: number; name: string }[]>([])
 
   const title = initialData ? 'Editar Fixture' : 'Agregar Fixture'
   const toastMessage = initialData ? 'Fixture modificado' : 'Fixture agregado'
@@ -68,7 +76,15 @@ const FixtureForm = ({ initialData, torneos, locations }: FixtureFormProps) => {
 
   const formSchema = z.object({
     name: z.string().min(1, { message: 'Obligatorio' }),
-    torneo_id: z.coerce.number({
+    torneo_id: z.coerce.string({
+      required_error: 'Obligatorio',
+      invalid_type_error: 'Obligatorio'
+    }),
+    fase_id: z.coerce.number({
+      required_error: 'Obligatorio',
+      invalid_type_error: 'Obligatorio'
+    }),
+    tipo_partido_id: z.coerce.number({
       required_error: 'Obligatorio',
       invalid_type_error: 'Obligatorio'
     }),
@@ -80,12 +96,28 @@ const FixtureForm = ({ initialData, torneos, locations }: FixtureFormProps) => {
     defaultValues: initialData || {
       name: '',
       torneo_id: undefined,
+      fase_id: undefined,
+      tipo_partido_id: undefined,
       location_id: undefined
     }
   })
 
+  async function getTorneoFases(torneoId: string) {
+    const { data, error } = await supabase.rpc('get_fases_torneo', {
+      torneo: torneoId
+    })
+
+    if (error) {
+      return toast.error('No se pudo encontrar fase')
+    }
+    console.log({ data })
+    const fases = data.map(item => ({ id: item.fase_id, name: item.fase }))
+    setFases(fases)
+    return data
+  }
+
   async function onSubmit(values: z.infer<typeof formSchema>) {
-    const { name, torneo_id, location_id } = values
+    const { name, torneo_id, fase_id, location_id } = values
 
     try {
       setLoading(true)
@@ -101,6 +133,7 @@ const FixtureForm = ({ initialData, torneos, locations }: FixtureFormProps) => {
           .update({
             name,
             torneo_id,
+            fase_id,
             location_id
           })
           .eq('id', +params.fixtureId)
@@ -114,6 +147,7 @@ const FixtureForm = ({ initialData, torneos, locations }: FixtureFormProps) => {
         const { error } = await supabase.from('fixtures').insert({
           name,
           torneo_id,
+          fase_id,
           location_id
         })
 
@@ -173,7 +207,11 @@ const FixtureForm = ({ initialData, torneos, locations }: FixtureFormProps) => {
           className='flex flex-col w-full max-w-xs rounded bg-white py-3 px-4 shadow gap-5 justify-center self-center'>
           <div className='flex gap-2'>
             <span className='bg-gradient-to-r from-emerald-300 to-emerald-700 rounded-full p-2 flex items-center justify-center'>
-              <Swords className='text-white' size={30} />
+              <Swords
+                className='text-white'
+                size={30}
+                onClick={() => console.log(form.getValues())}
+              />
             </span>
             <h1 className='text-xl font-semibold flex items-center gap-2'>
               {title}
@@ -242,6 +280,7 @@ const FixtureForm = ({ initialData, torneos, locations }: FixtureFormProps) => {
                             key={torneo.id}
                             onSelect={() => {
                               form.setValue('torneo_id', torneo.id)
+                              getTorneoFases(torneo.id)
                             }}>
                             <>
                               <Check
@@ -271,6 +310,64 @@ const FixtureForm = ({ initialData, torneos, locations }: FixtureFormProps) => {
                     </Command>
                   </PopoverContent>
                 </Popover>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          {/* fases */}
+          <FormField
+            control={form.control}
+            name='fase_id'
+            render={({ field }) => (
+              <FormItem className='space-y-3'>
+                <FormLabel>Fases</FormLabel>
+                <FormControl>
+                  <RadioGroup
+                    onValueChange={field.onChange}
+                    defaultValue={`${field.value}`}
+                    className='flex flex-col space-y-1'>
+                    {fases.map(fase => (
+                      <FormItem className='flex items-center space-x-3 space-y-0'>
+                        <FormControl>
+                          <RadioGroupItem value={fase.id.toString()} />
+                        </FormControl>
+                        <FormLabel className='font-normal'>
+                          {fase.name}
+                        </FormLabel>
+                      </FormItem>
+                    ))}
+                  </RadioGroup>
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          {/* tipo partido */}
+          <FormField
+            control={form.control}
+            name='tipo_partido_id'
+            render={({ field }) => (
+              <FormItem className='space-y-3'>
+                <FormLabel>Tipo Partido</FormLabel>
+                <FormControl>
+                  <RadioGroup
+                    onValueChange={field.onChange}
+                    defaultValue={`${field.value}`}
+                    className='flex flex-col space-y-1'>
+                    {tiposPartido.map(tipo => (
+                      <FormItem className='flex items-center space-x-3 space-y-0'>
+                        <FormControl>
+                          <RadioGroupItem value={tipo.id.toString()} />
+                        </FormControl>
+                        <FormLabel className='font-normal'>
+                          {tipo.name}
+                        </FormLabel>
+                      </FormItem>
+                    ))}
+                  </RadioGroup>
+                </FormControl>
                 <FormMessage />
               </FormItem>
             )}

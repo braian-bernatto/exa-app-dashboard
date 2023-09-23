@@ -74,65 +74,50 @@ export interface Database {
       }
       fixture_players: {
         Row: {
-          fase_id: number
           fixture_id: string
           goals: number
           is_local: boolean
+          is_present: boolean
           player_id: number
           red_card: boolean
           red_card_motive: string | null
           team_id: number
           team_local: number
           team_visit: number
-          torneo_id: string
           yellow_cards: number
         }
         Insert: {
-          fase_id: number
           fixture_id: string
           goals: number
           is_local: boolean
+          is_present?: boolean
           player_id: number
           red_card?: boolean
           red_card_motive?: string | null
           team_id: number
           team_local: number
           team_visit: number
-          torneo_id: string
           yellow_cards?: number
         }
         Update: {
-          fase_id?: number
           fixture_id?: string
           goals?: number
           is_local?: boolean
+          is_present?: boolean
           player_id?: number
           red_card?: boolean
           red_card_motive?: string | null
           team_id?: number
           team_local?: number
           team_visit?: number
-          torneo_id?: string
           yellow_cards?: number
         }
         Relationships: [
           {
             foreignKeyName: "fixture_teams_fixture_players_fk"
-            columns: [
-              "fixture_id",
-              "torneo_id",
-              "fase_id",
-              "team_local",
-              "team_visit"
-            ]
+            columns: ["fixture_id", "team_local", "team_visit"]
             referencedRelation: "fixture_teams"
-            referencedColumns: [
-              "fixture_id",
-              "torneo_id",
-              "fase_id",
-              "team_local",
-              "team_visit"
-            ]
+            referencedColumns: ["fixture_id", "team_local", "team_visit"]
           },
           {
             foreignKeyName: "players_fixture_players_fk"
@@ -150,38 +135,32 @@ export interface Database {
       }
       fixture_teams: {
         Row: {
-          fase_id: number
           fixture_id: string
           team_local: number
           team_visit: number
-          torneo_id: string
           walkover_local: boolean
           walkover_visit: boolean
         }
         Insert: {
-          fase_id: number
           fixture_id: string
           team_local: number
           team_visit: number
-          torneo_id: string
           walkover_local?: boolean
           walkover_visit?: boolean
         }
         Update: {
-          fase_id?: number
           fixture_id?: string
           team_local?: number
           team_visit?: number
-          torneo_id?: string
           walkover_local?: boolean
           walkover_visit?: boolean
         }
         Relationships: [
           {
             foreignKeyName: "fixtures_fixture_teams_fk"
-            columns: ["fixture_id", "torneo_id", "fase_id"]
+            columns: ["fixture_id"]
             referencedRelation: "fixtures"
-            referencedColumns: ["fixture_id", "torneo_id", "fase_id"]
+            referencedColumns: ["id"]
           },
           {
             foreignKeyName: "teams_fixture_teams_fk"
@@ -200,28 +179,34 @@ export interface Database {
       fixtures: {
         Row: {
           fase_id: number
-          fixture_id: string
-          location_id: number
+          id: string
+          location_id: number | null
           name: string
           torneo_id: string
         }
         Insert: {
           fase_id: number
-          fixture_id?: string
-          location_id: number
+          id?: string
+          location_id?: number | null
           name: string
           torneo_id: string
         }
         Update: {
           fase_id?: number
-          fixture_id?: string
-          location_id?: number
+          id?: string
+          location_id?: number | null
           name?: string
           torneo_id?: string
         }
         Relationships: [
           {
             foreignKeyName: "fixtures_location_id_fkey"
+            columns: ["location_id"]
+            referencedRelation: "locations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "locations_fixtures_fk"
             columns: ["location_id"]
             referencedRelation: "locations"
             referencedColumns: ["id"]
@@ -624,6 +609,20 @@ export interface Database {
         }
         Returns: boolean
       }
+      get_fases_torneo: {
+        Args: {
+          torneo: string
+        }
+        Returns: {
+          torneo_id: string
+          fase_id: number
+          tipo_partido_id: number
+          torneo: string
+          torneo_image_url: string
+          fase: string
+          tipo_partido_name: string
+        }[]
+      }
       get_fixture_details: {
         Args: {
           fixture: number
@@ -638,12 +637,13 @@ export interface Database {
           fase_id: number
           name: string
           location_id: number
-          location_name: string
           exa: string
           torneo: string
           torneo_image_url: string
           fase: string
-          tipo: string
+          tipo_partido_id: number
+          tipo_partido_name: string
+          location_name: string
         }[]
       }
       get_fixtures_by_torneo: {
