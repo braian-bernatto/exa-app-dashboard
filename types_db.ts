@@ -523,48 +523,11 @@ export interface Database {
         }
         Returns: Record<string, unknown>
       }
-      delete_goals: {
-        Args: {
-          fixture: number
-          team_1: number
-          team_2: number
-        }
-        Returns: boolean
-      }
-      delete_not_goals: {
-        Args: {
-          fixture: number
-          player_ids: number[]
-        }
-        Returns: boolean
-      }
-      delete_not_red_cards: {
-        Args: {
-          fixture: number
-          player_ids: number[]
-        }
-        Returns: boolean
-      }
-      delete_not_yellow_cards_array: {
-        Args: {
-          fixture: number
-          player_ids: number[]
-        }
-        Returns: boolean
-      }
       delete_player_image: {
         Args: {
           image_url: string
         }
         Returns: Record<string, unknown>
-      }
-      delete_red_cards: {
-        Args: {
-          fixture: number
-          team_1: number
-          team_2: number
-        }
-        Returns: boolean
       }
       delete_storage_object: {
         Args: {
@@ -585,23 +548,7 @@ export interface Database {
         }
         Returns: Record<string, unknown>
       }
-      delete_versus: {
-        Args: {
-          fixture: number
-          team_one: number
-          team_two: number
-        }
-        Returns: boolean
-      }
       delete_walkovers: {
-        Args: {
-          fixture: number
-          team_1: number
-          team_2: number
-        }
-        Returns: boolean
-      }
-      delete_yellow_cards: {
         Args: {
           fixture: number
           team_1: number
@@ -633,7 +580,8 @@ export interface Database {
           fase_id: number
           name: string
           location_id: number
-          exa: string
+          exa_id: number
+          exa_name: string
           torneo: string
           torneo_image_url: string
           fase: string
@@ -656,27 +604,14 @@ export interface Database {
           fase_id: number
           name: string
           location_id: number
-          exa: string
+          exa_id: number
+          exa_name: string
           torneo: string
           torneo_image_url: string
           fase: string
           tipo_partido_id: number
           tipo_partido_name: string
           location_name: string
-        }[]
-      }
-      get_fixtures_by_torneo: {
-        Args: {
-          torneo_id: number
-        }
-        Returns: {
-          id: number
-          created_at: string
-          name: string
-          location_id: number
-          torneo_id: number
-          date: string
-          location: string
         }[]
       }
       get_goals: {
