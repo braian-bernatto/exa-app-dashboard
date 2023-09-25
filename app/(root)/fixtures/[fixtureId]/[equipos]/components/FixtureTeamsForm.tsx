@@ -120,7 +120,7 @@ const FixtureTeamsForm = ({
 
   const formSchema = z
     .object({
-      fixture_id: z.coerce.number({
+      fixture_id: z.coerce.string({
         required_error: 'Obligatorio',
         invalid_type_error: 'Obligatorio'
       }),
@@ -586,37 +586,37 @@ const FixtureTeamsForm = ({
           )
 
           // clear all tables
-          const { error: deleteGoalsError } = await supabase.rpc(
-            'delete_not_goals',
-            {
-              fixture: fixture_id,
-              player_ids: notGoalsArray
-            }
-          )
-          const { error: deleteYellowCardsError } = await supabase.rpc(
-            'delete_not_yellow_cards_array',
-            {
-              fixture: fixture_id,
-              player_ids: notYellowCardsArray
-            }
-          )
-          const { error: deleteRedCardsError } = await supabase.rpc(
-            'delete_not_red_cards',
-            {
-              fixture: fixture_id,
-              player_ids: notRedCardsArray
-            }
-          )
+          // const { error: deleteGoalsError } = await supabase.rpc(
+          //   'delete_not_goals',
+          //   {
+          //     fixture: fixture_id,
+          //     player_ids: notGoalsArray
+          //   }
+          // )
+          // const { error: deleteYellowCardsError } = await supabase.rpc(
+          //   'delete_not_yellow_cards_array',
+          //   {
+          //     fixture: fixture_id,
+          //     player_ids: notYellowCardsArray
+          //   }
+          // )
+          // const { error: deleteRedCardsError } = await supabase.rpc(
+          //   'delete_not_red_cards',
+          //   {
+          //     fixture: fixture_id,
+          //     player_ids: notRedCardsArray
+          //   }
+          // )
 
           // delete previous walkover
-          const { data, error: deleteWalkoversError } = await supabase.rpc(
-            'delete_walkovers',
-            {
-              fixture: fixture_id,
-              team_1,
-              team_2
-            }
-          )
+          // const { data, error: deleteWalkoversError } = await supabase.rpc(
+          //   'delete_walkovers',
+          //   {
+          //     fixture: fixture_id,
+          //     team_1,
+          //     team_2
+          //   }
+          // )
 
           // upsert goals
           const goalsArray = modifiedRows

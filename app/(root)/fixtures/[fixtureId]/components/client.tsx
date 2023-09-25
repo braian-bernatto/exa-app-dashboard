@@ -26,6 +26,8 @@ const FixtureDetailsClient = ({
 }: FixtureDetailsClientProps) => {
   const router = useRouter()
   const params = useParams()
+
+  console.log({ data })
   return (
     <>
       <FixtureForm

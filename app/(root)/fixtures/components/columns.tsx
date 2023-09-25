@@ -16,19 +16,6 @@ export const columns: ColumnDef<FixtureColumn>[] = [
     header: 'Nombre'
   },
   {
-    accessorKey: 'fase',
-    header: ({ column }) => {
-      return (
-        <Button
-          variant='ghost'
-          onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}>
-          Fase
-          <ArrowUpDown className='ml-2 h-4 w-4' />
-        </Button>
-      )
-    }
-  },
-  {
     accessorKey: 'torneo',
     header: ({ column }) => {
       return (
@@ -43,8 +30,43 @@ export const columns: ColumnDef<FixtureColumn>[] = [
     cell: ({ row }) => <CellTorneoImage data={row.original} />
   },
   {
+    accessorKey: 'fase',
+    header: ({ column }) => {
+      return (
+        <Button
+          variant='ghost'
+          onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}>
+          Fase
+          <ArrowUpDown className='ml-2 h-4 w-4' />
+        </Button>
+      )
+    }
+  },
+  {
+    accessorKey: 'tipo_partido_name',
+    header: ({ column }) => {
+      return (
+        <Button
+          variant='ghost'
+          onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}>
+          Tipo Partido
+          <ArrowUpDown className='ml-2 h-4 w-4' />
+        </Button>
+      )
+    }
+  },
+  {
     accessorKey: 'location_name',
-    header: 'Local',
+    header: ({ column }) => {
+      return (
+        <Button
+          variant='ghost'
+          onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}>
+          Local
+          <ArrowUpDown className='ml-2 h-4 w-4' />
+        </Button>
+      )
+    },
     cell: ({ row }) => <CellLocal data={row.original} />
   },
   {

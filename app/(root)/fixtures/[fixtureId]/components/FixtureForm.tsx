@@ -1,7 +1,7 @@
 'use client'
 import { useSupabase } from '@/providers/SupabaseProvider'
 import { GetFixtures, Locations, TiposPartido, Torneos } from '@/types'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useForm } from 'react-hook-form'
 import * as z from 'zod'
 import { zodResolver } from '@hookform/resolvers/zod'
@@ -110,14 +110,13 @@ const FixtureForm = ({
     if (error) {
       return toast.error('No se pudo encontrar fase')
     }
-    console.log({ data })
     const fases = data.map(item => ({ id: item.fase_id, name: item.fase }))
     setFases(fases)
     return data
   }
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
-    const { name, torneo_id, fase_id, location_id } = values
+    const { name, torneo_id, fase_id, location_id, tipo_partido_id } = values
 
     try {
       setLoading(true)
@@ -132,16 +131,26 @@ const FixtureForm = ({
           .from('fixtures')
           .update({
             name,
-            torneo_id,
-            fase_id,
             location_id
           })
-          .eq('id', +params.fixtureId)
+          .eq('id', params.fixtureId)
 
         if (error) {
           console.log(error)
           setLoading(false)
           return toast.error(`No se pudo ${action}`)
+        }
+
+        const { error: torneoFaseError } = await supabase
+          .from('torneo_fase')
+          .update({ tipo_partido_id })
+          .eq('torneo_id', torneo_id)
+          .eq('fase_id', fase_id)
+
+        if (torneoFaseError) {
+          console.log(torneoFaseError)
+          setLoading(false)
+          return toast.error(`No se pudo ${action} tipo partido`)
         }
       } else {
         const { error } = await supabase.from('fixtures').insert({
@@ -155,6 +164,18 @@ const FixtureForm = ({
           console.log(error)
           setLoading(false)
           return toast.error(`No se pudo ${action}`)
+        }
+
+        const { error: torneoFaseError } = await supabase
+          .from('torneo_fase')
+          .update({ tipo_partido_id })
+          .eq('torneo_id', torneo_id)
+          .eq('fase_id', fase_id)
+
+        if (torneoFaseError) {
+          console.log(torneoFaseError)
+          setLoading(false)
+          return toast.error(`No se pudo ${action} tipo partido`)
         }
       }
 
@@ -175,7 +196,7 @@ const FixtureForm = ({
       const { error } = await supabase
         .from('fixtures')
         .delete()
-        .eq('id', +params.fixtureId)
+        .eq('id', params.fixtureId)
 
       if (error) {
         console.log(error)
@@ -192,6 +213,12 @@ const FixtureForm = ({
       setOpen(false)
     }
   }
+
+  useEffect(() => {
+    if (initialData) {
+      getTorneoFases(initialData.torneo_id)
+    }
+  }, [])
 
   return (
     <>
@@ -324,11 +351,14 @@ const FixtureForm = ({
                 <FormLabel>Fases</FormLabel>
                 <FormControl>
                   <RadioGroup
+                    disabled={initialData ? true : false}
                     onValueChange={field.onChange}
                     defaultValue={`${field.value}`}
                     className='flex flex-col space-y-1'>
                     {fases.map(fase => (
-                      <FormItem className='flex items-center space-x-3 space-y-0'>
+                      <FormItem
+                        key={fase.id}
+                        className='flex items-center space-x-3 space-y-0'>
                         <FormControl>
                           <RadioGroupItem value={fase.id.toString()} />
                         </FormControl>
@@ -357,7 +387,9 @@ const FixtureForm = ({
                     defaultValue={`${field.value}`}
                     className='flex flex-col space-y-1'>
                     {tiposPartido.map(tipo => (
-                      <FormItem className='flex items-center space-x-3 space-y-0'>
+                      <FormItem
+                        key={tipo.id}
+                        className='flex items-center space-x-3 space-y-0'>
                         <FormControl>
                           <RadioGroupItem value={tipo.id.toString()} />
                         </FormControl>

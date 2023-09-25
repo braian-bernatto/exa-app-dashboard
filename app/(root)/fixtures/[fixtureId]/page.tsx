@@ -17,8 +17,9 @@ const FixutrePage = async ({
   const locations = await getLocations()
 
   const { data: fixture } = await supabase
-    .rpc('get_fixtures')
-    .eq('id', params.fixtureId)
+    .rpc('get_fixture_by_id', {
+      fixture_id: params.fixtureId
+    })
     .single()
 
   let data

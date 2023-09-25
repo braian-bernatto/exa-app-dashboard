@@ -623,6 +623,25 @@ export interface Database {
           tipo_partido_name: string
         }[]
       }
+      get_fixture_by_id: {
+        Args: {
+          fixture_id: string
+        }
+        Returns: {
+          fixture_id: string
+          torneo_id: string
+          fase_id: number
+          name: string
+          location_id: number
+          exa: string
+          torneo: string
+          torneo_image_url: string
+          fase: string
+          tipo_partido_id: number
+          tipo_partido_name: string
+          location_name: string
+        }[]
+      }
       get_fixture_details: {
         Args: {
           fixture: number

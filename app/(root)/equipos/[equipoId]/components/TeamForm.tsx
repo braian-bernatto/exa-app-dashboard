@@ -57,10 +57,10 @@ const formSchema = z.object({
     )
     .or(z.string())
     .optional(),
-  exa_id: z.coerce.number({ invalid_type_error: 'Obligatorio' })
+  exa_id: z.coerce.number({ invalid_type_error: 'Obligatorio' }).nullable()
 })
 
-type TeamType = Pick<Teams, 'name' | 'image_url' | 'exa_id'> & {
+type TeamType = Teams & {
   public_image_url: string
 }
 
