@@ -5,16 +5,16 @@ import { Separator } from '@/components/ui/separator'
 import { Plus } from 'lucide-react'
 import { useParams, useRouter } from 'next/navigation'
 import { DataTable } from '@/components/ui/data-table'
-import { FixtureDetailsColumn, columns } from './columns'
+import { columns } from './columns'
 import FixtureForm, { FixtureType } from './FixtureForm'
-import { Locations, TiposPartido, Torneos } from '@/types'
+import { GetFixturesTeams, Locations, TiposPartido, Torneos } from '@/types'
 
 interface FixtureDetailsClientProps {
   torneos: Torneos[]
   tiposPartido: TiposPartido[]
   locations: Locations[]
   data: FixtureType | undefined
-  fixtureDetails: FixtureDetailsColumn[]
+  fixtureDetails: GetFixturesTeams
 }
 
 const FixtureDetailsClient = ({
@@ -27,7 +27,6 @@ const FixtureDetailsClient = ({
   const router = useRouter()
   const params = useParams()
 
-  console.log({ data })
   return (
     <>
       <FixtureForm

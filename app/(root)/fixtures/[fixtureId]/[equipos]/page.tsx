@@ -37,17 +37,21 @@ const FixutrePage = async ({
     .eq('fixture_id', params.fixtureId)
     .eq('team_local', +params.equipos.split('-vs-')[0])
     .eq('team_visit', +params.equipos.split('-vs-')[1])
+    .single()
 
-  const { data: fixturePlayers } = await supabase
-    .from('fixture_players')
-    .select()
-    .eq('fixture_id', params.fixtureId)
-    .eq('team_local', +params.equipos.split('-vs-')[0])
-    .eq('team_visit', +params.equipos.split('-vs-')[1])
+  const { data: fixturePlayers } = await supabase.rpc(
+    'get_fixture_players_by_fixture_id',
+    {
+      fixture: params.fixtureId,
+      local: +params.equipos.split('-vs-')[0],
+      visit: +params.equipos.split('-vs-')[1]
+    }
+  )
 
-  console.log({ fixtureTeams })
-
-  const data = { ...fixtureTeams, ...fixturePlayers }
+  const data =
+    fixtureTeams && fixturePlayers
+      ? { ...fixtureTeams, fixturePlayers }
+      : undefined
 
   return (
     <div className='flex flex-col gap-5 items-center'>

@@ -610,6 +610,28 @@ export interface Database {
         }
         Returns: Json
       }
+      get_fixture_players_by_fixture_id: {
+        Args: {
+          fixture: string
+          local: number
+          visit: number
+        }
+        Returns: {
+          fixture_id: string
+          team_local: number
+          team_visit: number
+          team_id: number
+          id: number
+          is_local: boolean
+          goals: number
+          yellow_cards: number
+          red_card: boolean
+          red_card_motive: string
+          is_present: boolean
+          name: string
+          position_id: string
+        }[]
+      }
       get_fixture_teams_by_fixture_id: {
         Args: {
           fixture_id: string
@@ -698,7 +720,7 @@ export interface Database {
       }
       get_team_ids_fixture: {
         Args: {
-          fixture: number
+          fixture: string
         }
         Returns: number[]
       }

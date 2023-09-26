@@ -1,7 +1,7 @@
 'use client'
 
 import { useSupabase } from '@/providers/SupabaseProvider'
-import { GetFixtures, Players, Teams } from '@/types'
+import { FixtureTeams, GetFixturesPlayers, Players, Teams } from '@/types'
 import { useEffect, useState } from 'react'
 import { useForm } from 'react-hook-form'
 import * as z from 'zod'
@@ -49,14 +49,15 @@ import { Columns } from '@/app/(root)/fixtures/[fixtureId]/[equipos]/components/
 import { Separator } from '../../../../../../components/ui/separator'
 import { Toggle } from '../../../../../../components/ui/toggle'
 import { toast } from 'react-hot-toast'
-import { FixtureDetailsColumn } from '@/app/(root)/fixtures/[fixtureId]/components/columns'
 import { AlertModal } from '@/components/modals/AlertModal'
 import Spinner from '@/components/Spinner'
 import { Switch } from '@/components/ui/switch'
 import { Label } from '@/components/ui/label'
 
 interface FixtureTeamsFormProps {
-  initialData: FixtureDetailsColumn | undefined
+  initialData:
+    | ({ fixturePlayers: GetFixturesPlayers } & FixtureTeams)
+    | undefined
   teams: Teams[]
   players: Players[]
 }
@@ -95,16 +96,16 @@ const FixtureTeamsForm = ({
     { id: number; goals: number }[] | undefined
   >(undefined)
   const [playersTeam_local, setPlayersTeam_local] = useState<
-    PlayersFixture[] | undefined
+    GetFixturesPlayers | Players[] | undefined
   >(undefined)
   const [playersTeam_visit, setPlayersTeamVisit] = useState<
-    PlayersFixture[] | undefined
+    GetFixturesPlayers | Players[] | undefined
   >(undefined)
   const [filteredPlayersTeamLocal, setFilteredPlayersTeamLocal] = useState<
-    PlayersFixture[] | []
+    GetFixturesPlayers | Players[] | []
   >([])
   const [filteredPlayersTeamVisit, setFilteredPlayersTeamVisit] = useState<
-    PlayersFixture[] | []
+    GetFixturesPlayers | Players[] | []
   >([])
   const [modifiedRows, setModifiedRows] = useState<any[]>([])
 
@@ -235,7 +236,10 @@ const FixtureTeamsForm = ({
     }
   })
 
-  const getTeamLogo = (filteredPlayers?: Players[], teamNumber?: number) => {
+  const getTeamLogo = (
+    filteredPlayers?: Players[] | GetFixturesPlayers,
+    teamNumber?: number
+  ) => {
     if (filteredPlayers && filteredPlayers.length > 0) {
       const url = teams.filter(
         team => team.id === filteredPlayers[0].team_id
@@ -255,90 +259,16 @@ const FixtureTeamsForm = ({
     )
   }
 
-  const getPlayerGoals = async (id: number) => {
-    const { data } = await supabase
-      .from('goals')
-      .select()
-      .eq('fixture_id', params.fixtureId)
-      .eq('player_id', id)
-
-    if (data?.length) {
-      return data[0].quantity
-    }
-    return 0
-  }
-
-  const getPlayerYellowCards = async (id: number) => {
-    const { data } = await supabase
-      .from('yellow_cards')
-      .select()
-      .eq('fixture_id', params.fixtureId)
-      .eq('player_id', id)
-
-    if (data?.length) {
-      return data[0].quantity
-    }
-    return 0
-  }
-
-  const getPlayerRedCard = async (id: number) => {
-    const { data } = await supabase
-      .from('red_cards')
-      .select()
-      .eq('fixture_id', params.fixtureId)
-      .eq('player_id', id)
-
-    if (data?.length) {
-      return data[0]
-    }
-    return false
-  }
-
-  const getTeamWalkover = async (id: number) => {
-    const { data } = await supabase
-      .from('walkover')
-      .select()
-      .eq('fixture_id', params.fixtureId)
-      .eq('team_id', id)
-
-    if (data?.length) {
-      return true
-    }
-    return false
-  }
-
   const getTeamIdsFixture = async () => {
+    // disabled all the used teams
     const { data } = await supabase.rpc('get_team_ids_fixture', {
-      fixture: +params.fixtureId
+      fixture: `${params.fixtureId}`
     })
     if (data?.length) {
       setTeamIdsInFixture(data)
       return
     }
     setTeamIdsInFixture([])
-  }
-
-  const getPlayersDetails = async (id: number) => {
-    //filtro los jugadores del equipo seleccionado y agrego los detalles de cada uno
-    const result = await Promise.all(
-      players
-        .filter(player => player.team_id === id)
-        .map(async players => {
-          const redData = await getPlayerRedCard(players.id)
-
-          return {
-            ...players,
-            goals: await getPlayerGoals(players.id),
-            yellow_cards: await getPlayerYellowCards(players.id),
-            red_card: redData ? true : false,
-            motivo: redData ? redData.motivo! : '',
-            is_present: undefined,
-            is_local: players.team_id === initialData.team_local ? true : false
-          }
-        })
-    )
-
-    return result
   }
 
   const getResetedPlayersDetails = (id: number) => {
@@ -359,26 +289,32 @@ const FixtureTeamsForm = ({
   }
 
   const setPlayers = async () => {
-    setLoading(true)
-    const players_1 = await getPlayersDetails(initialData.team_local)
-    const players_2 = await getPlayersDetails(initialData.team_visit)
-    setPlayersTeam_local(players_1)
-    setPlayersTeamVisit(players_2)
-    setFilteredPlayersTeamLocal(players_1)
-    setFilteredPlayersTeamVisit(players_2)
-    setModifiedRows([...players_1, ...players_2])
-    setLoading(false)
+    if (initialData) {
+      setLoading(true)
+      const players_1 = initialData.fixturePlayers.filter(
+        player => player.team_id === player.team_local
+      )
+      const players_2 = initialData.fixturePlayers.filter(
+        player => player.team_id === player.team_visit
+      )
+      setPlayersTeam_local(players_1)
+      setPlayersTeamVisit(players_2)
+      setFilteredPlayersTeamLocal(players_1)
+      setFilteredPlayersTeamVisit(players_2)
+      setModifiedRows([...players_1, ...players_2])
+      setLoading(false)
+    }
   }
 
   const setTeamWalkover = async () => {
-    setLoading(true)
-    const team_local = await getTeamWalkover(initialData.team_local)
-    const team_visit = await getTeamWalkover(initialData.team_visit)
-    setToggle1(team_local)
-    setToggle2(team_visit)
-    hideTeamsToggle_1(team_local, team_visit)
-    hideTeamsToggle_2(team_visit, team_local)
-    setLoading(false)
+    if (initialData) {
+      setLoading(true)
+      setToggle1(initialData.walkover_local)
+      setToggle2(initialData.walkover_visit)
+      hideTeamsToggle_1(initialData.walkover_local, initialData.walkover_visit)
+      hideTeamsToggle_2(initialData.walkover_visit, initialData.walkover_local)
+      setLoading(false)
+    }
   }
 
   const countGoals = () => {
@@ -432,11 +368,11 @@ const FixtureTeamsForm = ({
 
   const updatePlayersList = (
     teamWalkover: boolean,
-    teamPlayers: PlayersFixture[],
-    setTeamPlayers: (list: PlayersFixture[] | []) => void,
+    teamPlayers: GetFixturesPlayers | Players[],
+    setTeamPlayers: (list: GetFixturesPlayers | Players[] | []) => void,
     vsTeamWalkover: boolean,
-    vsTeamPlayers: PlayersFixture[],
-    setVsTeamPlayers: (list: PlayersFixture[] | []) => void
+    vsTeamPlayers: GetFixturesPlayers | Players[],
+    setVsTeamPlayers: (list: GetFixturesPlayers | Players[] | []) => void
   ) => {
     const vsTeamPorteros = vsTeamPlayers.filter(
       player => player.position_id === 'POR'
@@ -588,7 +524,7 @@ const FixtureTeamsForm = ({
             ...playersTeam_visit!
           ]
             .filter(player => playerIds.indexOf(player.id) === -1)
-            .filter(player => player.red_cards)
+            .filter(player => player.red_card)
             .map(player => player.id)
 
           notRedCardsArray.push(
@@ -596,39 +532,6 @@ const FixtureTeamsForm = ({
               .filter(player => !player.red_cards)
               .map(player => player.id)
           )
-
-          // clear all tables
-          // const { error: deleteGoalsError } = await supabase.rpc(
-          //   'delete_not_goals',
-          //   {
-          //     fixture: fixture_id,
-          //     player_ids: notGoalsArray
-          //   }
-          // )
-          // const { error: deleteYellowCardsError } = await supabase.rpc(
-          //   'delete_not_yellow_cards_array',
-          //   {
-          //     fixture: fixture_id,
-          //     player_ids: notYellowCardsArray
-          //   }
-          // )
-          // const { error: deleteRedCardsError } = await supabase.rpc(
-          //   'delete_not_red_cards',
-          //   {
-          //     fixture: fixture_id,
-          //     player_ids: notRedCardsArray
-          //   }
-          // )
-
-          // delete previous walkover
-          // const { data, error: deleteWalkoversError } = await supabase.rpc(
-          //   'delete_walkovers',
-          //   {
-          //     fixture: fixture_id,
-          //     team_local,
-          //     team_visit
-          //   }
-          // )
 
           // upsert goals
           const goalsArray = modifiedRows
@@ -776,34 +679,12 @@ const FixtureTeamsForm = ({
 
         // walkover
         if (walkoverTeam1 || walkoverTeam2) {
-          const walkoverArray =
-            walkoverTeam1 && walkoverTeam2
-              ? [
-                  {
-                    fixture_id,
-                    team_id: team_local
-                  },
-                  {
-                    fixture_id,
-                    team_id: team_visit
-                  }
-                ]
-              : walkoverTeam1
-              ? [
-                  {
-                    fixture_id,
-                    team_id: team_local
-                  }
-                ]
-              : [
-                  {
-                    fixture_id,
-                    team_id: team_visit
-                  }
-                ]
           const { error: supabaseWalkoverError } = await supabase
-            .from('walkover')
-            .insert(walkoverArray)
+            .from('fixture_teams')
+            .update({
+              walkover_local: walkoverTeam1,
+              walkover_visit: walkoverTeam2
+            })
 
           if (supabaseWalkoverError) {
             setLoading(false)
@@ -814,14 +695,8 @@ const FixtureTeamsForm = ({
 
       setLoading(false)
 
-      // limpiamos los datos modificados
       router.back()
       router.refresh()
-      // form.reset()
-      // setModifiedRows([])
-      // setPlayersTeam_local(undefined)
-      // setPlayersTeamVisit(undefined)
-      // clearWalkover()
       toast.success(toastMessage)
     } catch (error) {
       toast.error('Hubo un error')
@@ -831,67 +706,39 @@ const FixtureTeamsForm = ({
   }
 
   const onDelete = async () => {
-    try {
-      setLoading(true)
+    if (initialData) {
+      try {
+        setLoading(true)
 
-      const { error } = await supabase.rpc('delete_versus', {
-        fixture: params.fixtureId,
-        team_one: initialData.team_local,
-        team_two: initialData.team_visit
-      })
+        const { error } = await supabase.rpc('delete_versus', {
+          fixture: initialData.fixture_id,
+          local: initialData.team_local,
+          visit: initialData.team_visit
+        })
 
-      // clear all tables
-      const { error: deleteGoalsError } = await supabase.rpc('delete_goals', {
-        fixture: params.fixtureId,
-        team_local: initialData.team_local,
-        team_visit: initialData.team_visit
-      })
-      const { error: deleteYellowCardsError } = await supabase.rpc(
-        'delete_yellow_cards',
-        {
-          fixture: params.fixtureId,
-          team_local: initialData.team_local,
-          team_visit: initialData.team_visit
+        if (error) {
+          console.log(error)
+          setLoading(false)
+          return toast.error(`No se pudo borrar`)
         }
-      )
-      const { error: deleteRedCardsError } = await supabase.rpc(
-        'delete_red_cards',
-        {
-          fixture: params.fixtureId,
-          team_local: initialData.team_local,
-          team_visit: initialData.team_visit
-        }
-      )
-      // delete previous walkover
-      const { data, error: deleteWalkoversError } = await supabase.rpc(
-        'delete_walkovers',
-        {
-          fixture: params.fixtureId,
-          team_local: initialData.team_local,
-          team_visit: initialData.team_visit
-        }
-      )
-
-      if (error) {
-        console.log(error)
+        router.refresh()
+        router.back()
+        toast.success('Borrado con éxito')
+      } catch (error) {
+        toast.error('Hubo un error')
+      } finally {
         setLoading(false)
-        return toast.error(`No se pudo borrar`)
+        setOpen(false)
       }
-      router.refresh()
-      router.back()
-      toast.success('Borrado con éxito')
-    } catch (error) {
-      toast.error('Hubo un error')
-    } finally {
-      setLoading(false)
-      setOpen(false)
     }
   }
 
   useEffect(() => {
     if (initialData) {
       setPlayers()
-      setHour(format(initialData.date, 'HH:mm'))
+      if (initialData.date) {
+        setHour(format(new Date(initialData.date), 'HH:mm'))
+      }
     } else {
       getTeamIdsFixture()
     }
@@ -1171,7 +1018,7 @@ const FixtureTeamsForm = ({
                               !field.value && 'text-muted-foreground'
                             )}>
                             {field.value ? (
-                              format(field.value!, 'PP | HH:mm', {
+                              format(field.value, 'PP | HH:mm', {
                                 locale: es
                               })
                             ) : (
@@ -1317,21 +1164,6 @@ const FixtureTeamsForm = ({
                           onPressedChange={e => {
                             setToggle1(!toggle1)
                             hideTeamsToggle_1(e, walkoverTeam2)
-                            // if (e && initialData) {
-                            //   const resetPlayers = getResetedPlayersDetails(
-                            //     playersTeam_local[0].team_id
-                            //   )
-                            //   setFilteredPlayersTeamLocal(resetPlayers)
-
-                            //   if (playersTeam_visit?.length) {
-                            //     const resetPlayers2 = getResetedPlayersDetails(
-                            //       playersTeam_visit[0].team_id
-                            //     )
-                            //     setFilteredPlayersTeamVisit(resetPlayers2)
-                            //   }
-                            // } else {
-                            //   setModifiedRows([])
-                            // }
                           }}>
                           Walkover
                         </Toggle>
