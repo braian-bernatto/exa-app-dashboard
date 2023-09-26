@@ -52,12 +52,12 @@ export const Columns: ColumnDef<Players>[] = [
     cell: TableCellYellowCard
   },
   {
-    accessorKey: 'red_cards',
+    accessorKey: 'red_card',
     header: 'T.R.',
     cell: TableCellRedCard
   },
   {
-    accessorKey: 'motivo',
+    accessorKey: 'red_card_motive',
     header: 'Motivo',
     cell: TableCellMotivo
   },

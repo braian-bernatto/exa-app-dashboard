@@ -11,7 +11,10 @@ const TableCellMotivo = ({ getValue, row, column, table }: any) => {
 
   const onBlur = () => {
     table.options.meta?.updateData(row.index, column.id, value)
-    table.options.meta?.addModifiedRows({ ...row.original, motivo: value })
+    table.options.meta?.addModifiedRows({
+      ...row.original,
+      red_card_motive: value
+    })
   }
 
   return (

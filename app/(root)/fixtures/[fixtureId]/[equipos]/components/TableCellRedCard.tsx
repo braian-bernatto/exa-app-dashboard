@@ -11,7 +11,7 @@ const TableCellRedCard = ({ getValue, row, column, table }: any) => {
 
   const onCheckedChange = () => {
     table.options.meta?.updateData(row.index, column.id, !value)
-    table.options.meta?.addModifiedRows({ ...row.original, red_cards: !value })
+    table.options.meta?.addModifiedRows({ ...row.original, red_card: !value })
   }
 
   return <Checkbox checked={value} onCheckedChange={onCheckedChange} />
