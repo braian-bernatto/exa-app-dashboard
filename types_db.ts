@@ -135,6 +135,8 @@ export interface Database {
       }
       fixture_teams: {
         Row: {
+          cancha_nro: number | null
+          date: string | null
           fixture_id: string
           team_local: number
           team_visit: number
@@ -142,6 +144,8 @@ export interface Database {
           walkover_visit: boolean
         }
         Insert: {
+          cancha_nro?: number | null
+          date?: string | null
           fixture_id: string
           team_local: number
           team_visit: number
@@ -149,6 +153,8 @@ export interface Database {
           walkover_visit?: boolean
         }
         Update: {
+          cancha_nro?: number | null
+          date?: string | null
           fixture_id?: string
           team_local?: number
           team_visit?: number

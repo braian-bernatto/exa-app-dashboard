@@ -8,6 +8,7 @@ import TableCellYellowCard from './TableCellYellowCard'
 import TableCellGoals from './TableCellGoals'
 import TableCellRedCard from './TableCellRedCard'
 import TableCellMotivo from './TableCellMotivo'
+import TableCellPresent from './TableCellPresent'
 
 export const Columns: ColumnDef<Players>[] = [
   {
@@ -18,8 +19,7 @@ export const Columns: ColumnDef<Players>[] = [
           type='button'
           className='text-xs'
           variant='ghost'
-          onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
-        >
+          onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}>
           Nombre
           <ArrowUpDown className='ml-2 h-4 w-4' />
         </Button>
@@ -38,8 +38,7 @@ export const Columns: ColumnDef<Players>[] = [
           type='button'
           className='text-xs'
           variant='ghost'
-          onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
-        >
+          onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}>
           Goles
           <ArrowUpDown className='ml-2 h-4 w-4' />
         </Button>
@@ -61,5 +60,10 @@ export const Columns: ColumnDef<Players>[] = [
     accessorKey: 'motivo',
     header: 'Motivo',
     cell: TableCellMotivo
+  },
+  {
+    accessorKey: 'is_present',
+    header: 'Presente',
+    cell: TableCellPresent
   }
 ]

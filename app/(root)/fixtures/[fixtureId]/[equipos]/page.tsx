@@ -15,18 +15,19 @@ const FixutrePage = async ({
 }) => {
   const supabase = createClient()
 
-  const { data: fixture } = await supabase
+  const { data: fixture, error } = await supabase
     .rpc('get_fixture_by_id', {
       fixture_id: params.fixtureId
     })
     .single()
 
-  console.log({ fixture })
+  if (error) {
+    console.log(error)
+    return <p>Hubo un error en el servidor</p>
+  }
 
-  //@ts-ignore
-  const teams = await getTeamsByExa(fixture?.exa_id)
-  //@ts-ignore
-  const players = await getPlayersByExa(fixture?.exa_id)
+  const teams = await getTeamsByExa(fixture.exa_id)
+  const players = await getPlayersByExa(fixture.exa_id)
 
   // TODO: revisar porque se refresca 6 veces el dom
 
@@ -41,7 +42,6 @@ const FixutrePage = async ({
     <div className='flex flex-col gap-5 items-center'>
       <FixtureTeamsForm
         initialData={fixtureTeams}
-        fixture={fixture}
         teams={teams}
         players={players}
       />

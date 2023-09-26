@@ -34,9 +34,9 @@ const FixutrePage = async ({
   }
 
   const { data: fixtureDetails } = await supabase
-    .from('fixture_details')
-    .select('*, team_1(id, name, image_url), team_2(id, name, image_url)')
-    .eq('fixture_id', +params.fixtureId)
+    .from('fixture_teams')
+    .select('*')
+    .eq('fixture_id', params.fixtureId)
     .order('date', { ascending: true })
 
   const { data: tipos_partido } = await supabase

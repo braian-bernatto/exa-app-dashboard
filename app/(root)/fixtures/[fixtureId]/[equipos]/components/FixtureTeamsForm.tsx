@@ -1,7 +1,7 @@
 'use client'
 
 import { useSupabase } from '@/providers/SupabaseProvider'
-import { Fixtures, GetFixtures, Players, Teams } from '@/types'
+import { GetFixtures, Players, Teams } from '@/types'
 import { useEffect, useState } from 'react'
 import { useForm } from 'react-hook-form'
 import * as z from 'zod'
@@ -19,6 +19,8 @@ import {
   CalendarIcon,
   Check,
   ChevronsUpDown,
+  MinusCircle,
+  PlusCircle,
   Shield,
   Swords,
   Trash
@@ -55,7 +57,6 @@ import { Label } from '@/components/ui/label'
 
 interface FixtureTeamsFormProps {
   initialData: FixtureDetailsColumn | undefined
-  fixture: GetFixtures[0] | null
   teams: Teams[]
   players: Players[]
 }
@@ -63,13 +64,12 @@ interface FixtureTeamsFormProps {
 interface PlayersFixture extends Players {
   goals: number | undefined
   yellow_cards: number | undefined
-  red_cards: boolean
+  red_card: boolean
   motivo: string
 }
 
 const FixtureTeamsForm = ({
   initialData,
-  fixture,
   teams,
   players
 }: FixtureTeamsFormProps) => {
@@ -97,13 +97,13 @@ const FixtureTeamsForm = ({
   const [playersTeam_local, setPlayersTeam_local] = useState<
     PlayersFixture[] | undefined
   >(undefined)
-  const [playersTeam_visit, setPlayersTeam_visit] = useState<
+  const [playersTeam_visit, setPlayersTeamVisit] = useState<
     PlayersFixture[] | undefined
   >(undefined)
-  const [filteredPlayersTeam_local, setFilteredPlayersTeam_local] = useState<
+  const [filteredPlayersTeamLocal, setFilteredPlayersTeamLocal] = useState<
     PlayersFixture[] | []
   >([])
-  const [filteredPlayersTeam_visit, setFilteredPlayersTeam_visit] = useState<
+  const [filteredPlayersTeamVisit, setFilteredPlayersTeamVisit] = useState<
     PlayersFixture[] | []
   >([])
   const [modifiedRows, setModifiedRows] = useState<any[]>([])
@@ -122,14 +122,6 @@ const FixtureTeamsForm = ({
   const formSchema = z
     .object({
       fixture_id: z.coerce.string({
-        required_error: 'Obligatorio',
-        invalid_type_error: 'Obligatorio'
-      }),
-      torneo_id: z.coerce.string({
-        required_error: 'Obligatorio',
-        invalid_type_error: 'Obligatorio'
-      }),
-      fase_id: z.coerce.number({
         required_error: 'Obligatorio',
         invalid_type_error: 'Obligatorio'
       }),
@@ -233,8 +225,6 @@ const FixtureTeamsForm = ({
     resolver: zodResolver(formSchema),
     defaultValues: initialData || {
       fixture_id: params.fixtureId,
-      torneo_id: fixture?.torneo_id,
-      fase_id: fixture?.fase_id,
       team_local: undefined,
       team_visit: undefined,
       date: undefined,
@@ -340,8 +330,10 @@ const FixtureTeamsForm = ({
             ...players,
             goals: await getPlayerGoals(players.id),
             yellow_cards: await getPlayerYellowCards(players.id),
-            red_cards: redData ? true : false,
-            motivo: redData ? redData.motivo! : ''
+            red_card: redData ? true : false,
+            motivo: redData ? redData.motivo! : '',
+            is_present: undefined,
+            is_local: players.team_id === initialData.team_local ? true : false
           }
         })
     )
@@ -356,8 +348,11 @@ const FixtureTeamsForm = ({
         ...players,
         goals: 0,
         yellow_cards: 0,
-        red_cards: false,
-        motivo: ''
+        red_card: false,
+        motivo: '',
+        is_present: true,
+        is_local:
+          players.team_id === form.getValues('team_local') ? true : false
       }))
 
     return filtered
@@ -368,9 +363,9 @@ const FixtureTeamsForm = ({
     const players_1 = await getPlayersDetails(initialData.team_local)
     const players_2 = await getPlayersDetails(initialData.team_visit)
     setPlayersTeam_local(players_1)
-    setPlayersTeam_visit(players_2)
-    setFilteredPlayersTeam_local(players_1)
-    setFilteredPlayersTeam_visit(players_2)
+    setPlayersTeamVisit(players_2)
+    setFilteredPlayersTeamLocal(players_1)
+    setFilteredPlayersTeamVisit(players_2)
     setModifiedRows([...players_1, ...players_2])
     setLoading(false)
   }
@@ -499,10 +494,10 @@ const FixtureTeamsForm = ({
       updatePlayersList(
         e,
         playersTeam_local,
-        setFilteredPlayersTeam_local,
+        setFilteredPlayersTeamLocal,
         vs,
         playersTeam_visit!,
-        setFilteredPlayersTeam_visit
+        setFilteredPlayersTeamVisit
       )
     }
   }
@@ -516,10 +511,10 @@ const FixtureTeamsForm = ({
       updatePlayersList(
         e,
         playersTeam_visit,
-        setFilteredPlayersTeam_visit,
+        setFilteredPlayersTeamVisit,
         vs,
         playersTeam_local!,
-        setFilteredPlayersTeam_local
+        setFilteredPlayersTeamLocal
       )
     }
   }
@@ -543,7 +538,7 @@ const FixtureTeamsForm = ({
 
       if (initialData) {
         // fixture details
-        const { error: supabaseFixtureDetailError } = await supabase
+        const { error: supabaseFixtureTeamsError } = await supabase
           .from('fixture_details')
           .update({
             cancha_nro,
@@ -553,9 +548,9 @@ const FixtureTeamsForm = ({
           .eq('team_local', team_local)
           .eq('team_visit', team_visit)
 
-        if (supabaseFixtureDetailError) {
+        if (supabaseFixtureTeamsError) {
           setLoading(false)
-          console.log(supabaseFixtureDetailError)
+          console.log(supabaseFixtureTeamsError)
           return toast.error('No se pudo grabar Fixture Detalle')
         }
 
@@ -735,9 +730,9 @@ const FixtureTeamsForm = ({
           }
         }
       } else {
-        // fixture details
-        const { error: supabaseFixtureDetailError } = await supabase
-          .from('fixture_details')
+        // fixture teams
+        const { error: supabaseFixtureTeamsError } = await supabase
+          .from('fixture_teams')
           .insert({
             fixture_id,
             team_local,
@@ -746,73 +741,36 @@ const FixtureTeamsForm = ({
             date: date.toISOString()
           })
 
-        if (supabaseFixtureDetailError) {
+        if (supabaseFixtureTeamsError) {
           setLoading(false)
-          console.log(supabaseFixtureDetailError)
-          return toast.error('No se pudo grabar Fixture Detalle')
+          console.log(supabaseFixtureTeamsError)
+          return toast.error('No se pudo grabar Fixture Equipo')
         }
 
-        // cargamos datos si es que se modificaron datos de las tablas
+        // fixture players
         if (modifiedRows.length) {
-          // goals
-          const goalsArray = modifiedRows
-            .filter(player => player.goals > 0)
-            .map(player => ({
-              fixture_id,
-              team_id: player.team_id,
-              player_id: player.id,
-              quantity: player.goals
-            }))
+          const formattedPlayers = modifiedRows.map(player => ({
+            fixture_id,
+            team_local,
+            team_visit,
+            team_id: player.team_id,
+            player_id: player.id,
+            is_local: player.is_local,
+            is_present: player.is_present,
+            goals: player.goals,
+            yellow_cards: player.yellow_cards,
+            red_card: player.red_card,
+            red_card_motive: player.motivo
+          }))
 
-          if (goalsArray.length) {
-            const { error: supabaseGoalsError } = await supabase
-              .from('goals')
-              .insert(goalsArray)
+          const { error: supabaseFixturePlayersError } = await supabase
+            .from('fixture_players')
+            .insert(formattedPlayers)
 
-            if (supabaseGoalsError) {
-              setLoading(false)
-              console.log(supabaseGoalsError)
-              return toast.error('No se pudieron grabar los Goles')
-            }
-          }
-          // yellow cards
-          const yellowCardsArray = modifiedRows
-            .filter(player => player.yellow_cards > 0)
-            .map(player => ({
-              fixture_id,
-              team_id: player.team_id,
-              player_id: player.id,
-              quantity: player.yellow_cards
-            }))
-          if (yellowCardsArray.length) {
-            const { error: supabaseYellowCardsError } = await supabase
-              .from('yellow_cards')
-              .insert(yellowCardsArray)
-
-            if (supabaseYellowCardsError) {
-              setLoading(false)
-              return toast.error('No se pudieron grabar las Tarjetas Amarillas')
-            }
-          }
-          // red cards
-          const redCardsArray = modifiedRows
-            .filter(player => player.red_cards)
-            .map(player => ({
-              fixture_id,
-              team_id: player.team_id,
-              player_id: player.id,
-              motivo: player.motivo
-            }))
-
-          if (redCardsArray.length) {
-            const { error: supabaseRedCardError } = await supabase
-              .from('red_cards')
-              .insert(redCardsArray)
-
-            if (supabaseRedCardError) {
-              setLoading(false)
-              return toast.error('No se pudieron grabar las Tarjetas Rojas')
-            }
+          if (supabaseFixturePlayersError) {
+            setLoading(false)
+            console.log(supabaseFixturePlayersError)
+            return toast.error('No se pudo grabar Fixture Jugadores')
           }
         }
 
@@ -862,7 +820,7 @@ const FixtureTeamsForm = ({
       // form.reset()
       // setModifiedRows([])
       // setPlayersTeam_local(undefined)
-      // setPlayersTeam_visit(undefined)
+      // setPlayersTeamVisit(undefined)
       // clearWalkover()
       toast.success(toastMessage)
     } catch (error) {
@@ -940,7 +898,7 @@ const FixtureTeamsForm = ({
   }, [])
 
   useEffect(() => {
-    if (initialData && filteredPlayersTeam_local?.length) {
+    if (initialData && filteredPlayersTeamLocal?.length) {
       setTeamWalkover()
     }
   }, [playersTeam_local])
@@ -949,12 +907,9 @@ const FixtureTeamsForm = ({
     countGoals()
   }, [modifiedRows])
 
-  useEffect(() => {
-    setModifiedRows([
-      ...filteredPlayersTeam_local,
-      ...filteredPlayersTeam_visit
-    ])
-  }, [filteredPlayersTeam_local, filteredPlayersTeam_visit])
+  // useEffect(() => {
+  //   setModifiedRows([...filteredPlayersTeamLocal, ...filteredPlayersTeamVisit])
+  // }, [filteredPlayersTeamLocal, filteredPlayersTeamVisit])
 
   return (
     <>
@@ -975,9 +930,10 @@ const FixtureTeamsForm = ({
                 className='text-white'
                 size={30}
                 onClick={() => {
+                  console.log(form.getValues())
                   console.log({
-                    filteredPlayersTeam_local,
-                    filteredPlayersTeam_visit,
+                    filteredPlayersTeamLocal,
+                    filteredPlayersTeamVisit,
                     modifiedRows,
                     walkoverTeam1,
                     walkoverTeam2,
@@ -1063,7 +1019,8 @@ const FixtureTeamsForm = ({
                                   team.id
                                 )
                                 setPlayersTeam_local(filtered)
-                                setFilteredPlayersTeam_local(filtered)
+                                setModifiedRows([...modifiedRows, ...filtered])
+                                setFilteredPlayersTeamLocal(filtered)
                               }}>
                               <>
                                 <Check
@@ -1157,8 +1114,8 @@ const FixtureTeamsForm = ({
                                   team.id
                                 )
 
-                                setPlayersTeam_visit(filtered)
-                                setFilteredPlayersTeam_visit(filtered)
+                                setPlayersTeamVisit(filtered)
+                                setFilteredPlayersTeamVisit(filtered)
                               }}>
                               <>
                                 <Check
@@ -1196,7 +1153,7 @@ const FixtureTeamsForm = ({
 
           {/* date - time - cancha */}
           <div className='grid sm:grid-cols-2 w-full gap-4 items-center'>
-            <div className='flex gap-1'>
+            <div className='flex gap-4'>
               {/* Date */}
               <FormField
                 control={form.control}
@@ -1279,20 +1236,45 @@ const FixtureTeamsForm = ({
                 control={form.control}
                 name='cancha_nro'
                 render={({ field }) => (
-                  <FormItem className='rounded bg-white w-[75px] shrink-0'>
+                  <FormItem className='rounded bg-white shrink-0'>
                     <FormLabel>Cancha N°</FormLabel>
                     <FormControl>
-                      <Input
-                        className={`font-semibold text-center ${
-                          field.value !== undefined && field.value > 0
-                            ? ''
-                            : 'text-muted-foreground'
-                        }`}
-                        type='number'
-                        min={1}
-                        {...field}
-                        onClick={e => e.currentTarget.select()}
-                      />
+                      <span className='relative flex items-center justify-center mr-5'>
+                        <button
+                          disabled={field.value === 0}
+                          type='button'
+                          {...field}
+                          onClick={() => {
+                            console.log(field.value)
+                            if (field.value) {
+                              form.setValue(
+                                'cancha_nro',
+                                field.value > 0 ? +field.value - 1 : 0
+                              )
+                            }
+                          }}>
+                          <MinusCircle className='text-muted-foreground' />
+                        </button>
+                        <Input
+                          className={`font-semibold text-center w-[75px] ${
+                            field.value !== undefined && field.value > 0
+                              ? ''
+                              : 'text-muted-foreground'
+                          }`}
+                          type='number'
+                          min={1}
+                          {...field}
+                          onClick={e => e.currentTarget.select()}
+                        />
+                        <button
+                          type='button'
+                          {...field}
+                          onClick={() => {
+                            form.setValue('cancha_nro', +field.value! + 1)
+                          }}>
+                          <PlusCircle className='text-muted-foreground' />
+                        </button>
+                      </span>
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -1325,7 +1307,7 @@ const FixtureTeamsForm = ({
                       <Separator />
                       <span
                         className={`flex flex-col items-center relative ${
-                          filteredPlayersTeam_local.length > 0 && 'top-5'
+                          filteredPlayersTeamLocal.length > 0 && 'top-5'
                         }`}>
                         <Toggle
                           variant={'outline'}
@@ -1339,13 +1321,13 @@ const FixtureTeamsForm = ({
                             //   const resetPlayers = getResetedPlayersDetails(
                             //     playersTeam_local[0].team_id
                             //   )
-                            //   setFilteredPlayersTeam_local(resetPlayers)
+                            //   setFilteredPlayersTeamLocal(resetPlayers)
 
                             //   if (playersTeam_visit?.length) {
                             //     const resetPlayers2 = getResetedPlayersDetails(
                             //       playersTeam_visit[0].team_id
                             //     )
-                            //     setFilteredPlayersTeam_visit(resetPlayers2)
+                            //     setFilteredPlayersTeamVisit(resetPlayers2)
                             //   }
                             // } else {
                             //   setModifiedRows([])
@@ -1363,10 +1345,10 @@ const FixtureTeamsForm = ({
                     </p>
                   )}
                 </div>
-                {filteredPlayersTeam_local.length > 0 && (
+                {filteredPlayersTeamLocal.length > 0 && (
                   <DataTable
                     columns={Columns}
-                    intialValues={filteredPlayersTeam_local || []}
+                    intialValues={filteredPlayersTeamLocal || []}
                     addModifiedRows={addModifiedRows}
                   />
                 )}
@@ -1384,7 +1366,7 @@ const FixtureTeamsForm = ({
                       <Separator />
                       <span
                         className={`flex flex-col items-center relative ${
-                          filteredPlayersTeam_visit.length > 0 && 'top-5'
+                          filteredPlayersTeamVisit.length > 0 && 'top-5'
                         }`}>
                         <Toggle
                           variant={'outline'}
@@ -1398,13 +1380,13 @@ const FixtureTeamsForm = ({
                             //   const resetPlayers = getResetedPlayersDetails(
                             //     playersTeam_visit[0].team_id
                             //   )
-                            //   setFilteredPlayersTeam_visit(resetPlayers)
+                            //   setFilteredPlayersTeamVisit(resetPlayers)
 
                             //   if (playersTeam_local?.length) {
                             //     const resetPlayers = getResetedPlayersDetails(
                             //       playersTeam_local[0].team_id
                             //     )
-                            //     setFilteredPlayersTeam_local(resetPlayers)
+                            //     setFilteredPlayersTeamLocal(resetPlayers)
                             //   }
                             // } else {
                             //   setModifiedRows([])
@@ -1422,10 +1404,10 @@ const FixtureTeamsForm = ({
                     </p>
                   )}
                 </div>
-                {filteredPlayersTeam_visit.length > 0 && (
+                {filteredPlayersTeamVisit.length > 0 && (
                   <DataTable
                     columns={Columns}
-                    intialValues={filteredPlayersTeam_visit || []}
+                    intialValues={filteredPlayersTeamVisit || []}
                     addModifiedRows={addModifiedRows}
                   />
                 )}
