@@ -69,7 +69,6 @@ const FixtureTeamsForm = ({
 }: FixtureTeamsFormProps) => {
   const router = useRouter()
   const params = useParams()
-  console.log({ initialData })
 
   const { supabase } = useSupabase()
   const [loading, setLoading] = useState(false)

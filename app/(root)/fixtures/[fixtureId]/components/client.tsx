@@ -28,7 +28,7 @@ const FixtureDetailsClient = ({
   const params = useParams()
 
   return (
-    <>
+    <div className='flex flex-wrap justify-center gap-5 w-full'>
       <FixtureForm
         initialData={data}
         torneos={torneos}
@@ -36,7 +36,7 @@ const FixtureDetailsClient = ({
         locations={locations}
       />
       {data && (
-        <>
+        <article className='flex flex-col gap-5 w-full md:w-auto'>
           <Separator />
           <div className='flex items-center justify-end'>
             <Button
@@ -52,9 +52,9 @@ const FixtureDetailsClient = ({
             filterLabel='Fecha'
             filterKey='date'
           />
-        </>
+        </article>
       )}
-    </>
+    </div>
   )
 }
 

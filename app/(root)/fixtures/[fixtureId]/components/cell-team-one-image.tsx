@@ -33,7 +33,7 @@ const CellTeamOneImage = ({ data }: CellTeamImageProps) => {
         data.team_local_name
       )}
       <span className='font-semibold text-muted-foreground rounded-full shadow text-lg w-[25px] h-[25px] text-center flex justify-center items-center border bg-white'>
-        {data.team_local_goals}
+        {data.team_local_goals || '-'}
       </span>
       {data.walkover_local && (
         <span className='text-pink-800 shadow rounded-full px-2 bg-white absolute -top-[13px] opacity-80 text-xs'>

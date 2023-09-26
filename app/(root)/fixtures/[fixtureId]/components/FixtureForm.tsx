@@ -231,7 +231,7 @@ const FixtureForm = ({
       <Form {...form}>
         <form
           onSubmit={form.handleSubmit(onSubmit)}
-          className='flex flex-col w-full max-w-xs rounded bg-white py-3 px-4 shadow gap-5 justify-center self-center'>
+          className='flex flex-col w-full max-w-xs rounded bg-white py-3 px-4 shadow gap-5'>
           <div className='flex gap-2'>
             <span className='bg-gradient-to-r from-emerald-300 to-emerald-700 rounded-full p-2 flex items-center justify-center'>
               <Swords
