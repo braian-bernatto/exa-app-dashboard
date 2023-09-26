@@ -38,13 +38,20 @@ const FixutrePage = async ({
     .eq('team_local', +params.equipos.split('-vs-')[0])
     .eq('team_visit', +params.equipos.split('-vs-')[1])
 
+  const { data: fixturePlayers } = await supabase
+    .from('fixture_players')
+    .select()
+    .eq('fixture_id', params.fixtureId)
+    .eq('team_local', +params.equipos.split('-vs-')[0])
+    .eq('team_visit', +params.equipos.split('-vs-')[1])
+
+  console.log({ fixtureTeams })
+
+  const data = { ...fixtureTeams, ...fixturePlayers }
+
   return (
     <div className='flex flex-col gap-5 items-center'>
-      <FixtureTeamsForm
-        initialData={fixtureTeams}
-        teams={teams}
-        players={players}
-      />
+      <FixtureTeamsForm initialData={data} teams={teams} players={players} />
     </div>
   )
 }

@@ -7,16 +7,9 @@ import CellTeamTwoImage from './cell-team-two-image'
 import CellCancha from './cell-cancha'
 import { Button } from '@/components/ui/button'
 import { ArrowUpDown } from 'lucide-react'
+import { GetFixturesTeams } from '@/types'
 
-export type FixtureDetailsColumn =
-  | {
-      fixture_id: number
-      team_1: { id: number; name: string; image_url: string }
-      team_2: { id: number; name: string; image_url: string }
-      cancha_nro: number | null
-      date: string
-    }
-  | any
+export type FixtureDetailsColumn = GetFixturesTeams[0]
 
 export const columns: ColumnDef<FixtureDetailsColumn>[] = [
   {
@@ -48,13 +41,13 @@ export const columns: ColumnDef<FixtureDetailsColumn>[] = [
     cell: ({ row }) => <CellCancha data={row.original} />
   },
   {
-    accessorKey: 'team_1',
-    header: 'Equipo 1',
+    accessorKey: 'team_local',
+    header: 'Local',
     cell: ({ row }) => <CellTeamOneImage data={row.original} />
   },
   {
-    accessorKey: 'team_2',
-    header: 'Equipo 2',
+    accessorKey: 'team_visit',
+    header: 'Visitante',
     cell: ({ row }) => <CellTeamTwoImage data={row.original} />
   },
   {

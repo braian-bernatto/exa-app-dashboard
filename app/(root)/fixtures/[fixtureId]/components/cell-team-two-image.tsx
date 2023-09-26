@@ -1,7 +1,7 @@
 import { useSupabase } from '@/providers/SupabaseProvider'
 import Image from 'next/image'
 import { FixtureDetailsColumn } from './columns'
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 
 interface CellTeamImageProps {
   data: FixtureDetailsColumn
@@ -9,47 +9,16 @@ interface CellTeamImageProps {
 
 const CellTeamTwoImage = ({ data }: CellTeamImageProps) => {
   const [imageError, setImageError] = useState(false)
-  const [goals, setGoals] = useState<number | '-'>('-')
-  const [walkover, setWalkover] = useState(false)
   const { supabase } = useSupabase()
 
   const { data: imageUrl } = supabase.storage
     .from('teams')
-    .getPublicUrl(data.team_2.image_url)
-
-  useEffect(() => {
-    const getDetails = async () => {
-      // goals
-      const { data: goles } = await supabase.rpc('get_goals', {
-        fixture: data.fixture_id,
-        team: data.team_2.id
-      })
-
-      if (goles) {
-        setGoals(goles)
-      } else {
-        setGoals(0)
-      }
-
-      // walkover
-      const { data: isWalkover } = await supabase
-        .from('walkover')
-        .select()
-        .eq('team_id', data.team_2.id)
-        .eq('fixture_id', data.fixture_id)
-
-      if (isWalkover?.length) {
-        setWalkover(true)
-      }
-    }
-
-    getDetails()
-  }, [])
+    .getPublicUrl(data.team_visit_image_url)
 
   return (
     <div className='flex gap-2 items-center relative text-xs'>
       <span className='font-semibold text-muted-foreground rounded-full shadow text-lg w-[25px] h-[25px] text-center flex justify-center items-center border bg-white'>
-        {goals}
+        {data.team_visit_goals}
       </span>
       {!imageError ? (
         <div className='w-[30px] h-[30px] relative'>
@@ -64,9 +33,9 @@ const CellTeamTwoImage = ({ data }: CellTeamImageProps) => {
           />
         </div>
       ) : (
-        data.team_2.name
+        data.team_visit_name
       )}
-      {walkover && (
+      {data.walkover_visit && (
         <span className='text-pink-800 shadow rounded-full px-2 bg-white absolute -top-[13px] opacity-80 text-xs'>
           Walkover
         </span>

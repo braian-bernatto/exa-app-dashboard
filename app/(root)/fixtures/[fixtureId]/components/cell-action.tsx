@@ -36,8 +36,8 @@ const CellAction = ({ data }: CellActionProps) => {
 
       const { error } = await supabase.rpc('delete_versus', {
         fixture: data.fixture_id,
-        team_one: data.team_1.id,
-        team_two: data.team_2.id
+        local: data.team_local,
+        visit: data.team_visit
       })
 
       if (error) {
@@ -80,10 +80,9 @@ const CellAction = ({ data }: CellActionProps) => {
           <DropdownMenuItem
             onClick={() =>
               router.push(
-                `/fixtures/${data.fixture_id}/${data.team_1.id}-vs-${data.team_2.id}`
+                `/fixtures/${data.fixture_id}/${data.team_local}-vs-${data.team_visit}`
               )
-            }
-          >
+            }>
             <Edit className='mr-2 h-4 w-4' /> Editar
           </DropdownMenuItem>
           <DropdownMenuItem onClick={() => setOpen(true)}>

@@ -907,9 +907,9 @@ const FixtureTeamsForm = ({
     countGoals()
   }, [modifiedRows])
 
-  // useEffect(() => {
-  //   setModifiedRows([...filteredPlayersTeamLocal, ...filteredPlayersTeamVisit])
-  // }, [filteredPlayersTeamLocal, filteredPlayersTeamVisit])
+  useEffect(() => {
+    setModifiedRows([...filteredPlayersTeamLocal, ...filteredPlayersTeamVisit])
+  }, [filteredPlayersTeamLocal, filteredPlayersTeamVisit])
 
   return (
     <>

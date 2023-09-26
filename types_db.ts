@@ -554,6 +554,14 @@ export interface Database {
         }
         Returns: Record<string, unknown>
       }
+      delete_versus: {
+        Args: {
+          fixture: string
+          local: number
+          visit: number
+        }
+        Returns: boolean
+      }
       delete_walkovers: {
         Args: {
           fixture: number
@@ -601,6 +609,26 @@ export interface Database {
           fixture: number
         }
         Returns: Json
+      }
+      get_fixture_teams_by_fixture_id: {
+        Args: {
+          fixture_id: string
+        }
+        Returns: {
+          fixture_id: string
+          team_local: number
+          team_visit: number
+          walkover_local: boolean
+          walkover_visit: boolean
+          date: string
+          cancha_nro: number
+          team_local_name: string
+          team_local_image_url: string
+          team_visit_name: string
+          team_visit_image_url: string
+          team_local_goals: number
+          team_visit_goals: number
+        }[]
       }
       get_fixtures: {
         Args: Record<PropertyKey, never>

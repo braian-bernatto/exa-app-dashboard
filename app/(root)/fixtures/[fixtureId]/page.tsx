@@ -33,11 +33,10 @@ const FixutrePage = async ({
     }
   }
 
-  const { data: fixtureDetails } = await supabase
-    .from('fixture_teams')
-    .select('*')
-    .eq('fixture_id', params.fixtureId)
-    .order('date', { ascending: true })
+  const { data: fixtureDetails } = await supabase.rpc(
+    'get_fixture_teams_by_fixture_id',
+    { fixture_id: params.fixtureId }
+  )
 
   const { data: tipos_partido } = await supabase
     .from('tipo_partido')
