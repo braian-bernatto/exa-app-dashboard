@@ -74,11 +74,8 @@ const FixtureTeamsForm = ({
   const [loading, setLoading] = useState(false)
   const [open, setOpen] = useState(false)
 
-  const [toggle1, setToggle1] = useState(false)
-  const [toggle2, setToggle2] = useState(false)
-
-  const [walkoverTeam1, setWalkoverTeam1] = useState(false)
-  const [walkoverTeam2, setWalkoverTeam2] = useState(false)
+  const [toggleLocal, setToggleLocal] = useState(false)
+  const [toggleVisit, setToggleVisit] = useState(false)
 
   const [teamIdsInFixture, setTeamIdsInFixture] = useState<number[]>([])
 
@@ -87,10 +84,10 @@ const FixtureTeamsForm = ({
   const [goals, setGoals] = useState<
     { id: number; goals: number }[] | undefined
   >(undefined)
-  const [playersTeam_local, setPlayersTeam_local] = useState<
+  const [playersTeamLocal, setPlayersTeamLocal] = useState<
     GetFixturesPlayers | Players[] | undefined
   >(undefined)
-  const [playersTeam_visit, setPlayersTeamVisit] = useState<
+  const [playersTeamVisit, setPlayersTeamVisit] = useState<
     GetFixturesPlayers | Players[] | undefined
   >(undefined)
   const [filteredPlayersTeamLocal, setFilteredPlayersTeamLocal] = useState<
@@ -142,7 +139,9 @@ const FixtureTeamsForm = ({
         .array()
         .max(2),
       walkover_local: z.boolean(),
-      walkover_visit: z.boolean()
+      walkover_visit: z.boolean(),
+      walkover_local_goals: z.coerce.number().optional().nullable(),
+      walkover_visit_goals: z.coerce.number().optional().nullable()
     })
     .refine(
       val => {
@@ -289,7 +288,7 @@ const FixtureTeamsForm = ({
       const players_2 = initialData.fixturePlayers.filter(
         player => player.team_id === player.team_visit
       )
-      setPlayersTeam_local(players_1)
+      setPlayersTeamLocal(players_1)
       setPlayersTeamVisit(players_2)
       setFilteredPlayersTeamLocal(players_1)
       setFilteredPlayersTeamVisit(players_2)
@@ -301,10 +300,10 @@ const FixtureTeamsForm = ({
   const setTeamWalkover = async () => {
     if (initialData) {
       setLoading(true)
-      setToggle1(initialData.walkover_local)
-      setToggle2(initialData.walkover_visit)
-      hideTeamsToggle_1(initialData.walkover_local, initialData.walkover_visit)
-      hideTeamsToggle_2(initialData.walkover_visit, initialData.walkover_local)
+      setToggleLocal(initialData.walkover_local)
+      initialData.walkover_local ? setFilteredPlayersTeamLocal([]) : ''
+      setToggleVisit(initialData.walkover_visit)
+      initialData.walkover_local ? setFilteredPlayersTeamVisit([]) : ''
       setLoading(false)
     }
   }
@@ -353,42 +352,8 @@ const FixtureTeamsForm = ({
     setGoals(totalCount)
   }
 
-  const clearWalkover = () => {
-    setWalkoverTeam1(false)
-    setWalkoverTeam2(false)
-  }
-
-  const updatePlayersList = (
-    teamWalkover: boolean,
-    teamPlayers: GetFixturesPlayers | Players[],
-    setTeamPlayers: (list: GetFixturesPlayers | Players[] | []) => void,
-    vsTeamWalkover: boolean,
-    vsTeamPlayers: GetFixturesPlayers | Players[],
-    setVsTeamPlayers: (list: GetFixturesPlayers | Players[] | []) => void
-  ) => {
-    const vsTeamPorteros = vsTeamPlayers.filter(
-      player => player.position_id === 'POR'
-    )
-    const teamPorteros = teamPlayers.filter(
-      player => player.position_id === 'POR'
-    )
-
-    // filtramos los jugadores del equipo contrario
-    teamWalkover
-      ? setVsTeamPlayers(vsTeamPorteros)
-      : vsTeamWalkover
-      ? setVsTeamPlayers([])
-      : setVsTeamPlayers(vsTeamPlayers)
-
-    // filtramos equipo en walkover si el otro equipo tambien esta sancionado
-    vsTeamWalkover
-      ? setTeamPlayers(teamPorteros)
-      : teamWalkover
-      ? setTeamPlayers([])
-      : setTeamPlayers(teamPlayers)
-  }
-
   const addModifiedRows = (data: any) => {
+    // this is the function that we pass to the players table
     let exists = false
 
     const newData = modifiedRows?.map(item => {
@@ -409,42 +374,9 @@ const FixtureTeamsForm = ({
   }
 
   const filterModifiedRows = (id: number) => {
+    // keep the players list of the team that doesn't change
     const filteredData = modifiedRows.filter(team => team.team_id !== id)
     setModifiedRows(filteredData)
-  }
-
-  const hideTeamsToggle_1 = (e: boolean, vs: boolean) => {
-    if (playersTeam_local) {
-      // agregamos el id del equipo en el array de walkover
-      setWalkoverTeam1(e)
-
-      // filtramos el listado del otro equipo a solo porteros
-      updatePlayersList(
-        e,
-        playersTeam_local,
-        setFilteredPlayersTeamLocal,
-        vs,
-        playersTeam_visit!,
-        setFilteredPlayersTeamVisit
-      )
-    }
-  }
-
-  const hideTeamsToggle_2 = (e: boolean, vs: boolean) => {
-    if (playersTeam_visit) {
-      // agregamos el id del equipo en el array de walkover
-      setWalkoverTeam2(e)
-
-      // filtramos el listado del otro equipo a solo porteros
-      updatePlayersList(
-        e,
-        playersTeam_visit,
-        setFilteredPlayersTeamVisit,
-        vs,
-        playersTeam_local!,
-        setFilteredPlayersTeamLocal
-      )
-    }
   }
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
@@ -598,7 +530,7 @@ const FixtureTeamsForm = ({
     if (initialData && filteredPlayersTeamLocal?.length) {
       setTeamWalkover()
     }
-  }, [playersTeam_local])
+  }, [playersTeamLocal])
 
   useEffect(() => {
     countGoals()
@@ -632,8 +564,6 @@ const FixtureTeamsForm = ({
                     filteredPlayersTeamLocal,
                     filteredPlayersTeamVisit,
                     modifiedRows,
-                    walkoverTeam1,
-                    walkoverTeam2,
                     goals
                   })
                 }}
@@ -671,7 +601,7 @@ const FixtureTeamsForm = ({
                           variant='outline'
                           role='combobox'
                           className={cn(
-                            'w-full justify-between text-xs',
+                            'uppercase w-full justify-between text-xs',
                             !field.value && 'text-muted-foreground'
                           )}>
                           {field.value
@@ -691,7 +621,7 @@ const FixtureTeamsForm = ({
                         <CommandGroup>
                           {teams.map(team => (
                             <CommandItem
-                              className={`text-xs ${
+                              className={`text-xs uppercase ${
                                 form.getValues('team_visit') === team.id ||
                                 teamIdsInFixture.includes(team.id)
                                   ? 'opacity-50 bg-slate-50'
@@ -704,10 +634,6 @@ const FixtureTeamsForm = ({
                               value={team.name!}
                               key={team.id}
                               onSelect={() => {
-                                // reseteo walkovers
-                                setToggle1(false)
-                                setToggle2(false)
-                                clearWalkover()
                                 filterModifiedRows(form.getValues('team_local'))
 
                                 form.setValue('team_local', team.id)
@@ -715,8 +641,7 @@ const FixtureTeamsForm = ({
                                 const filtered = getResetedPlayersDetails(
                                   team.id
                                 )
-                                setPlayersTeam_local(filtered)
-                                setModifiedRows([...modifiedRows, ...filtered])
+                                setPlayersTeamLocal(filtered)
                                 setFilteredPlayersTeamLocal(filtered)
                               }}>
                               <>
@@ -766,7 +691,7 @@ const FixtureTeamsForm = ({
                           variant='outline'
                           role='combobox'
                           className={cn(
-                            'w-full justify-between text-xs',
+                            'uppercase w-full justify-between text-xs',
                             !field.value && 'text-muted-foreground'
                           )}>
                           {field.value
@@ -786,7 +711,7 @@ const FixtureTeamsForm = ({
                         <CommandGroup>
                           {teams.map(team => (
                             <CommandItem
-                              className={`tex t-xs ${
+                              className={`uppercase tex t-xs ${
                                 form.getValues('team_local') === team.id ||
                                 teamIdsInFixture.includes(team.id)
                                   ? 'opacity-50 bg-slate-50'
@@ -799,10 +724,6 @@ const FixtureTeamsForm = ({
                               value={team.name!}
                               key={team.id}
                               onSelect={() => {
-                                // reseteo walkovers
-                                setToggle1(false)
-                                setToggle2(false)
-                                clearWalkover()
                                 filterModifiedRows(form.getValues('team_visit'))
 
                                 form.setValue('team_visit', team.id)
@@ -810,7 +731,6 @@ const FixtureTeamsForm = ({
                                 const filtered = getResetedPlayersDetails(
                                   team.id
                                 )
-
                                 setPlayersTeamVisit(filtered)
                                 setFilteredPlayersTeamVisit(filtered)
                               }}>
@@ -995,11 +915,11 @@ const FixtureTeamsForm = ({
 
           {/* players team 1 table */}
           <div className='w-full relative overflow-hidden'>
-            {playersTeam_local && (
+            {playersTeamLocal && (
               <>
                 <div
                   className={`w-full flex justify-center items-center gap-2 text-xs relative z-10`}>
-                  {playersTeam_local?.length > 0 ? (
+                  {playersTeamLocal?.length > 0 ? (
                     <>
                       <Separator />
                       <span
@@ -1009,15 +929,18 @@ const FixtureTeamsForm = ({
                         <Toggle
                           variant={'outline'}
                           size={'sm'}
-                          pressed={toggle1}
+                          pressed={toggleLocal}
                           className='left-0 top-0 h-5 text-muted-foreground'
                           onPressedChange={e => {
-                            setToggle1(!toggle1)
-                            hideTeamsToggle_1(e, walkoverTeam2)
+                            setToggleLocal(e)
+                            form.setValue('walkover_local', e)
+                            e
+                              ? setFilteredPlayersTeamLocal([])
+                              : setFilteredPlayersTeamLocal(playersTeamLocal)
                           }}>
                           Walkover
                         </Toggle>
-                        {getTeamLogo(playersTeam_local, 1)}
+                        {getTeamLogo(playersTeamLocal, 1)}
                       </span>
                       <Separator />
                     </>
@@ -1039,11 +962,11 @@ const FixtureTeamsForm = ({
           </div>
           {/* players team 2 table */}
           <div className='w-full relative overflow-hidden'>
-            {playersTeam_visit && (
+            {playersTeamVisit && (
               <>
                 <div
                   className={`w-full flex justify-center items-center gap-2 text-xs relative z-10`}>
-                  {playersTeam_visit?.length > 0 ? (
+                  {playersTeamVisit?.length > 0 ? (
                     <>
                       <Separator />
                       <span
@@ -1053,30 +976,18 @@ const FixtureTeamsForm = ({
                         <Toggle
                           variant={'outline'}
                           size={'sm'}
-                          pressed={toggle2}
+                          pressed={toggleVisit}
                           className='left-0 top-0 h-5 text-muted-foreground'
                           onPressedChange={e => {
-                            setToggle2(!toggle2)
-                            hideTeamsToggle_2(e, walkoverTeam1)
-                            // if (e && initialData) {
-                            //   const resetPlayers = getResetedPlayersDetails(
-                            //     playersTeam_visit[0].team_id
-                            //   )
-                            //   setFilteredPlayersTeamVisit(resetPlayers)
-
-                            //   if (playersTeam_local?.length) {
-                            //     const resetPlayers = getResetedPlayersDetails(
-                            //       playersTeam_local[0].team_id
-                            //     )
-                            //     setFilteredPlayersTeamLocal(resetPlayers)
-                            //   }
-                            // } else {
-                            //   setModifiedRows([])
-                            // }
+                            setToggleVisit(e)
+                            form.setValue('walkover_visit', e)
+                            e
+                              ? setFilteredPlayersTeamVisit([])
+                              : setFilteredPlayersTeamVisit(playersTeamVisit)
                           }}>
                           Walkover
                         </Toggle>
-                        {getTeamLogo(playersTeam_visit, 2)}
+                        {getTeamLogo(playersTeamVisit, 2)}
                       </span>
                       <Separator />
                     </>
@@ -1101,28 +1012,79 @@ const FixtureTeamsForm = ({
           <div className='flex justify-center items-center overflow-hidden w-full'>
             <div
               className={`w-full flex justify-center items-center gap-2 text-xs relative`}>
-              {getTeamLogo(playersTeam_local ?? playersTeam_local, 1)}
+              {getTeamLogo(playersTeamLocal ?? playersTeamLocal, 1)}
             </div>
+            {/* walkover local goals */}
+            <FormField
+              control={form.control}
+              name='walkover_local_goals'
+              render={({ field }) => (
+                <FormItem className='rounded bg-white shrink-0'>
+                  <FormLabel>Goles Walkover</FormLabel>
+                  <FormControl>
+                    <span className='relative flex items-center justify-center mr-5'>
+                      <button
+                        disabled={field.value === 0}
+                        type='button'
+                        {...field}
+                        onClick={() => {
+                          if (field.value) {
+                            form.setValue(
+                              'walkover_local_goals',
+                              field.value > 0 ? +field.value - 1 : 0
+                            )
+                          }
+                        }}>
+                        <MinusCircle className='text-muted-foreground' />
+                      </button>
+                      <Input
+                        className={`font-semibold text-center w-[75px] ${
+                          field.value !== (null || undefined) && field.value > 0
+                            ? ''
+                            : 'text-muted-foreground'
+                        }`}
+                        type='number'
+                        min={1}
+                        {...field}
+                        onClick={e => e.currentTarget.select()}
+                      />
+                      <button
+                        type='button'
+                        {...field}
+                        onClick={() => {
+                          form.setValue(
+                            'walkover_local_goals',
+                            +field.value! + 1
+                          )
+                        }}>
+                        <PlusCircle className='text-muted-foreground' />
+                      </button>
+                    </span>
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
             <h2 className='text-4xl text-muted-foreground text-center flex-none'>
-              {playersTeam_local?.length &&
+              {playersTeamLocal?.length &&
                 goals !== undefined &&
-                goals.filter(item => item.id === playersTeam_local[0].team_id!)
+                goals.filter(item => item.id === playersTeamLocal[0].team_id!)
                   .length &&
                 goals.filter(
-                  item => item.id === playersTeam_local[0].team_id!
+                  item => item.id === playersTeamLocal[0].team_id!
                 )[0].goals}
               -
-              {playersTeam_visit?.length &&
+              {playersTeamVisit?.length &&
                 goals !== undefined &&
-                goals.filter(item => item.id === playersTeam_visit[0].team_id!)
+                goals.filter(item => item.id === playersTeamVisit[0].team_id!)
                   .length &&
                 goals.filter(
-                  item => item.id === playersTeam_visit[0].team_id!
+                  item => item.id === playersTeamVisit[0].team_id!
                 )[0].goals}
             </h2>
             <div
               className={`w-full flex justify-center items-center gap-2 text-xs relative `}>
-              {getTeamLogo(playersTeam_visit ?? playersTeam_visit, 2)}
+              {getTeamLogo(playersTeamVisit ?? playersTeamVisit, 2)}
             </div>
           </div>
 
@@ -1156,8 +1118,6 @@ const FixtureTeamsForm = ({
               disabled={loading}
               onClick={() => {
                 form.setValue('goals', goals!)
-                form.setValue('walkover_local', walkoverTeam1)
-                form.setValue('walkover_visit', walkoverTeam2)
               }}>
               {action}
             </Button>

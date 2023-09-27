@@ -141,7 +141,9 @@ export interface Database {
           team_local: number
           team_visit: number
           walkover_local: boolean
+          walkover_local_goals: number | null
           walkover_visit: boolean
+          walkover_visit_goals: number | null
         }
         Insert: {
           cancha_nro?: number | null
@@ -150,7 +152,9 @@ export interface Database {
           team_local: number
           team_visit: number
           walkover_local?: boolean
+          walkover_local_goals?: number | null
           walkover_visit?: boolean
+          walkover_visit_goals?: number | null
         }
         Update: {
           cancha_nro?: number | null
@@ -159,7 +163,9 @@ export interface Database {
           team_local?: number
           team_visit?: number
           walkover_local?: boolean
+          walkover_local_goals?: number | null
           walkover_visit?: boolean
+          walkover_visit_goals?: number | null
         }
         Relationships: [
           {
