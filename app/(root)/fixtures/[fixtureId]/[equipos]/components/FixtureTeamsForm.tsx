@@ -128,8 +128,8 @@ const FixtureTeamsForm = ({
       goals_visit: z.coerce.number().optional(),
       walkover_local: z.boolean(),
       walkover_visit: z.boolean(),
-      walkover_local_goals: z.coerce.number().optional(),
-      walkover_visit_goals: z.coerce.number().optional()
+      walkover_local_goals: z.coerce.number().optional().nullable(),
+      walkover_visit_goals: z.coerce.number().optional().nullable()
     })
     .refine(
       val => {
@@ -278,12 +278,18 @@ const FixtureTeamsForm = ({
   const setPlayers = async () => {
     if (initialData) {
       setLoading(true)
-      const players_1 = initialData.fixturePlayers.filter(
-        player => player.team_id === player.team_local
-      )
-      const players_2 = initialData.fixturePlayers.filter(
-        player => player.team_id === player.team_visit
-      )
+      const players_1 = initialData.fixturePlayers.length
+        ? initialData.fixturePlayers.filter(
+            player => player.team_id === player.team_local
+          )
+        : getResetedPlayersDetails(initialData?.team_local)
+
+      const players_2 = initialData.fixturePlayers.length
+        ? initialData.fixturePlayers.filter(
+            player => player.team_id === player.team_visit
+          )
+        : getResetedPlayersDetails(initialData?.team_visit)
+
       setPlayersTeamLocal(players_1)
       setPlayersTeamVisit(players_2)
       setFilteredPlayersTeamLocal(players_1)
@@ -295,12 +301,10 @@ const FixtureTeamsForm = ({
 
   const setTeamWalkover = async () => {
     if (initialData) {
-      setLoading(true)
       setToggleLocal(initialData.walkover_local)
       initialData.walkover_local ? setFilteredPlayersTeamLocal([]) : ''
       setToggleVisit(initialData.walkover_visit)
       initialData.walkover_local ? setFilteredPlayersTeamVisit([]) : ''
-      setLoading(false)
     }
   }
 
@@ -352,7 +356,7 @@ const FixtureTeamsForm = ({
   async function onSubmit(values: z.infer<typeof formSchema>) {
     try {
       setLoading(true)
-      const {
+      let {
         fixture_id,
         team_local,
         team_visit,
@@ -366,6 +370,15 @@ const FixtureTeamsForm = ({
 
       if (!fixture_id || !team_local || !team_visit || !date) {
         return toast.error('Faltan cargar datos')
+      }
+
+      // clear walkover goals if not selected
+      if (!walkover_local) {
+        walkover_local_goals = null
+      }
+
+      if (!walkover_visit) {
+        walkover_visit_goals = null
       }
 
       const formattedPlayers = modifiedRows.map(player => ({
@@ -496,17 +509,12 @@ const FixtureTeamsForm = ({
       setPlayers()
       if (initialData.date) {
         setHour(format(new Date(initialData.date), 'HH:mm'))
+        setTeamWalkover()
       }
     } else {
       getTeamIdsFixture()
     }
   }, [])
-
-  useEffect(() => {
-    if (initialData && filteredPlayersTeamLocal?.length) {
-      setTeamWalkover()
-    }
-  }, [playersTeamLocal])
 
   useEffect(() => {
     countGoals()
@@ -537,6 +545,9 @@ const FixtureTeamsForm = ({
                 onClick={() => {
                   console.log(form.getValues())
                   console.log({
+                    initialData,
+                    playersTeamLocal,
+                    playersTeamVisit,
                     filteredPlayersTeamLocal,
                     filteredPlayersTeamVisit,
                     modifiedRows,
@@ -889,7 +900,7 @@ const FixtureTeamsForm = ({
             </div>
           </div>
 
-          {/* players team 1 table */}
+          {/* players team local table */}
           <div className='w-full relative overflow-hidden'>
             {playersTeamLocal && (
               <>
@@ -906,13 +917,18 @@ const FixtureTeamsForm = ({
                           variant={'outline'}
                           size={'sm'}
                           pressed={toggleLocal}
-                          className='left-0 top-0 h-5 text-muted-foreground'
+                          className={`left-0 top-0 h-5 text-muted-foreground ${
+                            toggleLocal && 'border border-pink-400'
+                          }`}
                           onPressedChange={e => {
                             setToggleLocal(e)
                             form.setValue('walkover_local', e)
-                            e
-                              ? setFilteredPlayersTeamLocal([])
-                              : setFilteredPlayersTeamLocal(playersTeamLocal)
+
+                            if (e) {
+                              setFilteredPlayersTeamLocal([])
+                            } else {
+                              setFilteredPlayersTeamLocal(playersTeamLocal)
+                            }
                           }}>
                           Walkover
                         </Toggle>
@@ -936,7 +952,7 @@ const FixtureTeamsForm = ({
               </>
             )}
           </div>
-          {/* players team 2 table */}
+          {/* players team visit table */}
           <div className='w-full relative overflow-hidden'>
             {playersTeamVisit && (
               <>
@@ -953,13 +969,18 @@ const FixtureTeamsForm = ({
                           variant={'outline'}
                           size={'sm'}
                           pressed={toggleVisit}
-                          className='left-0 top-0 h-5 text-muted-foreground'
+                          className={`left-0 top-0 h-5 text-muted-foreground ${
+                            toggleVisit && 'border border-pink-400'
+                          }`}
                           onPressedChange={e => {
                             setToggleVisit(e)
                             form.setValue('walkover_visit', e)
-                            e
-                              ? setFilteredPlayersTeamVisit([])
-                              : setFilteredPlayersTeamVisit(playersTeamVisit)
+
+                            if (e) {
+                              setFilteredPlayersTeamVisit([])
+                            } else {
+                              setFilteredPlayersTeamVisit(playersTeamVisit)
+                            }
                           }}>
                           Walkover
                         </Toggle>
