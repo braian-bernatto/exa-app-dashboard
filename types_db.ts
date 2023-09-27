@@ -650,6 +650,8 @@ export interface Database {
           walkover_visit: boolean
           date: string
           cancha_nro: number
+          walkover_local_goals: number
+          walkover_visit_goals: number
           team_local_name: string
           team_local_image_url: string
           team_visit_name: string

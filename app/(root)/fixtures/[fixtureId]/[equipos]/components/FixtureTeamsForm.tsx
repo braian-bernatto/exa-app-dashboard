@@ -81,9 +81,8 @@ const FixtureTeamsForm = ({
 
   const [hour, setHour] = useState('')
   const [allowPreviousDates, setAllowPreviousDates] = useState(false)
-  const [goals, setGoals] = useState<
-    { id: number; goals: number }[] | undefined
-  >(undefined)
+  const [goalsLocal, setGoalsLocal] = useState(0)
+  const [goalsVisit, setGoalsVisit] = useState(0)
   const [playersTeamLocal, setPlayersTeamLocal] = useState<
     GetFixturesPlayers | Players[] | undefined
   >(undefined)
@@ -125,19 +124,8 @@ const FixtureTeamsForm = ({
       }),
       date: z.date({ required_error: 'Obligatorio' }),
       cancha_nro: z.coerce.number().optional(),
-      goals: z
-        .object(
-          {
-            id: z.number(),
-            goals: z.number().min(0)
-          },
-          {
-            required_error: 'Faltan cargar los goles',
-            invalid_type_error: 'Faltan cargar los goles'
-          }
-        )
-        .array()
-        .max(2),
+      goals_local: z.coerce.number().optional(),
+      goals_visit: z.coerce.number().optional(),
       walkover_local: z.boolean(),
       walkover_visit: z.boolean(),
       walkover_local_goals: z.coerce.number().optional(),
@@ -192,20 +180,25 @@ const FixtureTeamsForm = ({
     )
     .refine(
       val => {
-        const bothWalkover = val.walkover_local && val.walkover_visit
-
         // if none of the teams are in walkover omit this refine
         if (!val.walkover_local && !val.walkover_visit) return true
 
         // if there is walkover there must be goals to the other team
-        if (!goals) return false
-        if (goals?.length === 0) return false
-        if (bothWalkover && goals?.length < 2) return false
+        if (val.walkover_local && !val.walkover_visit_goals) return false
+        if (val.walkover_visit && !val.walkover_local_goals) return false
 
-        if (bothWalkover && (goals[0].goals === 0 || goals[1].goals === 0))
-          return false
-        if (val.walkover_local && goals[0].goals > 0) return true
-        if (val.walkover_visit && goals[0].goals > 0) return true
+        if (
+          val.walkover_local &&
+          val.walkover_visit_goals &&
+          val.walkover_visit_goals > 0
+        )
+          return true
+        if (
+          val.walkover_visit &&
+          val.walkover_local_goals &&
+          val.walkover_local_goals > 0
+        )
+          return true
       },
       {
         message: 'Goles por walkover deben ser mayores que cero',
@@ -221,9 +214,12 @@ const FixtureTeamsForm = ({
       team_visit: undefined,
       date: undefined,
       cancha_nro: 0,
-      goals: undefined,
+      goals_local: 0,
+      goals_visit: 0,
       walkover_local: false,
-      walkover_visit: false
+      walkover_visit: false,
+      walkover_local_goals: undefined,
+      walkover_local_visit: undefined
     }
   })
 
@@ -309,47 +305,21 @@ const FixtureTeamsForm = ({
   }
 
   const countGoals = () => {
-    const totalCount = modifiedRows.reduce((prev, curr) => {
-      // Inicia el array con el primer item
-      if (!prev.length) {
-        prev.push({
-          id: curr.team_id,
-          goals: +curr.goals
-        })
-        return prev
+    const sumLocalGoals = modifiedRows.reduce((acc, curr) => {
+      if (curr.team_id === form.getValues('team_local')) {
+        acc = acc + curr.goals
       }
+      return acc
+    }, 0)
+    setGoalsLocal(sumLocalGoals)
 
-      // Busca si existe el item en el array y suma los goles
-      const teamIndex = prev.findIndex(
-        (team: any) => +team.id === +curr.team_id
-      )
-
-      if (teamIndex !== -1) {
-        const filteredList = prev.filter(
-          (team: any) => team.id !== curr.team_id
-        )
-        const foundItem = prev.filter((team: any) => team.id === curr.team_id)
-
-        prev = [
-          ...filteredList,
-          { id: foundItem[0].id, goals: +foundItem[0].goals + +curr.goals }
-        ]
-        return prev
-      } else {
-        // Si no encontro el dato en el array entonces se agrega como nuevo
-        prev = [
-          ...prev,
-          {
-            id: curr.team_id,
-            goals: +curr.goals
-          }
-        ]
+    const sumVisitGoals = modifiedRows.reduce((acc, curr) => {
+      if (curr.team_id === form.getValues('team_visit')) {
+        acc = acc + curr.goals
       }
-
-      return prev
-    }, [])
-
-    setGoals(totalCount)
+      return acc
+    }, 0)
+    setGoalsVisit(sumVisitGoals)
   }
 
   const addModifiedRows = (data: any) => {
@@ -389,7 +359,9 @@ const FixtureTeamsForm = ({
         date,
         cancha_nro,
         walkover_local,
-        walkover_visit
+        walkover_visit,
+        walkover_local_goals,
+        walkover_visit_goals
       } = values
 
       if (!fixture_id || !team_local || !team_visit || !date) {
@@ -418,7 +390,9 @@ const FixtureTeamsForm = ({
             cancha_nro,
             date: date.toISOString(),
             walkover_local,
-            walkover_visit
+            walkover_visit,
+            walkover_local_goals,
+            walkover_visit_goals
           })
           .eq('fixture_id', fixture_id)
           .eq('team_local', team_local)
@@ -454,6 +428,8 @@ const FixtureTeamsForm = ({
             cancha_nro,
             walkover_local,
             walkover_visit,
+            walkover_local_goals,
+            walkover_visit_goals,
             date: date.toISOString()
           })
 
@@ -564,7 +540,8 @@ const FixtureTeamsForm = ({
                     filteredPlayersTeamLocal,
                     filteredPlayersTeamVisit,
                     modifiedRows,
-                    goals
+                    goalsLocal,
+                    goalsVisit
                   })
                 }}
               />
@@ -862,7 +839,6 @@ const FixtureTeamsForm = ({
                           type='button'
                           {...field}
                           onClick={() => {
-                            console.log(field.value)
                             if (field.value) {
                               form.setValue(
                                 'cancha_nro',
@@ -873,7 +849,7 @@ const FixtureTeamsForm = ({
                           <MinusCircle className='text-muted-foreground' />
                         </button>
                         <Input
-                          className={`font-semibold text-center w-[75px] ${
+                          className={`font-semibold text-center w-[50px] ${
                             field.value !== undefined && field.value > 0
                               ? ''
                               : 'text-muted-foreground'
@@ -1009,152 +985,150 @@ const FixtureTeamsForm = ({
           </div>
 
           {/* resultado */}
-          <div className='flex justify-center items-center overflow-hidden w-full'>
+          <div className='flex justify-center items-center w-full py-1'>
             <div
               className={`w-full flex flex-col justify-center items-center gap-2 text-xs relative`}>
               {getTeamLogo(playersTeamLocal ?? playersTeamLocal, 1)}
               {/* walkover local goals */}
-              <FormField
-                control={form.control}
-                name='walkover_local_goals'
-                render={({ field }) => (
-                  <FormItem className='rounded bg-white shrink-0'>
-                    <FormControl>
-                      <span className='relative flex items-center justify-center'>
-                        <button
-                          disabled={field.value === 0}
-                          type='button'
-                          {...field}
-                          onClick={() => {
-                            if (field.value) {
+              {toggleVisit && (
+                <FormField
+                  control={form.control}
+                  name='walkover_local_goals'
+                  render={({ field }) => (
+                    <FormItem className='rounded bg-white shrink-0'>
+                      <FormControl>
+                        <span className='relative flex items-center justify-center'>
+                          <button
+                            disabled={field.value === 0}
+                            type='button'
+                            {...field}
+                            onClick={() => {
                               form.setValue(
                                 'walkover_local_goals',
-                                field.value > 0 ? +field.value - 1 : 0
+                                field.value
+                                  ? field.value > 0
+                                    ? +field.value - 1
+                                    : 0
+                                  : 0
                               )
-                            }
-                          }}>
-                          <MinusCircle
-                            className='text-muted-foreground'
-                            size={30}
+                            }}>
+                            <MinusCircle
+                              className='text-muted-foreground'
+                              size={30}
+                            />
+                          </button>
+                          <Input
+                            className={`font-semibold text-xl text-center w-[50px] text-muted-foreground ${
+                              field.value !== (null || undefined) &&
+                              field.value > 0
+                                ? ''
+                                : 'text-muted-foreground'
+                            }`}
+                            type='number'
+                            min={1}
+                            defaultValue={0}
+                            {...field}
+                            onClick={e => e.currentTarget.select()}
                           />
-                        </button>
-                        <Input
-                          className={`font-semibold text-md text-center w-[50px] text-muted-foreground ${
-                            field.value !== (null || undefined) &&
-                            field.value > 0
-                              ? ''
-                              : 'text-muted-foreground'
-                          }`}
-                          type='number'
-                          min={1}
-                          {...field}
-                          onClick={e => e.currentTarget.select()}
-                        />
-                        <button
-                          type='button'
-                          {...field}
-                          onClick={() => {
-                            form.setValue(
-                              'walkover_local_goals',
-                              +field.value! + 1
-                            )
-                          }}>
-                          <PlusCircle
-                            className='text-muted-foreground'
-                            size={30}
-                          />
-                        </button>
-                      </span>
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+                          <button
+                            type='button'
+                            {...field}
+                            onClick={() => {
+                              form.setValue(
+                                'walkover_local_goals',
+                                field.value ? +field.value + 1 : 1
+                              )
+                            }}>
+                            <PlusCircle
+                              className='text-muted-foreground'
+                              size={30}
+                            />
+                          </button>
+                        </span>
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              )}
             </div>
-            <h2 className='text-4xl text-muted-foreground text-center flex-none'>
-              {playersTeamLocal?.length &&
-                goals !== undefined &&
-                goals.filter(item => item.id === playersTeamLocal[0].team_id!)
-                  .length &&
-                goals.filter(
-                  item => item.id === playersTeamLocal[0].team_id!
-                )[0].goals}
-              -
-              {playersTeamVisit?.length &&
-                goals !== undefined &&
-                goals.filter(item => item.id === playersTeamVisit[0].team_id!)
-                  .length &&
-                goals.filter(
-                  item => item.id === playersTeamVisit[0].team_id!
-                )[0].goals}
-            </h2>
+            {!toggleLocal && !toggleVisit && (
+              <h2 className='text-4xl text-muted-foreground text-center flex-none'>
+                {goalsLocal}-{goalsVisit}
+              </h2>
+            )}
             <div
               className={`w-full flex flex-col justify-center items-center gap-2 text-xs relative`}>
               {getTeamLogo(playersTeamVisit ?? playersTeamVisit, 2)}
               {/* walkover visit goals */}
-              <FormField
-                control={form.control}
-                name='walkover_visit_goals'
-                render={({ field }) => (
-                  <FormItem className='rounded bg-white shrink-0'>
-                    <FormControl>
-                      <span className='relative flex items-center justify-center'>
-                        <button
-                          disabled={field.value === 0}
-                          type='button'
-                          {...field}
-                          onClick={() => {
-                            if (field.value) {
+              {toggleLocal && (
+                <FormField
+                  control={form.control}
+                  name='walkover_visit_goals'
+                  render={({ field }) => (
+                    <FormItem className='rounded bg-white shrink-0'>
+                      <FormControl>
+                        <span className='relative flex items-center justify-center'>
+                          <button
+                            disabled={field.value === 0}
+                            type='button'
+                            {...field}
+                            onClick={() => {
                               form.setValue(
                                 'walkover_visit_goals',
-                                field.value > 0 ? +field.value - 1 : 0
+                                field.value
+                                  ? field.value > 0
+                                    ? +field.value - 1
+                                    : 0
+                                  : 0
                               )
-                            }
-                          }}>
-                          <MinusCircle
-                            className='text-muted-foreground'
-                            size={30}
+                            }}>
+                            <MinusCircle
+                              className='text-muted-foreground'
+                              size={30}
+                            />
+                          </button>
+                          <Input
+                            className={`font-semibold text-xl text-center w-[50px] text-muted-foreground ${
+                              field.value !== (null || undefined) &&
+                              field.value > 0
+                                ? ''
+                                : 'text-muted-foreground'
+                            }`}
+                            type='number'
+                            min={1}
+                            defaultValue={0}
+                            {...field}
+                            onClick={e => e.currentTarget.select()}
                           />
-                        </button>
-                        <Input
-                          className={`font-semibold text-md text-center w-[50px] text-muted-foreground ${
-                            field.value !== (null || undefined) &&
-                            field.value > 0
-                              ? ''
-                              : 'text-muted-foreground'
-                          }`}
-                          type='number'
-                          min={1}
-                          {...field}
-                          onClick={e => e.currentTarget.select()}
-                        />
-                        <button
-                          type='button'
-                          {...field}
-                          onClick={() => {
-                            form.setValue(
-                              'walkover_visit_goals',
-                              +field.value! + 1
-                            )
-                          }}>
-                          <PlusCircle
-                            className='text-muted-foreground'
-                            size={30}
-                          />
-                        </button>
-                      </span>
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+                          <button
+                            type='button'
+                            {...field}
+                            onClick={() => {
+                              form.setValue(
+                                'walkover_visit_goals',
+                                field.value ? +field.value + 1 : 1
+                              )
+                            }}>
+                            <PlusCircle
+                              className='text-muted-foreground'
+                              size={30}
+                            />
+                          </button>
+                        </span>
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              )}
             </div>
           </div>
 
           {/* goals */}
           <FormField
             control={form.control}
-            name='goals'
+            name='goals_local'
             render={({ field }) => (
               <FormItem className='rounded bg-white'>
                 <FormMessage />
@@ -1178,10 +1152,7 @@ const FixtureTeamsForm = ({
               type='submit'
               variant={'default'}
               className='w-full'
-              disabled={loading}
-              onClick={() => {
-                form.setValue('goals', goals!)
-              }}>
+              disabled={loading}>
               {action}
             </Button>
           </div>

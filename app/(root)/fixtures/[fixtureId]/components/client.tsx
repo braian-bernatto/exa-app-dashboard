@@ -26,6 +26,7 @@ const FixtureDetailsClient = ({
 }: FixtureDetailsClientProps) => {
   const router = useRouter()
   const params = useParams()
+  console.log(fixtureDetails)
 
   return (
     <div className='flex flex-wrap justify-center gap-5 w-full'>
