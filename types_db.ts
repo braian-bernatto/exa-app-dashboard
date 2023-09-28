@@ -535,6 +535,14 @@ export interface Database {
         }
         Returns: Record<string, unknown>
       }
+      delete_fixture_players: {
+        Args: {
+          fixture: string
+          local: number
+          visit: number
+        }
+        Returns: boolean
+      }
       delete_player_image: {
         Args: {
           image_url: string

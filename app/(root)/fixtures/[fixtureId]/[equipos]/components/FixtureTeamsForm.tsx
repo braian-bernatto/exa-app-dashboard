@@ -302,9 +302,11 @@ const FixtureTeamsForm = ({
   const setTeamWalkover = async () => {
     if (initialData) {
       setToggleLocal(initialData.walkover_local)
-      initialData.walkover_local ? setFilteredPlayersTeamLocal([]) : ''
       setToggleVisit(initialData.walkover_visit)
-      initialData.walkover_local ? setFilteredPlayersTeamVisit([]) : ''
+      if (initialData.walkover_local || initialData.walkover_visit) {
+        setFilteredPlayersTeamLocal([])
+        setFilteredPlayersTeamVisit([])
+      }
     }
   }
 
@@ -374,11 +376,11 @@ const FixtureTeamsForm = ({
 
       // clear walkover goals if not selected
       if (!walkover_local) {
-        walkover_local_goals = null
+        walkover_visit_goals = null
       }
 
       if (!walkover_visit) {
-        walkover_visit_goals = null
+        walkover_local_goals = null
       }
 
       const formattedPlayers = modifiedRows.map(player => ({
@@ -418,17 +420,33 @@ const FixtureTeamsForm = ({
         }
 
         // fixture players
-        const { error: supabaseFixturePlayersError } = await supabase
-          .from('fixture_players')
-          .upsert(formattedPlayers)
-          .eq('fixture_id', fixture_id)
-          .eq('team_local', team_local)
-          .eq('team_visit', team_visit)
+        if (walkover_local || walkover_visit) {
+          // if (initialData.fixturePlayers.length){
+          const { error } = await supabase.rpc('delete_fixture_players', {
+            fixture: fixture_id,
+            local: team_local,
+            visit: team_visit
+          })
 
-        if (supabaseFixturePlayersError) {
-          setLoading(false)
-          console.log(supabaseFixturePlayersError)
-          return toast.error('No se pudo grabar Fixture Jugadores')
+          if (error) {
+            setLoading(false)
+            console.log(error)
+            return toast.error('No se pudo borrar Fixture Jugadores')
+          }
+          // }
+        } else {
+          const { error: supabaseFixturePlayersError } = await supabase
+            .from('fixture_players')
+            .upsert(formattedPlayers)
+            .eq('fixture_id', fixture_id)
+            .eq('team_local', team_local)
+            .eq('team_visit', team_visit)
+
+          if (supabaseFixturePlayersError) {
+            setLoading(false)
+            console.log(supabaseFixturePlayersError)
+            return toast.error('No se pudo grabar Fixture Jugadores')
+          }
         }
       } else {
         // fixture teams
@@ -926,8 +944,13 @@ const FixtureTeamsForm = ({
 
                             if (e) {
                               setFilteredPlayersTeamLocal([])
+                              setFilteredPlayersTeamVisit([])
                             } else {
+                              if (toggleVisit) return // si el otro equipo esta en walkover no mostramos nada
                               setFilteredPlayersTeamLocal(playersTeamLocal)
+                              if (playersTeamVisit?.length) {
+                                setFilteredPlayersTeamVisit(playersTeamVisit)
+                              }
                             }
                           }}>
                           Walkover
@@ -978,8 +1001,13 @@ const FixtureTeamsForm = ({
 
                             if (e) {
                               setFilteredPlayersTeamVisit([])
+                              setFilteredPlayersTeamLocal([])
                             } else {
+                              if (toggleLocal) return // si el otro equipo esta en walkover no mostramos nada
                               setFilteredPlayersTeamVisit(playersTeamVisit)
+                              if (playersTeamLocal?.length) {
+                                setFilteredPlayersTeamLocal(playersTeamLocal)
+                              }
                             }
                           }}>
                           Walkover
@@ -1145,17 +1173,6 @@ const FixtureTeamsForm = ({
               )}
             </div>
           </div>
-
-          {/* goals */}
-          <FormField
-            control={form.control}
-            name='goals_local'
-            render={({ field }) => (
-              <FormItem className='rounded bg-white'>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
 
           {/* walkovers */}
           <FormField

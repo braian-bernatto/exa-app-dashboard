@@ -18,7 +18,11 @@ const CellTeamTwoImage = ({ data }: CellTeamImageProps) => {
   return (
     <div className='flex gap-2 items-center relative text-xs'>
       <span className='font-semibold text-muted-foreground rounded-full shadow text-lg w-[25px] h-[25px] text-center flex justify-center items-center border bg-white'>
-        {data.team_visit_goals || '-'}
+        {data.team_visit_goals !== null
+          ? data.team_visit_goals
+          : data.walkover_visit_goals !== null
+          ? data.walkover_visit_goals
+          : '-'}
       </span>
       {!imageError ? (
         <div className='w-[30px] h-[30px] relative'>
