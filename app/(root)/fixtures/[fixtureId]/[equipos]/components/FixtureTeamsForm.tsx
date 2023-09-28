@@ -56,7 +56,9 @@ import { Label } from '@/components/ui/label'
 
 interface FixtureTeamsFormProps {
   initialData:
-    | ({ fixturePlayers: GetFixturesPlayers } & FixtureTeams)
+    | ({ fixturePlayers: GetFixturesPlayers } & Omit<FixtureTeams, 'date'> & {
+          date: any
+        })
     | undefined
   teams: Teams[]
   players: Players[]
@@ -123,7 +125,7 @@ const FixtureTeamsForm = ({
         invalid_type_error: 'Obligatorio'
       }),
       date: z.date({ required_error: 'Obligatorio' }),
-      cancha_nro: z.coerce.number().optional(),
+      cancha_nro: z.coerce.number().optional().nullable(),
       goals_local: z.coerce.number().optional(),
       goals_visit: z.coerce.number().optional(),
       walkover_local: z.boolean(),
@@ -209,7 +211,7 @@ const FixtureTeamsForm = ({
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: initialData || {
-      fixture_id: params.fixtureId,
+      fixture_id: params.fixtureId as string,
       team_local: undefined,
       team_visit: undefined,
       date: undefined,
@@ -219,7 +221,7 @@ const FixtureTeamsForm = ({
       walkover_local: false,
       walkover_visit: false,
       walkover_local_goals: undefined,
-      walkover_local_visit: undefined
+      walkover_visit_goals: undefined
     }
   })
 
@@ -867,6 +869,7 @@ const FixtureTeamsForm = ({
                           disabled={field.value === 0}
                           type='button'
                           {...field}
+                          value={field.value === null ? 0 : field.value}
                           onClick={() => {
                             if (field.value) {
                               form.setValue(
@@ -879,18 +882,22 @@ const FixtureTeamsForm = ({
                         </button>
                         <Input
                           className={`font-semibold text-center w-[50px] ${
-                            field.value !== undefined && field.value > 0
+                            field.value !== undefined &&
+                            field.value &&
+                            field.value > 0
                               ? ''
                               : 'text-muted-foreground'
                           }`}
                           type='number'
                           min={1}
                           {...field}
+                          value={field.value === null ? 0 : field.value}
                           onClick={e => e.currentTarget.select()}
                         />
                         <button
                           type='button'
                           {...field}
+                          value={field.value === null ? 0 : field.value}
                           onClick={() => {
                             form.setValue('cancha_nro', +field.value! + 1)
                           }}>

@@ -648,7 +648,7 @@ export interface Database {
       }
       get_fixture_teams_by_fixture_id: {
         Args: {
-          fixture_id: string
+          fixture: string
         }
         Returns: {
           fixture_id: string
@@ -718,7 +718,7 @@ export interface Database {
       }
       get_tabla_posiciones: {
         Args: {
-          p_torneo_id: number
+          p_torneo_id: string
         }
         Returns: {
           team_id: number

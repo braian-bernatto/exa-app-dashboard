@@ -1,7 +1,7 @@
 'use client'
 
 import { Button } from '@/components/ui/button'
-import { Players } from '@/types'
+import { GetFixturesPlayers, Players } from '@/types'
 import { ColumnDef } from '@tanstack/react-table'
 import { ArrowUpDown } from 'lucide-react'
 import TableCellYellowCard from './TableCellYellowCard'
@@ -10,7 +10,7 @@ import TableCellRedCard from './TableCellRedCard'
 import TableCellMotivo from './TableCellMotivo'
 import TableCellPresent from './TableCellPresent'
 
-export const Columns: ColumnDef<Players>[] = [
+export const Columns: ColumnDef<Players | GetFixturesPlayers[0]>[] = [
   {
     accessorKey: 'name',
     header: ({ column }) => {

@@ -34,14 +34,13 @@ const FixutrePage = async ({
   }
 
   const { data: fixtureDetails } = await supabase
-    .rpc('get_fixture_teams_by_fixture_id', { fixture_id: params.fixtureId })
+    .rpc('get_fixture_teams_by_fixture_id', { fixture: params.fixtureId })
     .order('date', { ascending: false })
 
   const { data: tipos_partido } = await supabase
     .from('tipo_partido')
     .select()
     .order('id', { ascending: true })
-
   return (
     <div className='flex flex-col gap-5'>
       <FixtureDetailsClient
