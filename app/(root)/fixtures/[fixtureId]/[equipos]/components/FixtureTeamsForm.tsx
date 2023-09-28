@@ -1051,6 +1051,7 @@ const FixtureTeamsForm = ({
                             disabled={field.value === 0}
                             type='button'
                             {...field}
+                            value={field.value === null ? 0 : field.value}
                             onClick={() => {
                               form.setValue(
                                 'walkover_local_goals',
@@ -1069,6 +1070,7 @@ const FixtureTeamsForm = ({
                           <Input
                             className={`font-semibold text-xl text-center w-[50px] text-muted-foreground ${
                               field.value !== (null || undefined) &&
+                              field.value &&
                               field.value > 0
                                 ? ''
                                 : 'text-muted-foreground'
@@ -1077,11 +1079,13 @@ const FixtureTeamsForm = ({
                             min={1}
                             defaultValue={0}
                             {...field}
+                            value={field.value === null ? 0 : field.value}
                             onClick={e => e.currentTarget.select()}
                           />
                           <button
                             type='button'
                             {...field}
+                            value={field.value === null ? 0 : field.value}
                             onClick={() => {
                               form.setValue(
                                 'walkover_local_goals',
@@ -1122,6 +1126,7 @@ const FixtureTeamsForm = ({
                             disabled={field.value === 0}
                             type='button'
                             {...field}
+                            value={field.value === null ? 0 : field.value}
                             onClick={() => {
                               form.setValue(
                                 'walkover_visit_goals',
@@ -1140,6 +1145,7 @@ const FixtureTeamsForm = ({
                           <Input
                             className={`font-semibold text-xl text-center w-[50px] text-muted-foreground ${
                               field.value !== (null || undefined) &&
+                              field.value &&
                               field.value > 0
                                 ? ''
                                 : 'text-muted-foreground'
@@ -1148,11 +1154,13 @@ const FixtureTeamsForm = ({
                             min={1}
                             defaultValue={0}
                             {...field}
+                            value={field.value === null ? 0 : field.value}
                             onClick={e => e.currentTarget.select()}
                           />
                           <button
                             type='button'
                             {...field}
+                            value={field.value === null ? 0 : field.value}
                             onClick={() => {
                               form.setValue(
                                 'walkover_visit_goals',
