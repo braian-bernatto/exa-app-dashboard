@@ -169,19 +169,19 @@ export interface Database {
         }
         Relationships: [
           {
-            foreignKeyName: "fixtures_fixture_teams_fk"
+            foreignKeyName: "fixture_teams_fixture_id_fkey"
             columns: ["fixture_id"]
             referencedRelation: "fixtures"
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "teams_fixture_teams_fk"
+            foreignKeyName: "fixture_teams_team_local_fkey"
             columns: ["team_local"]
             referencedRelation: "teams"
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "teams_fixture_teams_fk1"
+            foreignKeyName: "fixture_teams_team_visit_fkey"
             columns: ["team_visit"]
             referencedRelation: "teams"
             referencedColumns: ["id"]
@@ -487,6 +487,34 @@ export interface Database {
           }
         ]
       }
+      torneo_teams: {
+        Row: {
+          team_id: number
+          torneo_id: string
+        }
+        Insert: {
+          team_id: number
+          torneo_id: string
+        }
+        Update: {
+          team_id?: number
+          torneo_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "torneo_teams_team_id_fkey"
+            columns: ["team_id"]
+            referencedRelation: "teams"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "torneo_teams_torneo_id_fkey"
+            columns: ["torneo_id"]
+            referencedRelation: "torneos"
+            referencedColumns: ["id"]
+          }
+        ]
+      }
       torneos: {
         Row: {
           exa_id: number
@@ -624,6 +652,12 @@ export interface Database {
         }
         Returns: Json
       }
+      get_fixture_front: {
+        Args: {
+          fixture: string
+        }
+        Returns: Json
+      }
       get_fixture_players_by_fixture_id: {
         Args: {
           fixture: string
@@ -670,6 +704,26 @@ export interface Database {
       }
       get_fixtures: {
         Args: Record<PropertyKey, never>
+        Returns: {
+          fixture_id: string
+          torneo_id: string
+          fase_id: number
+          name: string
+          location_id: number
+          exa_id: number
+          exa_name: string
+          torneo: string
+          torneo_image_url: string
+          fase: string
+          tipo_partido_id: number
+          tipo_partido_name: string
+          location_name: string
+        }[]
+      }
+      get_fixtures_by_torneo: {
+        Args: {
+          torneo: string
+        }
         Returns: {
           fixture_id: string
           torneo_id: string

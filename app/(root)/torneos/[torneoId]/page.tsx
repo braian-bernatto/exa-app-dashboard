@@ -27,6 +27,12 @@ const TorneoPage = async ({
     .select('fase_id')
     .eq('torneo_id', params.torneoId)
 
+  //torneo_teams update
+  const { data: torneo_teams } = await supabase
+    .from('torneo_teams')
+    .select('team_id')
+    .eq('torneo_id', params.torneoId)
+
   let data
 
   if (torneo) {
@@ -34,7 +40,7 @@ const TorneoPage = async ({
       .from('torneos')
       .getPublicUrl(torneo.image_url!)
 
-    data = { ...torneo, public_image_url: '', fases: [] }
+    data = { ...torneo, public_image_url: '', fases: [], teams: [] }
 
     if (storage) {
       data = { ...data, public_image_url: storage.publicUrl }
@@ -43,6 +49,11 @@ const TorneoPage = async ({
     if (torneo_fase) {
       const ids = torneo_fase.map(fase => fase.fase_id)
       data = { ...data, fases: [...ids] }
+    }
+
+    if (torneo_teams) {
+      const ids = torneo_teams.map(team => team.team_id)
+      data = { ...data, teams: [...ids] }
     }
   }
 

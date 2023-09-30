@@ -1,5 +1,5 @@
 'use client'
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { Input } from '../../../../../components/ui/input'
 import { Check, ChevronsUpDown, Shield, Trash, Trophy } from 'lucide-react'
 import { Button } from '../../../../../components/ui/button'
@@ -20,7 +20,7 @@ import uniqid from 'uniqid'
 import { toast } from 'react-hot-toast'
 import { useSupabase } from '@/providers/SupabaseProvider'
 import { useParams, useRouter } from 'next/navigation'
-import { Exas, Fases, Torneos } from '@/types'
+import { Exas, Fases, Teams, Torneos } from '@/types'
 import { AlertModal } from '@/components/modals/AlertModal'
 import PreviewImageUrl from '@/components/PreviewImageUrl'
 import PreviewImageFile from '../../../../../components/PreviewImageFile'
@@ -65,12 +65,19 @@ const formSchema = z.object({
   fases: z.array(z.number()).refine(value => value.some(item => item), {
     message: 'Selecciona al menos una opción.'
   }),
+  teams: z.array(z.number()).refine(value => value.some(item => item), {
+    message: 'Selecciona al menos una opción.'
+  }),
   points_victory: z.coerce.number().optional(),
   points_tie: z.coerce.number().optional(),
   points_defeat: z.coerce.number().optional()
 })
 
-type TorneoType = Torneos & { fases: number[]; public_image_url: string }
+type TorneoType = Torneos & {
+  fases: number[]
+  teams: number[]
+  public_image_url: string
+}
 
 interface TorneoFormProps {
   initialData: TorneoType | undefined
@@ -85,6 +92,7 @@ const TorneoForm = ({ initialData, exas, fases }: TorneoFormProps) => {
   const { supabase } = useSupabase()
   const [loading, setLoading] = useState(false)
   const [open, setOpen] = useState(false)
+  const [teamsList, setTeamsList] = useState<Teams[]>([])
 
   const title = initialData ? 'Editar Torneo' : 'Agregar Torneo'
   const toastMessage = initialData ? 'Torneo modificado' : 'Torneo agregado'
@@ -96,11 +104,39 @@ const TorneoForm = ({ initialData, exas, fases }: TorneoFormProps) => {
       name: '',
       image_url: '',
       fases: [],
+      teams: [],
       points_victory: 3,
       points_tie: 1,
       points_defeat: 0
     }
   })
+
+  const getTeams = async (id: number) => {
+    try {
+      const { data, error } = await supabase.rpc('get_teams_by_exa_id', {
+        exa_id: id
+      })
+
+      if (error) {
+        console.log(error)
+      }
+
+      const dataWithImage = data?.map(data => {
+        if (data.image_url?.length) {
+          const { data: imageData } = supabase.storage
+            .from('teams')
+            .getPublicUrl(data.image_url!)
+          return { ...data, image_url: imageData.publicUrl }
+        }
+        return data
+      })
+
+      setTeamsList((dataWithImage as any) || [])
+    } catch (error) {
+      console.log(error)
+      return toast.error('No pudieron obtener equipos del Exa seleccionado')
+    }
+  }
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     try {
@@ -111,6 +147,7 @@ const TorneoForm = ({ initialData, exas, fases }: TorneoFormProps) => {
         image_url,
         exa_id,
         fases,
+        teams,
         points_victory,
         points_tie,
         points_defeat
@@ -203,6 +240,53 @@ const TorneoForm = ({ initialData, exas, fases }: TorneoFormProps) => {
             return toast.error(`No se pudo ${action} en Torneo Fase`)
           }
         }
+
+        // update torneo teams
+        // check if a team was deleted
+        const deletedTeams = initialData.teams.filter(team => {
+          if (!teams.includes(team)) {
+            return teams
+          }
+        })
+
+        if (deletedTeams.length) {
+          const { error } = await supabase
+            .from('torneo_teams')
+            .delete()
+            .eq('torneo_id', params.torneoId)
+            .in('team_id', deletedTeams)
+
+          if (error) {
+            console.log(error)
+            setLoading(false)
+            return toast.error(`No se pudo borrar equipo de torneo`)
+          }
+        }
+
+        // check if new teams was added
+        const newTeams = teams.filter(team => {
+          if (!initialData.teams.includes(team)) {
+            return team
+          }
+        })
+
+        //insert torneo teams
+        if (newTeams.length > 0) {
+          const teamsFormatted = teams.map(team => ({
+            torneo_id: initialData.id,
+            team_id: team
+          }))
+
+          const { error: supabaseError } = await supabase
+            .from('torneo_teams')
+            .upsert(teamsFormatted)
+
+          if (supabaseError) {
+            console.log(supabaseError)
+            setLoading(false)
+            return toast.error(`No se pudo ${action} en Torneo Teams`)
+          }
+        }
       } else {
         //insert torneos
         const { data, error } = await supabase
@@ -230,14 +314,32 @@ const TorneoForm = ({ initialData, exas, fases }: TorneoFormProps) => {
             fase_id: fase
           }))
 
-          const { error: supabaseError } = await supabase
+          const { error: faseError } = await supabase
             .from('torneo_fase')
             .insert(fasesFormatted)
 
-          if (supabaseError) {
-            console.log(supabaseError)
+          if (faseError) {
+            console.log(faseError)
             setLoading(false)
             return toast.error(`No se pudo ${action} en Torneo Fase`)
+          }
+        }
+
+        //insert torneo teams
+        if (data && teams.length > 0) {
+          const teamsFormatted = teams.map(team => ({
+            torneo_id: data[0].id,
+            team_id: team
+          }))
+
+          const { error: teamsError } = await supabase
+            .from('torneo_teams')
+            .insert(teamsFormatted)
+
+          if (teamsError) {
+            console.log(teamsError)
+            setLoading(false)
+            return toast.error(`No se pudo ${action} en Torneo Teams`)
           }
         }
       }
@@ -277,6 +379,12 @@ const TorneoForm = ({ initialData, exas, fases }: TorneoFormProps) => {
       setOpen(false)
     }
   }
+
+  useEffect(() => {
+    if (initialData) {
+      getTeams(initialData.exa_id)
+    }
+  }, [])
 
   return (
     <>
@@ -364,6 +472,7 @@ const TorneoForm = ({ initialData, exas, fases }: TorneoFormProps) => {
                               key={exa.id}
                               onSelect={() => {
                                 form.setValue('exa_id', exa.id)
+                                getTeams(exa.id)
                               }}>
                               <>
                                 <Check
@@ -393,6 +502,55 @@ const TorneoForm = ({ initialData, exas, fases }: TorneoFormProps) => {
                     </Command>
                   </PopoverContent>
                 </Popover>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          {/* Teams */}
+          <FormField
+            control={form.control}
+            name='teams'
+            render={() => (
+              <FormItem>
+                <div className='mb-2'>
+                  <FormLabel className='text-base'>Equipos</FormLabel>
+                  <FormDescription>
+                    Selecciona los equipos a formar parte del torneo
+                  </FormDescription>
+                </div>
+                {teamsList.map(item => (
+                  <FormField
+                    key={item.id}
+                    control={form.control}
+                    name='teams'
+                    render={({ field }) => {
+                      return (
+                        <FormItem
+                          key={item.id}
+                          className='flex flex-row items-start space-x-3 space-y-0'>
+                          <FormControl>
+                            <Checkbox
+                              // disabled={initialData ? true : false}
+                              checked={field.value?.includes(item.id)}
+                              onCheckedChange={checked => {
+                                return checked
+                                  ? field.onChange([...field.value, item.id])
+                                  : field.onChange(
+                                      field.value?.filter(
+                                        value => value !== item.id
+                                      )
+                                    )
+                              }}
+                            />
+                          </FormControl>
+                          <FormLabel className='font-normal'>
+                            {item.name}
+                          </FormLabel>
+                        </FormItem>
+                      )
+                    }}
+                  />
+                ))}
                 <FormMessage />
               </FormItem>
             )}
