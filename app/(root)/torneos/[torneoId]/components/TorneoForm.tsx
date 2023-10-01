@@ -180,7 +180,7 @@ const TorneoForm = ({ initialData, exas, fases }: TorneoFormProps) => {
         const { error } = await supabase
           .from('torneos')
           .update({
-            name,
+            name: name.toLowerCase(),
             image_url: imagePath || image_url,
             points_victory,
             points_tie,
@@ -292,7 +292,7 @@ const TorneoForm = ({ initialData, exas, fases }: TorneoFormProps) => {
         const { data, error } = await supabase
           .from('torneos')
           .insert({
-            name,
+            name: name.toLowerCase(),
             image_url: imagePath,
             exa_id,
             points_victory,
@@ -450,7 +450,7 @@ const TorneoForm = ({ initialData, exas, fases }: TorneoFormProps) => {
                         variant='outline'
                         role='combobox'
                         className={cn(
-                          'w-full justify-between',
+                          'w-full justify-between capitalize ',
                           !field.value && 'text-muted-foreground'
                         )}>
                         {field.value && exas
@@ -470,6 +470,7 @@ const TorneoForm = ({ initialData, exas, fases }: TorneoFormProps) => {
                             <CommandItem
                               value={exa.name!}
                               key={exa.id}
+                              className='capitalize'
                               onSelect={() => {
                                 form.setValue('exa_id', exa.id)
                                 getTeams(exa.id)
@@ -543,7 +544,7 @@ const TorneoForm = ({ initialData, exas, fases }: TorneoFormProps) => {
                               }}
                             />
                           </FormControl>
-                          <FormLabel className='font-normal'>
+                          <FormLabel className='font-normal uppercase'>
                             {item.name}
                           </FormLabel>
                         </FormItem>
@@ -604,7 +605,7 @@ const TorneoForm = ({ initialData, exas, fases }: TorneoFormProps) => {
                       return (
                         <FormItem
                           key={item.id}
-                          className='flex flex-row items-start space-x-3 space-y-0'>
+                          className='flex flex-row items-start space-x-3 space-y-0 capitalize'>
                           <FormControl>
                             <Checkbox
                               checked={field.value?.includes(item.id)}

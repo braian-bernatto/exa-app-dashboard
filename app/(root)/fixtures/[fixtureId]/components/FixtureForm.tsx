@@ -130,7 +130,7 @@ const FixtureForm = ({
         const { error } = await supabase
           .from('fixtures')
           .update({
-            name,
+            name: name.toLowerCase(),
             location_id
           })
           .eq('id', params.fixtureId)
@@ -154,7 +154,7 @@ const FixtureForm = ({
         }
       } else {
         const { error } = await supabase.from('fixtures').insert({
-          name,
+          name: name.toLowerCase(),
           torneo_id,
           fase_id,
           location_id

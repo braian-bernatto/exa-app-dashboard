@@ -243,7 +243,7 @@ const PlayerForm = ({
         const { error: supabaseError } = await supabase
           .from('players')
           .update({
-            name,
+            name: name.toLowerCase(),
             team_id,
             image_url: imagePath || image_url,
             country_iso2,
@@ -268,7 +268,7 @@ const PlayerForm = ({
       } else {
         //insert
         const { error: supabaseError } = await supabase.from('players').insert({
-          name,
+          name: name.toLowerCase(),
           team_id,
           image_url: imagePath,
           country_iso2,

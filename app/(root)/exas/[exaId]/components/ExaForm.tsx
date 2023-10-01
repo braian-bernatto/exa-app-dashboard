@@ -102,7 +102,7 @@ const ExaForm = ({ initialData }: ExaFormProps) => {
         const { error } = await supabase
           .from('exas')
           .update({
-            name,
+            name: name.toLowerCase(),
             image_url: imagePath || image_url
           })
           .eq('id', +params.exaId)
@@ -115,7 +115,7 @@ const ExaForm = ({ initialData }: ExaFormProps) => {
       } else {
         //insert
         const { error } = await supabase.from('exas').insert({
-          name,
+          name: name.toLowerCase(),
           image_url: imagePath
         })
         if (error) {
@@ -171,8 +171,7 @@ const ExaForm = ({ initialData }: ExaFormProps) => {
       <Form {...form}>
         <form
           onSubmit={form.handleSubmit(onSubmit)}
-          className='flex flex-col w-full max-w-xs rounded bg-white py-3 px-4 shadow gap-5 justify-center'
-        >
+          className='flex flex-col w-full max-w-xs rounded bg-white py-3 px-4 shadow gap-5 justify-center'>
           <div className='flex gap-2'>
             <span className='bg-gradient-to-r from-emerald-300 to-emerald-700 rounded-full p-2 flex items-center justify-center'>
               <Trophy className='text-white' size={30} />
@@ -187,8 +186,7 @@ const ExaForm = ({ initialData }: ExaFormProps) => {
                 disabled={loading}
                 variant='destructive'
                 size='icon'
-                onClick={() => setOpen(true)}
-              >
+                onClick={() => setOpen(true)}>
                 <Trash className='h-4 w-4' />
               </Button>
             )}
@@ -240,8 +238,7 @@ const ExaForm = ({ initialData }: ExaFormProps) => {
               type='submit'
               variant={'default'}
               className='w-full'
-              disabled={loading}
-            >
+              disabled={loading}>
               {action}
             </Button>
           </div>

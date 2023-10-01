@@ -124,7 +124,7 @@ const TeamForm = ({ initialData, exas }: TeamFormProps) => {
         const { error } = await supabase
           .from('teams')
           .update({
-            name,
+            name: name.toLowerCase(),
             image_url: imagePath || image_url,
             exa_id
           })
