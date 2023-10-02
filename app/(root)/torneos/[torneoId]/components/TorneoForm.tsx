@@ -450,7 +450,7 @@ const TorneoForm = ({ initialData, exas, fases }: TorneoFormProps) => {
                         variant='outline'
                         role='combobox'
                         className={cn(
-                          'w-full justify-between capitalize ',
+                          'w-full justify-between uppercase',
                           !field.value && 'text-muted-foreground'
                         )}>
                         {field.value && exas
@@ -470,7 +470,7 @@ const TorneoForm = ({ initialData, exas, fases }: TorneoFormProps) => {
                             <CommandItem
                               value={exa.name!}
                               key={exa.id}
-                              className='capitalize'
+                              className='uppercase'
                               onSelect={() => {
                                 form.setValue('exa_id', exa.id)
                                 getTeams(exa.id)
@@ -544,7 +544,7 @@ const TorneoForm = ({ initialData, exas, fases }: TorneoFormProps) => {
                               }}
                             />
                           </FormControl>
-                          <FormLabel className='font-normal uppercase'>
+                          <FormLabel className='font-normal capitalize'>
                             {item.name}
                           </FormLabel>
                         </FormItem>
