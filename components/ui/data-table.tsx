@@ -112,7 +112,7 @@ export function DataTable<TData, TValue>({
                 <TableCell
                   colSpan={columns.length}
                   className='h-24 text-center'>
-                  No results.
+                  No hay datos.
                 </TableCell>
               </TableRow>
             )}
@@ -125,14 +125,14 @@ export function DataTable<TData, TValue>({
           size='sm'
           onClick={() => table.previousPage()}
           disabled={!table.getCanPreviousPage()}>
-          Previous
+          Anterior
         </Button>
         <Button
           variant='outline'
           size='sm'
           onClick={() => table.nextPage()}
           disabled={!table.getCanNextPage()}>
-          Next
+          Siguiente
         </Button>
       </div>
     </div>
