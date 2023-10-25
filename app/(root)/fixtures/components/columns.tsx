@@ -12,6 +12,10 @@ export type FixtureColumn = GetFixtures[0]
 
 export const columns: ColumnDef<FixtureColumn>[] = [
   {
+    id: 'actions',
+    cell: ({ row }) => <CellAction data={row.original} />
+  },
+  {
     accessorKey: 'name',
     header: ({ column }) => {
       return (
@@ -77,9 +81,5 @@ export const columns: ColumnDef<FixtureColumn>[] = [
       )
     },
     cell: ({ row }) => <CellLocal data={row.original} />
-  },
-  {
-    id: 'actions',
-    cell: ({ row }) => <CellAction data={row.original} />
   }
 ]

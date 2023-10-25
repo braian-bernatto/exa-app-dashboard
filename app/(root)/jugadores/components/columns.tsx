@@ -16,6 +16,10 @@ export type PlayerColumn = Players & {
 
 export const columns: ColumnDef<PlayerColumn>[] = [
   {
+    id: 'actions',
+    cell: ({ row }) => <CellAction data={row.original} />
+  },
+  {
     accessorKey: 'image_url',
     header: 'Foto',
     cell: ({ row }) => <CellImage data={row.original} />
@@ -94,104 +98,100 @@ export const columns: ColumnDef<PlayerColumn>[] = [
       )
     }
   },
-  {
-    accessorKey: 'rating',
-    header: ({ column }) => {
-      return (
-        <Button
-          variant='ghost'
-          onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}>
-          Rating
-          <ArrowUpDown className='ml-2 h-4 w-4' />
-        </Button>
-      )
-    }
-  },
-  {
-    accessorKey: 'rit',
-    header: ({ column }) => {
-      return (
-        <Button
-          variant='ghost'
-          onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}>
-          Ritmo
-          <ArrowUpDown className='ml-2 h-4 w-4' />
-        </Button>
-      )
-    }
-  },
-  {
-    accessorKey: 'tir',
-    header: ({ column }) => {
-      return (
-        <Button
-          variant='ghost'
-          onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}>
-          Tiro
-          <ArrowUpDown className='ml-2 h-4 w-4' />
-        </Button>
-      )
-    }
-  },
-  {
-    accessorKey: 'pas',
-    header: ({ column }) => {
-      return (
-        <Button
-          variant='ghost'
-          onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}>
-          Pase
-          <ArrowUpDown className='ml-2 h-4 w-4' />
-        </Button>
-      )
-    }
-  },
-  {
-    accessorKey: 'reg',
-    header: ({ column }) => {
-      return (
-        <Button
-          variant='ghost'
-          onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}>
-          Regate
-          <ArrowUpDown className='ml-2 h-4 w-4' />
-        </Button>
-      )
-    }
-  },
-  {
-    accessorKey: 'def',
-    header: ({ column }) => {
-      return (
-        <Button
-          variant='ghost'
-          onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}>
-          Defensa
-          <ArrowUpDown className='ml-2 h-4 w-4' />
-        </Button>
-      )
-    }
-  },
-  {
-    accessorKey: 'fis',
-    header: ({ column }) => {
-      return (
-        <Button
-          variant='ghost'
-          onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}>
-          Físico
-          <ArrowUpDown className='ml-2 h-4 w-4' />
-        </Button>
-      )
-    }
-  },
+  // {
+  //   accessorKey: 'rating',
+  //   header: ({ column }) => {
+  //     return (
+  //       <Button
+  //         variant='ghost'
+  //         onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}>
+  //         Rating
+  //         <ArrowUpDown className='ml-2 h-4 w-4' />
+  //       </Button>
+  //     )
+  //   }
+  // },
+  // {
+  //   accessorKey: 'rit',
+  //   header: ({ column }) => {
+  //     return (
+  //       <Button
+  //         variant='ghost'
+  //         onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}>
+  //         Ritmo
+  //         <ArrowUpDown className='ml-2 h-4 w-4' />
+  //       </Button>
+  //     )
+  //   }
+  // },
+  // {
+  //   accessorKey: 'tir',
+  //   header: ({ column }) => {
+  //     return (
+  //       <Button
+  //         variant='ghost'
+  //         onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}>
+  //         Tiro
+  //         <ArrowUpDown className='ml-2 h-4 w-4' />
+  //       </Button>
+  //     )
+  //   }
+  // },
+  // {
+  //   accessorKey: 'pas',
+  //   header: ({ column }) => {
+  //     return (
+  //       <Button
+  //         variant='ghost'
+  //         onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}>
+  //         Pase
+  //         <ArrowUpDown className='ml-2 h-4 w-4' />
+  //       </Button>
+  //     )
+  //   }
+  // },
+  // {
+  //   accessorKey: 'reg',
+  //   header: ({ column }) => {
+  //     return (
+  //       <Button
+  //         variant='ghost'
+  //         onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}>
+  //         Regate
+  //         <ArrowUpDown className='ml-2 h-4 w-4' />
+  //       </Button>
+  //     )
+  //   }
+  // },
+  // {
+  //   accessorKey: 'def',
+  //   header: ({ column }) => {
+  //     return (
+  //       <Button
+  //         variant='ghost'
+  //         onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}>
+  //         Defensa
+  //         <ArrowUpDown className='ml-2 h-4 w-4' />
+  //       </Button>
+  //     )
+  //   }
+  // },
+  // {
+  //   accessorKey: 'fis',
+  //   header: ({ column }) => {
+  //     return (
+  //       <Button
+  //         variant='ghost'
+  //         onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}>
+  //         Físico
+  //         <ArrowUpDown className='ml-2 h-4 w-4' />
+  //       </Button>
+  //     )
+  //   }
+  // },
   {
     accessorKey: 'country_iso2',
     header: 'País',
     cell: ({ row }) => <CellCountryImage data={row.original} />
-  },
-  {
-    id: 'actions',
-    cell: ({ row }) => <CellAction data={row.original} />
   }
 ]

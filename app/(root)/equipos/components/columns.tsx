@@ -11,6 +11,10 @@ export type TeamColumn = Teams
 
 export const columns: ColumnDef<TeamColumn>[] = [
   {
+    id: 'actions',
+    cell: ({ row }) => <CellAction data={row.original} />
+  },
+  {
     accessorKey: 'image_url',
     header: 'Logo',
     cell: ({ row }) => <CellImage data={row.original} />
@@ -53,9 +57,5 @@ export const columns: ColumnDef<TeamColumn>[] = [
         </Button>
       )
     }
-  },
-  {
-    id: 'actions',
-    cell: ({ row }) => <CellAction data={row.original} />
   }
 ]

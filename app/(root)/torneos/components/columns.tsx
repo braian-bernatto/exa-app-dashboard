@@ -11,6 +11,10 @@ export type TorneoColumn = Torneos
 
 export const columns: ColumnDef<TorneoColumn>[] = [
   {
+    id: 'actions',
+    cell: ({ row }) => <CellAction data={row.original} />
+  },
+  {
     accessorKey: 'image_url',
     header: 'Logo',
     cell: ({ row }) => <CellImage data={row.original} />
@@ -40,9 +44,5 @@ export const columns: ColumnDef<TorneoColumn>[] = [
         </Button>
       )
     }
-  },
-  {
-    id: 'actions',
-    cell: ({ row }) => <CellAction data={row.original} />
   }
 ]

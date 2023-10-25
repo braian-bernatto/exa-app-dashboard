@@ -11,6 +11,10 @@ export type ExaColumn = Exas
 
 export const columns: ColumnDef<ExaColumn>[] = [
   {
+    id: 'actions',
+    cell: ({ row }) => <CellAction data={row.original} />
+  },
+  {
     accessorKey: 'image_url',
     header: 'Logo',
     cell: ({ row }) => <CellImage data={row.original} />
@@ -31,9 +35,5 @@ export const columns: ColumnDef<ExaColumn>[] = [
         </Button>
       )
     }
-  },
-  {
-    id: 'actions',
-    cell: ({ row }) => <CellAction data={row.original} />
   }
 ]
