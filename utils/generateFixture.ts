@@ -8,6 +8,7 @@ export const generarFixtureTodosContraTodos = (equipos: Teams[], tipoPartido?: T
 const totalEquipos = equipos.length
 const totalFechas = isEven(totalEquipos)? totalEquipos - 1 : totalEquipos
 const totalPartidos = (totalEquipos * (totalEquipos - 1)) / 2
+const partidosPorDia = isEven(totalEquipos)?  totalEquipos / 2 : (totalEquipos - 1) / 2
 
 // cuando es par el primer equipo va de local
 // los demas equipos van rotando hacia las manecillas del reloj
