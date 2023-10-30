@@ -3,7 +3,7 @@
 import { Button } from '@/components/ui/button'
 import { Heading } from '@/components/ui/heading'
 import { Separator } from '@/components/ui/separator'
-import { Plus } from 'lucide-react'
+import { Plus, Shuffle } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import { DataTable } from '@/components/ui/data-table'
 import { FixtureColumn, columns } from './columns'
@@ -21,9 +21,14 @@ const FixtureClient = ({ data }: FixtureClientProps) => {
           title={`Fixtures (${data.length})`}
           description='Maneja todos los fixtures de tus torneos'
         />
-        <Button onClick={() => router.push(`/fixtures/agregar`)}>
-          <Plus className='mr-2 h-4 w-4' /> Agregar
-        </Button>
+        <span className='gap-2 flex flex-wrap'>
+          <Button onClick={() => router.push(`/fixtures/generar`)}>
+            <Shuffle className='mr-2 h-4 w-4' /> Generar
+          </Button>
+          <Button onClick={() => router.push(`/fixtures/agregar`)}>
+            <Plus className='mr-2 h-4 w-4' /> Agregar
+          </Button>
+        </span>
       </div>
       <Separator />
       <DataTable

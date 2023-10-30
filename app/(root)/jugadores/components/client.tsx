@@ -29,8 +29,8 @@ const PlayerClient = ({ data }: PlayerClientProps) => {
       <DataTable
         columns={columns}
         data={data}
-        filterLabel='Equipo'
-        filterKey='team_name'
+        filterLabel='Nombre'
+        filterKey='name'
       />
     </>
   )

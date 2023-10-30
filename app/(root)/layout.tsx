@@ -13,8 +13,13 @@ export default function MainLayout({
       </div>
       <footer className='flex items-center w-full justify-between mx-auto max-w-7xl'>
         <div className='text-sm'>
-          <strong>Bernatto Inc</strong> |{' '}
-          <span>&copy; Todos los derechos reservados.</span>
+          <a
+            href='https://braian-bernatto.github.io/portfolio/'
+            target='_blank'
+            className='font-bold hover:underline'>
+            Bernatto Inc.
+          </a>{' '}
+          | <span>&copy; Todos los derechos reservados.</span>
         </div>
       </footer>
     </div>
