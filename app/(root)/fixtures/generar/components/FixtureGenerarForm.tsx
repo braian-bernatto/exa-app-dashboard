@@ -493,7 +493,7 @@ const FixtureGenerarForm = ({
                 <div
                   key={`ida-${index}`}
                   className='flex flex-col gap-2 justify-center border-b p-5 py-7 sm:py-10 w-[280px]'>
-                  <h2 className='w-full text-center font-semibold text-muted-foreground'>
+                  <h2 className='text-center font-semibold text-muted-foreground shadow-xl'>
                     Fecha {index + 1}
                   </h2>
                   {teams.map((team: any) => (
@@ -559,7 +559,7 @@ const FixtureGenerarForm = ({
                     <span className='rounded shadow px-2 absolute top-2 right-2 text-xs border border-emerald-600 animate animate-pulse'>
                       vuelta
                     </span>
-                    <h2 className='w-full text-center font-semibold'>
+                    <h2 className='text-center font-semibold text-muted-foreground shadow-xl'>
                       Fecha {fixtures.vuelta.length + index + 1}
                     </h2>
                     {teams.map((team: any) => (
