@@ -476,10 +476,11 @@ const FixtureGenerarForm = ({
               </div>
             )}
           </article>
+
           {/* fixtures */}
-          <article className='flex-1 flex flex-wrap max-h-[800px] items-center justify-center gap-5 overflow-y-auto p-1 sm:p-2'>
-            {fixtures &&
-              fixtures.ida.map((teams: any, index: number) => (
+          {fixtures && (
+            <article className='flex-1 flex flex-wrap max-h-[800px] items-center justify-center gap-5 overflow-y-auto p-1 sm:p-2'>
+              {fixtures.ida.map((teams: any, index: number) => (
                 <div
                   key={`ida-${index}`}
                   className='flex flex-col gap-2 justify-center shadow rounded p-2 w-[280px]'>
@@ -539,7 +540,75 @@ const FixtureGenerarForm = ({
                   ))}
                 </div>
               ))}
-          </article>
+
+              {/* vuelta */}
+              {fixtures.vuelta &&
+                fixtures.vuelta.map((teams: any, index: number) => (
+                  <div
+                    key={`vuelta-${index}`}
+                    className='flex flex-col gap-2 justify-center shadow rounded p-2 w-[280px] relative'>
+                    <span className='rounded shadow px-2 absolute top-2 right-2 text-xs border border-emerald-600 animate animate-pulse'>
+                      vuelta
+                    </span>
+                    <h2 className='w-full text-center font-semibold'>
+                      Fecha {fixtures.vuelta.length + index + 1}
+                    </h2>
+                    {teams.map((team: any) => (
+                      <div
+                        key={`${team.local.id}-${team.visitante.id}`}
+                        className='grid grid-cols-3 justify-center items-center shadow p-2'>
+                        {/* local */}
+                        {team.local.id ? (
+                          <div className='flex flex-col items-center justify-center'>
+                            <span className='w-10 h-10 relative'>
+                              {team.local.image_url && (
+                                <Image
+                                  src={team.local.image_url}
+                                  fill
+                                  className='object-contain'
+                                  alt='team logo'
+                                />
+                              )}
+                            </span>
+                            <h2 className='text-xs capitalize text-center text-muted-foreground'>
+                              {team.local.name}
+                            </h2>
+                          </div>
+                        ) : (
+                          <p className='text-xs capitalize text-center text-muted-foreground'>
+                            {team.local}
+                          </p>
+                        )}
+                        <p className='px-2 shadow rounded text-center'>vs</p>
+                        {/* visitante */}
+                        {team.visitante.id ? (
+                          <div className='flex flex-col items-center'>
+                            <span className='w-10 h-10 relative'>
+                              {team.visitante.image_url && (
+                                <Image
+                                  src={team.visitante.image_url}
+                                  fill
+                                  className='object-contain'
+                                  alt='team logo'
+                                />
+                              )}
+                            </span>
+                            <h2 className='text-xs capitalize text-center text-muted-foreground'>
+                              {team.visitante.name}
+                            </h2>
+                          </div>
+                        ) : (
+                          <p className='text-xs capitalize text-center text-muted-foreground'>
+                            {team.visitante}
+                          </p>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                ))}
+            </article>
+          )}
+
           {/* boton */}
           <div className='sm:col-span-2 w-full flex justify-center'>
             <Button
