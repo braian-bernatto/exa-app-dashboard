@@ -1,6 +1,6 @@
 'use client'
 import { useSupabase } from '@/providers/SupabaseProvider'
-import { GetFixtures, Locations, Teams, TiposPartido, Torneos } from '@/types'
+import { Locations, Teams, TiposPartido, Torneos } from '@/types'
 import { useEffect, useState } from 'react'
 import { useForm } from 'react-hook-form'
 import * as z from 'zod'
@@ -66,6 +66,8 @@ const FixtureGenerarForm = ({
   const [loading, setLoading] = useState(false)
   const [open, setOpen] = useState(false)
   const [fases, setFases] = useState<{ id: number; name: string }[]>([])
+  const [faseTorneo, setFaseTorneo] = useState('')
+  const [tipoPartidoTorneo, setTipoPartidoTorneo] = useState('')
   const [teams, setTeams] = useState<Teams[] | []>([])
   const [fixtures, setFixtures] = useState<any>()
 
@@ -105,12 +107,6 @@ const FixtureGenerarForm = ({
     const teams = await getTeamsByTorneoClient(torneoId)
     const shuffledTeams = shuffle(teams)
     setTeams(shuffledTeams || [])
-    const fixtures = generarFixtureTodosContraTodos(shuffledTeams, {
-      id: 1,
-      name: 'ida y vuelta'
-    })
-    setFixtures(fixtures)
-    console.log({ fixtures })
   }
 
   async function getTorneoFases(torneoId: string) {
@@ -226,8 +222,11 @@ const FixtureGenerarForm = ({
   }
 
   useEffect(() => {
-    //
-  }, [])
+    if (faseTorneo === 'puntos' && teams.length > 0 && tipoPartidoTorneo) {
+      const fixtures = generarFixtureTodosContraTodos(teams, tipoPartidoTorneo)
+      setFixtures(fixtures)
+    }
+  }, [teams, faseTorneo, tipoPartidoTorneo])
 
   return (
     <>
@@ -344,7 +343,12 @@ const FixtureGenerarForm = ({
                           key={fase.id}
                           className='flex items-center space-x-3 space-y-0'>
                           <FormControl>
-                            <RadioGroupItem value={fase.id.toString()} />
+                            <RadioGroupItem
+                              onClick={() => {
+                                setFaseTorneo(fase.name)
+                              }}
+                              value={fase.id.toString()}
+                            />
                           </FormControl>
                           <FormLabel className='font-normal'>
                             {fase.name}
@@ -375,7 +379,12 @@ const FixtureGenerarForm = ({
                           key={tipo.id}
                           className='flex items-center space-x-3 space-y-0'>
                           <FormControl>
-                            <RadioGroupItem value={tipo.id.toString()} />
+                            <RadioGroupItem
+                              onClick={() => {
+                                setTipoPartidoTorneo(tipo.name)
+                              }}
+                              value={tipo.id.toString()}
+                            />
                           </FormControl>
                           <FormLabel className='font-normal'>
                             {tipo.name}
@@ -479,18 +488,18 @@ const FixtureGenerarForm = ({
 
           {/* fixtures */}
           {fixtures && (
-            <article className='flex-1 flex flex-wrap max-h-[800px] items-center justify-center gap-5 overflow-y-auto p-1 sm:p-2'>
+            <article className='flex-1 flex flex-wrap  w-[280px] max-h-[800px] items-center justify-center overflow-y-auto sm:p-2 sm:pb-7'>
               {fixtures.ida.map((teams: any, index: number) => (
                 <div
                   key={`ida-${index}`}
-                  className='flex flex-col gap-2 justify-center shadow rounded p-2 w-[280px]'>
+                  className='flex flex-col gap-2 justify-center border-b p-5 py-7 sm:py-10 w-[280px]'>
                   <h2 className='w-full text-center font-semibold'>
                     Fecha {index + 1}
                   </h2>
                   {teams.map((team: any) => (
                     <div
                       key={`${team.local.id}-${team.visitante.id}`}
-                      className='grid grid-cols-3 justify-center items-center shadow p-2'>
+                      className='grid grid-cols-3 justify-center items-center shadow-lg p-2'>
                       {/* local */}
                       {team.local.id ? (
                         <div className='flex flex-col items-center justify-center'>
@@ -546,7 +555,7 @@ const FixtureGenerarForm = ({
                 fixtures.vuelta.map((teams: any, index: number) => (
                   <div
                     key={`vuelta-${index}`}
-                    className='flex flex-col gap-2 justify-center shadow rounded p-2 w-[280px] relative'>
+                    className='flex flex-col gap-2 justify-center border-b p-5 py-7 sm:py-10 w-[280px] relative'>
                     <span className='rounded shadow px-2 absolute top-2 right-2 text-xs border border-emerald-600 animate animate-pulse'>
                       vuelta
                     </span>
@@ -556,7 +565,7 @@ const FixtureGenerarForm = ({
                     {teams.map((team: any) => (
                       <div
                         key={`${team.local.id}-${team.visitante.id}`}
-                        className='grid grid-cols-3 justify-center items-center shadow p-2'>
+                        className='grid grid-cols-3 justify-center items-center shadow-lg p-2'>
                         {/* local */}
                         {team.local.id ? (
                           <div className='flex flex-col items-center justify-center'>

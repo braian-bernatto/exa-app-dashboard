@@ -4,7 +4,7 @@ const isEven = (num: number)=>{
     return num % 2 === 0
 }
 
-export const generarFixtureTodosContraTodos = (equipos: any[], tipoPartido: TiposPartido )=>{
+export const generarFixtureTodosContraTodos = (equipos: any[], tipoPartido: string )=>{
 const totalEquipos = equipos.length
 const equipoPar = isEven(totalEquipos)
 const totalFechas = equipoPar? totalEquipos - 1 : totalEquipos
@@ -50,7 +50,7 @@ for(let i = 0; i < totalFechas; i++){
   
 // vuelta
 let partidosVuelta = <any>[]
-if(tipoPartido.name === 'ida y vuelta'){
+if(tipoPartido === 'ida y vuelta'){
   partidosVuelta = partidos.map(partido =>
     partido.map(par=>({local: par.visitante ,visitante: par.local}))
   )
