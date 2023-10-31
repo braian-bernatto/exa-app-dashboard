@@ -73,7 +73,7 @@ const FixtureGenerarForm = ({
 
   const title = 'Generar Fixture'
   const toastMessage = 'Fixture generado'
-  const action = 'Generar'
+  const action = 'Guardar'
 
   const formSchema = z.object({
     name: z.string().min(1, { message: 'Obligatorio' }),
@@ -493,13 +493,13 @@ const FixtureGenerarForm = ({
                 <div
                   key={`ida-${index}`}
                   className='flex flex-col gap-2 justify-center border-b p-5 py-7 sm:py-10 w-[280px]'>
-                  <h2 className='w-full text-center font-semibold'>
+                  <h2 className='w-full text-center font-semibold text-muted-foreground'>
                     Fecha {index + 1}
                   </h2>
                   {teams.map((team: any) => (
                     <div
                       key={`${team.local.id}-${team.visitante.id}`}
-                      className='grid grid-cols-3 justify-center items-center shadow-lg p-2'>
+                      className='grid grid-cols-3 justify-center items-center shadow-lg rounded p-2'>
                       {/* local */}
                       {team.local.id ? (
                         <div className='flex flex-col items-center justify-center'>
@@ -565,7 +565,7 @@ const FixtureGenerarForm = ({
                     {teams.map((team: any) => (
                       <div
                         key={`${team.local.id}-${team.visitante.id}`}
-                        className='grid grid-cols-3 justify-center items-center shadow-lg p-2'>
+                        className='grid grid-cols-3 justify-center items-center shadow-lg rounded p-2'>
                         {/* local */}
                         {team.local.id ? (
                           <div className='flex flex-col items-center justify-center'>
