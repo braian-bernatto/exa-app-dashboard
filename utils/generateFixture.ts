@@ -1,4 +1,4 @@
-import { Fases, Teams, TiposPartido } from "@/types";
+import { Teams, TiposPartido } from "@/types";
 
 const isEven = (num: number)=>{
     return num % 2 === 0
@@ -59,7 +59,7 @@ if(tipoPartido === 'ida y vuelta'){
  return {ida: partidos, vuelta: partidosVuelta}
 }
 
-export const generarFixtureEliminacion = (equipos: Teams[], tipoPartido?: TiposPartido )=>{
+export const generarFixtureEliminacion = (equipos: any[], tipoPartido: string )=>{
 
 
 
