@@ -16,11 +16,6 @@ const MainNav = ({
       active: pathname === `/exas`
     },
     {
-      href: `/torneos`,
-      label: 'Torneos',
-      active: pathname === `/torneos`
-    },
-    {
       href: `/equipos`,
       label: 'Equipos',
       active: pathname === `/equipos`
@@ -29,11 +24,6 @@ const MainNav = ({
       href: `/jugadores`,
       label: 'Jugadores',
       active: pathname === `/jugadores`
-    },
-    {
-      href: `/fixtures`,
-      label: 'Fixtures',
-      active: pathname === `/fixtures`
     }
   ]
   return (

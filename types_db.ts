@@ -506,6 +506,7 @@ export interface Database {
       }
       torneos: {
         Row: {
+          created_at: string | null
           exa_id: number
           id: string
           image_url: string | null
@@ -515,6 +516,7 @@ export interface Database {
           points_victory: number
         }
         Insert: {
+          created_at?: string | null
           exa_id: number
           id?: string
           image_url?: string | null
@@ -524,6 +526,7 @@ export interface Database {
           points_victory?: number
         }
         Update: {
+          created_at?: string | null
           exa_id?: number
           id?: string
           image_url?: string | null

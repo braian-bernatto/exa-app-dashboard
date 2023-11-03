@@ -5,15 +5,15 @@ import { Heading } from '@/components/ui/heading'
 import { Separator } from '@/components/ui/separator'
 import { Plus } from 'lucide-react'
 import { useRouter } from 'next/navigation'
-import { ExaColumn, columns } from './columns'
-import { DataTable } from '@/components/ui/data-table'
+import Exa from './exa'
 
 interface ExaClientProps {
-  data: ExaColumn[]
+  data: any[]
 }
 
 const ExaClient = ({ data }: ExaClientProps) => {
   const router = useRouter()
+
   return (
     <>
       <div className='flex items-center justify-between'>
@@ -26,12 +26,9 @@ const ExaClient = ({ data }: ExaClientProps) => {
         </Button>
       </div>
       <Separator />
-      <DataTable
-        columns={columns}
-        data={data}
-        filterLabel='Nombre'
-        filterKey='name'
-      />
+      <div className='w-full flex justify-center gap-10'>
+        {data && data.map(exa => <Exa key={exa.id} data={exa} />)}
+      </div>
     </>
   )
 }

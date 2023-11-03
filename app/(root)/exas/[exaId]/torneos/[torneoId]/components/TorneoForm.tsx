@@ -1,8 +1,6 @@
 'use client'
 import React, { useEffect, useState } from 'react'
-import { Input } from '../../../../../components/ui/input'
 import { Check, ChevronsUpDown, Shield, Trash, Trophy } from 'lucide-react'
-import { Button } from '../../../../../components/ui/button'
 
 import { useForm } from 'react-hook-form'
 import * as z from 'zod'
@@ -23,7 +21,6 @@ import { useParams, useRouter } from 'next/navigation'
 import { Exas, Fases, Teams, Torneos } from '@/types'
 import { AlertModal } from '@/components/modals/AlertModal'
 import PreviewImageUrl from '@/components/PreviewImageUrl'
-import PreviewImageFile from '../../../../../components/PreviewImageFile'
 import {
   Popover,
   PopoverContent,
@@ -40,6 +37,9 @@ import {
 import Image from 'next/image'
 import { Checkbox } from '@/components/ui/checkbox'
 import { Separator } from '@/components/ui/separator'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import PreviewImageFile from '@/components/PreviewImageFile'
 
 const MAX_FILE_SIZE = 5 * 1024 * 1024
 const ACCEPTED_IMAGE_TYPES = [
@@ -273,7 +273,7 @@ const TorneoForm = ({ initialData, exas }: TorneoFormProps) => {
       }
 
       router.refresh()
-      router.push('/torneos')
+      router.push(`/exas/${initialData?.exa_id}/torneos`)
       toast.success(toastMessage)
     } catch (error) {
       toast.error('Hubo un error')
@@ -298,7 +298,7 @@ const TorneoForm = ({ initialData, exas }: TorneoFormProps) => {
       }
 
       router.refresh()
-      router.push('/torneos')
+      router.push(`/exas/${initialData?.exa_id}/torneos`)
       toast.success('Borrado con éxito')
     } catch (error) {
       toast.error('Hubo un error')

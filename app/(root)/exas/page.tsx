@@ -1,6 +1,5 @@
 import { createClient } from '@/utils/supabaseServer'
 import ExaClient from './components/client'
-import { ExaColumn } from './components/columns'
 import { format, parseISO } from 'date-fns'
 
 export const revalidate = 0
@@ -12,7 +11,7 @@ export default async function ExasPage() {
     .select()
     .order('created_at', { ascending: false })
 
-  const formattedExas: ExaColumn[] | undefined = data?.map(item => ({
+  const formattedExas: any[] | undefined = data?.map(item => ({
     id: item.id,
     name: item.name,
     image_url: item.image_url || '',

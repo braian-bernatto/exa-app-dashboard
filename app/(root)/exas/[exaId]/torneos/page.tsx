@@ -3,12 +3,19 @@ import TorneosClient from './components/client'
 
 export const revalidate = 0
 
-export default async function TorneosPage() {
+export default async function TorneosPage({
+  params
+}: {
+  params: {
+    exaId: string
+  }
+}) {
   const supabase = createClient()
   const { data, error } = await supabase
     .from('torneos')
     .select('*, exas(id, name, image_url)')
-    .order('id', { ascending: false })
+    .eq('exa_id', +params.exaId)
+    .order('created_at', { ascending: false })
 
   if (error) {
     console.log(error)

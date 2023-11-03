@@ -1,7 +1,6 @@
 'use client'
 
 import { Copy, Edit, MoreHorizontal, Trash } from 'lucide-react'
-import { ExaColumn } from './columns'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -17,15 +16,18 @@ import { useState } from 'react'
 import { useSupabase } from '@/providers/SupabaseProvider'
 import { AlertModal } from '@/components/modals/AlertModal'
 
-interface CellActionProps {
-  data: ExaColumn
+interface ActionProps {
+  data: any
+  table: string
+  url: string
 }
 
-const CellAction = ({ data }: CellActionProps) => {
-  const [loading, setLoading] = useState(false)
-  const [open, setOpen] = useState(false)
+const Actions = ({ data, table, url }: ActionProps) => {
   const { supabase } = useSupabase()
   const router = useRouter()
+
+  const [loading, setLoading] = useState(false)
+  const [open, setOpen] = useState(false)
 
   const onCopy = () => {
     navigator.clipboard.writeText(data.id.toString())
@@ -36,7 +38,7 @@ const CellAction = ({ data }: CellActionProps) => {
     try {
       setLoading(true)
 
-      const { error } = await supabase.from('exas').delete().eq('id', data.id)
+      const { error } = await supabase.from(table).delete().eq('id', data.id)
 
       if (error) {
         console.log(error)
@@ -75,7 +77,7 @@ const CellAction = ({ data }: CellActionProps) => {
             <Copy className='mr-2 h-4 w-4' />
             Copiar ID
           </DropdownMenuItem>
-          <DropdownMenuItem onClick={() => router.push(`/exas/${data.id}`)}>
+          <DropdownMenuItem onClick={() => router.push(`${url}/${data.id}`)}>
             <Edit className='mr-2 h-4 w-4' /> Editar
           </DropdownMenuItem>
           <DropdownMenuItem onClick={() => setOpen(true)}>
@@ -87,4 +89,4 @@ const CellAction = ({ data }: CellActionProps) => {
   )
 }
 
-export default CellAction
+export default Actions
