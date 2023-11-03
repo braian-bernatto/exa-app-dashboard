@@ -1,6 +1,6 @@
 'use client'
 import { useSupabase } from '@/providers/SupabaseProvider'
-import { Locations, Teams, TiposPartido, Torneos } from '@/types'
+import { Fases, Locations, Teams, TiposPartido, Torneos } from '@/types'
 import { useEffect, useState } from 'react'
 import { useForm } from 'react-hook-form'
 import * as z from 'zod'
@@ -23,7 +23,6 @@ import {
   Swords,
   Trash
 } from 'lucide-react'
-import { Input } from '../../../../../components/ui/input'
 import { Button } from '../../../../../components/ui/button'
 import {
   Popover,
@@ -50,12 +49,14 @@ export const revalidate = 0
 
 interface FixtureGenerarFormProps {
   torneos: Torneos[]
+  fases: Fases[] | []
   tiposPartido: TiposPartido[] | []
   locations: Locations[]
 }
 
 const FixtureGenerarForm = ({
   torneos,
+  fases,
   tiposPartido,
   locations
 }: FixtureGenerarFormProps) => {
@@ -65,9 +66,9 @@ const FixtureGenerarForm = ({
   const { supabase } = useSupabase()
   const [loading, setLoading] = useState(false)
   const [open, setOpen] = useState(false)
-  const [fases, setFases] = useState<{ id: number; name: string }[]>([])
-  const [faseTorneo, setFaseTorneo] = useState('')
-  const [tipoPartidoTorneo, setTipoPartidoTorneo] = useState('')
+  const [faseNro, setFaseNro] = useState<number | null>()
+  const [faseSelected, setFaseSelected] = useState('')
+  const [tipoPartidoSelected, setTipoPartidoSelected] = useState('')
   const [teams, setTeams] = useState<Teams[] | []>([])
   const [fixtures, setFixtures] = useState<any>()
 
@@ -109,17 +110,13 @@ const FixtureGenerarForm = ({
     setTeams(shuffledTeams || [])
   }
 
-  async function getTorneoFases(torneoId: string) {
-    const { data, error } = await supabase.rpc('get_fases_torneo', {
-      torneo: torneoId
-    })
+  async function generateTorneoFaseNro(torneoId: string) {
+    const { data, count } = await supabase
+      .from('torneo_fase')
+      .select('*', { count: 'exact', head: true })
+      .eq('torneo_id', torneoId)
 
-    if (error) {
-      return toast.error('No se pudo encontrar fase')
-    }
-    const fases = data.map(item => ({ id: item.fase_id, name: item.fase }))
-    setFases(fases)
-    return data
+    setFaseNro(count ? count + 1 : 1)
   }
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
@@ -128,7 +125,7 @@ const FixtureGenerarForm = ({
     try {
       setLoading(true)
 
-      if (!name || !torneo_id) {
+      if (!name || !torneo_id || !faseNro) {
         return toast.error('Faltan cargar datos')
       }
 
@@ -222,11 +219,14 @@ const FixtureGenerarForm = ({
   }
 
   useEffect(() => {
-    if (faseTorneo === 'puntos' && teams.length > 0 && tipoPartidoTorneo) {
-      const fixtures = generarFixtureTodosContraTodos(teams, tipoPartidoTorneo)
+    if (faseSelected === 'puntos' && teams.length > 0 && tipoPartidoSelected) {
+      const fixtures = generarFixtureTodosContraTodos(
+        teams,
+        tipoPartidoSelected
+      )
       setFixtures(fixtures)
     }
-  }, [teams, faseTorneo, tipoPartidoTorneo])
+  }, [teams, faseSelected, tipoPartidoSelected])
 
   return (
     <>
@@ -290,7 +290,7 @@ const FixtureGenerarForm = ({
                               key={torneo.id}
                               onSelect={() => {
                                 form.setValue('torneo_id', torneo.id)
-                                getTorneoFases(torneo.id)
+                                generateTorneoFaseNro(torneo.id)
                                 getTorneoTeams(torneo.id)
                               }}>
                               <>
@@ -332,7 +332,7 @@ const FixtureGenerarForm = ({
               name='fase_id'
               render={({ field }) => (
                 <FormItem className='space-y-3'>
-                  <FormLabel>Fases</FormLabel>
+                  <FormLabel>Fase</FormLabel>
                   <FormControl>
                     <RadioGroup
                       onValueChange={field.onChange}
@@ -345,7 +345,7 @@ const FixtureGenerarForm = ({
                           <FormControl>
                             <RadioGroupItem
                               onClick={() => {
-                                setFaseTorneo(fase.name)
+                                setFaseSelected(fase.name)
                               }}
                               value={fase.id.toString()}
                             />
@@ -381,7 +381,7 @@ const FixtureGenerarForm = ({
                           <FormControl>
                             <RadioGroupItem
                               onClick={() => {
-                                setTipoPartidoTorneo(tipo.name)
+                                setTipoPartidoSelected(tipo.name)
                               }}
                               value={tipo.id.toString()}
                             />
@@ -487,7 +487,7 @@ const FixtureGenerarForm = ({
           </article>
 
           {/* fixtures puntos */}
-          {faseTorneo === 'puntos' && fixtures && (
+          {faseSelected === 'puntos' && fixtures && (
             <article className='flex-1 flex flex-wrap  w-[280px] max-h-[800px] items-center justify-center overflow-y-auto sm:p-2 sm:pb-7'>
               {fixtures.ida.map((teams: any, index: number) => (
                 <div
@@ -619,7 +619,7 @@ const FixtureGenerarForm = ({
           )}
 
           {/* fixtures eliminatorias */}
-          {faseTorneo === 'eliminatorias' && fixtures && (
+          {faseSelected === 'eliminatorias' && fixtures && (
             <article className='flex-1 flex flex-wrap  w-[280px] max-h-[800px] items-center justify-center overflow-y-auto sm:p-2 sm:pb-7'>
               {fixtures.ida.map((teams: any, index: number) => (
                 <div

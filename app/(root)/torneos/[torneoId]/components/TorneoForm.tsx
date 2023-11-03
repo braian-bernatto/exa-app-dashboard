@@ -62,9 +62,6 @@ const formSchema = z.object({
     .or(z.string())
     .optional()
     .nullable(),
-  fases: z.array(z.number()).refine(value => value.some(item => item), {
-    message: 'Selecciona al menos una opción.'
-  }),
   teams: z.array(z.number()).refine(value => value.some(item => item), {
     message: 'Selecciona al menos una opción.'
   }),
@@ -74,7 +71,6 @@ const formSchema = z.object({
 })
 
 type TorneoType = Torneos & {
-  fases: number[]
   teams: number[]
   public_image_url: string
 }
@@ -82,10 +78,9 @@ type TorneoType = Torneos & {
 interface TorneoFormProps {
   initialData: TorneoType | undefined
   exas: Exas[]
-  fases: Fases[] | []
 }
 
-const TorneoForm = ({ initialData, exas, fases }: TorneoFormProps) => {
+const TorneoForm = ({ initialData, exas }: TorneoFormProps) => {
   const router = useRouter()
   const params = useParams()
 
@@ -103,7 +98,6 @@ const TorneoForm = ({ initialData, exas, fases }: TorneoFormProps) => {
     defaultValues: initialData || {
       name: '',
       image_url: '',
-      fases: [],
       teams: [],
       points_victory: 3,
       points_tie: 1,
@@ -146,14 +140,13 @@ const TorneoForm = ({ initialData, exas, fases }: TorneoFormProps) => {
         name,
         image_url,
         exa_id,
-        fases,
         teams,
         points_victory,
         points_tie,
         points_defeat
       } = values
 
-      if (!name || !exa_id || !fases.length) {
+      if (!name || !exa_id) {
         return toast.error('Faltan datos')
       }
 
@@ -192,53 +185,6 @@ const TorneoForm = ({ initialData, exas, fases }: TorneoFormProps) => {
           console.log(error)
           setLoading(false)
           return toast.error(`No se pudo ${action}`)
-        }
-
-        // update torneo fase
-        // check if a fase was deleted
-        const deletedFase = initialData.fases.filter(fase => {
-          if (!fases.includes(fase)) {
-            return fase
-          }
-        })
-
-        if (deletedFase.length) {
-          const { error } = await supabase
-            .from('torneo_fase')
-            .delete()
-            .eq('torneo_id', params.torneoId)
-            .eq('fase_id', deletedFase)
-
-          if (error) {
-            console.log(error)
-            setLoading(false)
-            return toast.error(`No se pudo borrar fase`)
-          }
-        }
-
-        // check if new fase was added
-        const newFase = fases.filter(fase => {
-          if (!initialData.fases.includes(fase)) {
-            return fase
-          }
-        })
-
-        //insert torneos fase
-        if (newFase.length > 0) {
-          const fasesFormatted = fases.map(fase => ({
-            torneo_id: initialData.id,
-            fase_id: fase
-          }))
-
-          const { error: supabaseError } = await supabase
-            .from('torneo_fase')
-            .upsert(fasesFormatted)
-
-          if (supabaseError) {
-            console.log(supabaseError)
-            setLoading(false)
-            return toast.error(`No se pudo ${action} en Torneo Fase`)
-          }
         }
 
         // update torneo teams
@@ -305,24 +251,6 @@ const TorneoForm = ({ initialData, exas, fases }: TorneoFormProps) => {
           console.log(error)
           setLoading(false)
           return toast.error(`No se pudo ${action}`)
-        }
-
-        //insert torneos fase
-        if (data && fases.length > 0) {
-          const fasesFormatted = fases.map(fase => ({
-            torneo_id: data[0].id,
-            fase_id: fase
-          }))
-
-          const { error: faseError } = await supabase
-            .from('torneo_fase')
-            .insert(fasesFormatted)
-
-          if (faseError) {
-            console.log(faseError)
-            setLoading(false)
-            return toast.error(`No se pudo ${action} en Torneo Fase`)
-          }
         }
 
         //insert torneo teams
@@ -580,54 +508,6 @@ const TorneoForm = ({ initialData, exas, fases }: TorneoFormProps) => {
                     )}
                   </div>
                 </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          {/* Fases */}
-          <FormField
-            control={form.control}
-            name='fases'
-            render={() => (
-              <FormItem>
-                <div className='mb-2'>
-                  <FormLabel className='text-base'>Fases</FormLabel>
-                  <FormDescription>
-                    Selecciona una o varias opciones
-                  </FormDescription>
-                </div>
-                {fases.map(item => (
-                  <FormField
-                    key={item.id}
-                    control={form.control}
-                    name='fases'
-                    render={({ field }) => {
-                      return (
-                        <FormItem
-                          key={item.id}
-                          className='flex flex-row items-start space-x-3 space-y-0 capitalize'>
-                          <FormControl>
-                            <Checkbox
-                              checked={field.value?.includes(item.id)}
-                              onCheckedChange={checked => {
-                                return checked
-                                  ? field.onChange([...field.value, item.id])
-                                  : field.onChange(
-                                      field.value?.filter(
-                                        value => value !== item.id
-                                      )
-                                    )
-                              }}
-                            />
-                          </FormControl>
-                          <FormLabel className='font-normal'>
-                            {item.name}
-                          </FormLabel>
-                        </FormItem>
-                      )
-                    }}
-                  />
-                ))}
                 <FormMessage />
               </FormItem>
             )}

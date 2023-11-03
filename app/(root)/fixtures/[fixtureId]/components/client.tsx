@@ -7,10 +7,17 @@ import { useParams, useRouter } from 'next/navigation'
 import { DataTable } from '@/components/ui/data-table'
 import { columns } from './columns'
 import FixtureForm, { FixtureType } from './FixtureForm'
-import { GetFixturesTeams, Locations, TiposPartido, Torneos } from '@/types'
+import {
+  Fases,
+  GetFixturesTeams,
+  Locations,
+  TiposPartido,
+  Torneos
+} from '@/types'
 
 interface FixtureDetailsClientProps {
   torneos: Torneos[]
+  fases: Fases[]
   tiposPartido: TiposPartido[]
   locations: Locations[]
   data: FixtureType | undefined
@@ -19,6 +26,7 @@ interface FixtureDetailsClientProps {
 
 const FixtureDetailsClient = ({
   torneos,
+  fases,
   tiposPartido,
   locations,
   data,
@@ -32,6 +40,7 @@ const FixtureDetailsClient = ({
       <FixtureForm
         initialData={data}
         torneos={torneos}
+        fases={fases}
         tiposPartido={tiposPartido}
         locations={locations}
       />

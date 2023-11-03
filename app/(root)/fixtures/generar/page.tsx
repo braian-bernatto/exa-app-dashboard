@@ -10,6 +10,11 @@ const FixutreGenerar = async () => {
   const torneos = await getTorneos()
   const locations = await getLocations()
 
+  const { data: fases } = await supabase
+    .from('fases')
+    .select()
+    .order('id', { ascending: true })
+
   const { data: tipos_partido } = await supabase
     .from('tipo_partido')
     .select()
@@ -19,6 +24,7 @@ const FixutreGenerar = async () => {
     <div className='flex flex-col gap-5 items-center'>
       <FixtureGenerarForm
         torneos={torneos}
+        fases={fases || []}
         tiposPartido={tipos_partido || []}
         locations={locations}
       />

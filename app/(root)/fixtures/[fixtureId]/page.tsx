@@ -16,6 +16,11 @@ const FixutrePage = async ({
   const torneos = await getTorneos()
   const locations = await getLocations()
 
+  const { data: fases } = await supabase
+    .from('fases')
+    .select()
+    .order('id', { ascending: true })
+
   const { data: fixture } = await supabase
     .rpc('get_fixture_by_id', {
       fixture_id: params.fixtureId
@@ -45,6 +50,7 @@ const FixutrePage = async ({
     <div className='flex flex-col gap-5'>
       <FixtureDetailsClient
         torneos={torneos}
+        fases={fases || []}
         tiposPartido={tipos_partido || []}
         locations={locations}
         data={data}

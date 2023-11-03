@@ -1,6 +1,6 @@
 'use client'
 import { useSupabase } from '@/providers/SupabaseProvider'
-import { Fases, GetFixtures, Locations, TiposPartido, Torneos } from '@/types'
+import { Fases, Locations, TiposPartido, TorneoFase, Torneos } from '@/types'
 import { useEffect, useState } from 'react'
 import { useForm } from 'react-hook-form'
 import * as z from 'zod'
@@ -45,25 +45,21 @@ import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
 
 export const revalidate = 0
 
-export type FixtureType = GetFixtures[0] & {
-  torneo_public_image_url: string
-}
+export type TorneoFaseType = TorneoFase
 
-interface FixtureFormProps {
-  initialData: FixtureType | undefined
+interface TorneoFaseFormProps {
+  initialData: TorneoFaseType | undefined
   torneos: Torneos[]
   fases: Fases[] | []
   tiposPartido: TiposPartido[] | []
-  locations: Locations[]
 }
 
-const FixtureForm = ({
+const TorneoFaseForm = ({
   initialData,
   torneos,
   fases,
-  tiposPartido,
-  locations
-}: FixtureFormProps) => {
+  tiposPartido
+}: TorneoFaseFormProps) => {
   const router = useRouter()
   const params = useParams()
 
@@ -72,12 +68,11 @@ const FixtureForm = ({
   const [open, setOpen] = useState(false)
   const [faseNro, setFaseNro] = useState<number | null>()
 
-  const title = initialData ? 'Editar Fixture' : 'Agregar Fixture'
-  const toastMessage = initialData ? 'Fixture modificado' : 'Fixture agregado'
+  const title = initialData ? 'Editar Fase' : 'Agregar Fase'
+  const toastMessage = initialData ? 'Fase modificado' : 'Fase agregado'
   const action = initialData ? 'Modificar' : 'Agregar'
 
   const formSchema = z.object({
-    name: z.string().min(1, { message: 'Obligatorio' }),
     torneo_id: z.coerce.string({
       required_error: 'Obligatorio',
       invalid_type_error: 'Obligatorio'
@@ -89,18 +84,15 @@ const FixtureForm = ({
     tipo_partido_id: z.coerce.number({
       required_error: 'Obligatorio',
       invalid_type_error: 'Obligatorio'
-    }),
-    location_id: z.number().nullable().optional()
+    })
   })
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: initialData || {
-      name: '',
       torneo_id: undefined,
       fase_id: undefined,
-      tipo_partido_id: undefined,
-      location_id: undefined
+      tipo_partido_id: undefined
     }
   })
 
@@ -114,12 +106,12 @@ const FixtureForm = ({
   }
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
-    const { name, torneo_id, fase_id, location_id, tipo_partido_id } = values
+    const { torneo_id, fase_id, tipo_partido_id } = values
 
     try {
       setLoading(true)
 
-      if (!name || !torneo_id || !faseNro) {
+      if (!torneo_id || !faseNro || tipo_partido_id) {
         return toast.error('Faltan cargar datos')
       }
 
@@ -127,10 +119,7 @@ const FixtureForm = ({
       if (initialData) {
         const { error } = await supabase
           .from('fixtures')
-          .update({
-            name: name.toLowerCase(),
-            location_id
-          })
+          .update({})
           .eq('id', params.fixtureId)
 
         if (error) {
@@ -477,4 +466,4 @@ const FixtureForm = ({
   )
 }
 
-export default FixtureForm
+export default TorneoFaseForm
