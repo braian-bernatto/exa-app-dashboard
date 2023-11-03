@@ -2,7 +2,6 @@
 import Image from 'next/image'
 import { Button } from '@/components/ui/button'
 import { useEffect, useState } from 'react'
-import FixtureClient from './fixtureClient'
 import { createClient } from '@/utils/supabaseBrowser'
 import { useRouter } from 'next/navigation'
 
@@ -17,7 +16,9 @@ interface TorneoClientProps {
 const TorneoClient = ({ id, teams, fases }: TorneoClientProps) => {
   const supabase = createClient()
   const router = useRouter()
-  const [faseSelected, setFaseSelected] = useState(fases[0].fase_nro)
+  const [faseSelected, setFaseSelected] = useState(
+    fases.length > 0 ? fases[0].fase_nro : undefined
+  )
   const [fixtures, setFixtures] = useState<any[]>([])
   const [fixtureSelected, setFixtureSelected] = useState()
 
