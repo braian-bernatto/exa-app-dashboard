@@ -17,7 +17,7 @@ const Torneo = ({ data }: TorneoProps) => {
   return (
     <article className='relative'>
       <Link
-        href={`torneos/${data.id}`}
+        href={`torneos/${data.id}/dashboard`}
         className='rounded bg-white relative h-[150px] w-[150px] shadow flex flex-col items-center justify-center p-2 gap-2'>
         <span className='relative h-[100px] w-[100px]'>
           <Image
