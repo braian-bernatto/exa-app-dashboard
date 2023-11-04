@@ -1,44 +1,62 @@
 'use client'
 
 import { Button } from '@/components/ui/button'
-import { Heading } from '@/components/ui/heading'
 import { Separator } from '@/components/ui/separator'
-import { Plus, Shuffle } from 'lucide-react'
-import { useRouter } from 'next/navigation'
+import { Plus } from 'lucide-react'
+import { useParams, useRouter } from 'next/navigation'
 import { DataTable } from '@/components/ui/data-table'
-import { FixtureColumn, columns } from './columns'
+import { columns } from './columns'
+import FixtureForm, { FixtureType } from './FixtureForm'
+import { GetFixturesTeams, Locations } from '@/types'
+import { useEffect } from 'react'
 
-interface FixtureClientProps {
-  data: FixtureColumn[] | []
+interface FixtureDetailsClientProps {
+  fase: number
+  torneo: string
+  data: FixtureType | undefined
+  fixtureDetails: GetFixturesTeams
+  locations: Locations[]
 }
 
-const FixtureClient = ({ data }: FixtureClientProps) => {
+const FixtureDetailsClient = ({
+  fase,
+  torneo,
+  data,
+  fixtureDetails,
+  locations
+}: FixtureDetailsClientProps) => {
   const router = useRouter()
+  const params = useParams()
+
   return (
-    <div>
-      <div className='flex items-center justify-between'>
-        <Heading
-          title={`Fixtures (${data.length})`}
-          description='Maneja todos los fixtures de tus torneos'
-        />
-        <span className='gap-2 flex flex-wrap'>
-          <Button onClick={() => router.push(`/fixtures/generar`)}>
-            <Shuffle className='mr-2 h-4 w-4' /> Generar
-          </Button>
-          <Button onClick={() => router.push(`/fixtures/agregar`)}>
-            <Plus className='mr-2 h-4 w-4' /> Agregar
-          </Button>
-        </span>
-      </div>
-      <Separator />
-      <DataTable
-        columns={columns}
-        data={data}
-        filterLabel='Torneo'
-        filterKey='torneo'
+    <div className='flex flex-wrap justify-center gap-5 w-full'>
+      <FixtureForm
+        faseNro={fase}
+        torneoId={torneo}
+        initialData={data}
+        locations={locations}
       />
+      {data && (
+        <article className='flex flex-col gap-5 w-full md:w-auto'>
+          <Separator />
+          <div className='flex items-center justify-end'>
+            <Button
+              onClick={() =>
+                router.push(`/fixtures/${params.fixtureId}/agregar`)
+              }>
+              <Plus className='mr-2 h-4 w-4' /> Agregar Versus
+            </Button>
+          </div>
+          <DataTable
+            columns={columns}
+            data={fixtureDetails || []}
+            filterLabel='Fecha'
+            filterKey='date'
+          />
+        </article>
+      )}
     </div>
   )
 }
 
-export default FixtureClient
+export default FixtureDetailsClient

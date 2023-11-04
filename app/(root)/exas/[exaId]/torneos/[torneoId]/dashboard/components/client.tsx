@@ -4,6 +4,8 @@ import { Button } from '@/components/ui/button'
 import { useEffect, useState } from 'react'
 import { createClient } from '@/utils/supabaseBrowser'
 import { useRouter } from 'next/navigation'
+import FixtureDetailsClient from './fixtureClient'
+import { Locations } from '@/types'
 
 export const revalidate = 0
 
@@ -11,15 +13,15 @@ interface TorneoClientProps {
   id: string
   teams: any[]
   fases: any[]
+  locations: Locations[]
 }
 
-const TorneoClient = ({ id, teams, fases }: TorneoClientProps) => {
+const TorneoClient = ({ id, teams, fases, locations }: TorneoClientProps) => {
   const supabase = createClient()
   const router = useRouter()
-  const [faseSelected, setFaseSelected] = useState(
-    fases.length > 0 ? fases[0].fase_nro : undefined
-  )
+  const [faseSelected, setFaseSelected] = useState()
   const [fixtures, setFixtures] = useState<any[]>([])
+  const [fixtureDetails, setFixtureDetails] = useState<any[]>([])
   const [fixtureSelected, setFixtureSelected] = useState()
 
   const getFixtures = async () => {
@@ -30,11 +32,25 @@ const TorneoClient = ({ id, teams, fases }: TorneoClientProps) => {
       .eq('fase_nro', faseSelected)
       .order('order', { ascending: true })
 
-    console.log({ data, id, faseSelected })
     if (data) {
       setFixtures(data)
     }
   }
+
+  const getFixtureDetails = async (fixtureId: string) => {
+    const { data: fixtureDetails } = await supabase
+      .rpc('get_fixture_teams_by_fixture_id', { fixture: fixtureId })
+      .order('date', { ascending: false })
+    if (fixtureDetails) {
+      setFixtureDetails(fixtureDetails)
+    }
+  }
+
+  useEffect(() => {
+    if (fases.length > 0) {
+      setFaseSelected(fases[0].fase_nro)
+    }
+  }, [])
 
   useEffect(() => {
     if (faseSelected) {
@@ -119,9 +135,14 @@ const TorneoClient = ({ id, teams, fases }: TorneoClientProps) => {
                 <Button
                   key={fixture.id}
                   variant={
-                    fixtureSelected === fixture.id ? 'default' : 'outline'
+                    fixtureSelected && fixtureSelected.id === fixture.id
+                      ? 'default'
+                      : 'outline'
                   }
-                  onClick={() => setFixtureSelected(fixture.id)}
+                  onClick={() => {
+                    setFixtureSelected(fixture)
+                    getFixtureDetails(fixture.id)
+                  }}
                   className='flex flex-col h-full gap-1 text-xs'>
                   <h2 className='capitalize text-center text-md rounded-full'>
                     {fixture.name}
@@ -135,6 +156,17 @@ const TorneoClient = ({ id, teams, fases }: TorneoClientProps) => {
               ))}
           </div>
         </div>
+      )}
+
+      {/* fixtureClient */}
+      {faseSelected && (
+        <FixtureDetailsClient
+          fase={faseSelected}
+          torneo={id}
+          data={fixtureSelected}
+          fixtureDetails={fixtureDetails}
+          locations={locations}
+        />
       )}
     </div>
   )
