@@ -1,6 +1,6 @@
-import { createClient } from '@/utils/supabaseServer'
+import { createClient } from "@/utils/supabaseBrowser"
 
-export async function getTorneoFases(torneoId: string) {
+export async function getTorneoFasesClient(torneoId: string) {
     const supabase = createClient()
     const { data, count } = await supabase
       .from('torneo_fase')

@@ -6,37 +6,23 @@ import { Plus } from 'lucide-react'
 import { useParams, useRouter } from 'next/navigation'
 import { DataTable } from '@/components/ui/data-table'
 import { columns } from './columns'
-import FixtureForm, { FixtureType } from './FixtureForm'
-import { GetFixturesTeams, Locations } from '@/types'
-import { useEffect } from 'react'
+import { GetFixturesTeams } from '@/types'
+
+export const revalidate = 0
 
 interface FixtureDetailsClientProps {
-  fase: number
-  torneo: string
-  data: FixtureType | undefined
   fixtureDetails: GetFixturesTeams
-  locations: Locations[]
 }
 
 const FixtureDetailsClient = ({
-  fase,
-  torneo,
-  data,
-  fixtureDetails,
-  locations
+  fixtureDetails
 }: FixtureDetailsClientProps) => {
   const router = useRouter()
   const params = useParams()
 
   return (
     <div className='flex flex-wrap justify-center gap-5 w-full'>
-      <FixtureForm
-        faseNro={fase}
-        torneoId={torneo}
-        initialData={data}
-        locations={locations}
-      />
-      {data && (
+      {fixtureDetails && (
         <article className='flex flex-col gap-5 w-full md:w-auto'>
           <Separator />
           <div className='flex items-center justify-end'>

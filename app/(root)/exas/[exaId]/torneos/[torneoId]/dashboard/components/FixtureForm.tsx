@@ -1,6 +1,6 @@
 'use client'
 import { useSupabase } from '@/providers/SupabaseProvider'
-import { Fases, GetFixtures, Locations, TiposPartido, Torneos } from '@/types'
+import { Fixtures, Locations } from '@/types'
 import { useEffect, useState } from 'react'
 import { useForm } from 'react-hook-form'
 import * as z from 'zod'
@@ -14,20 +14,10 @@ import {
   FormMessage
 } from '@/components/ui/form'
 import { useParams, useRouter } from 'next/navigation'
-import {
-  Check,
-  ChevronsUpDown,
-  ChevronsUpDownIcon,
-  MapPin,
-  Shield,
-  Swords,
-  Trash
-} from 'lucide-react'
+import { Check, ChevronsUpDownIcon, MapPin, Swords, Trash } from 'lucide-react'
 import { cn } from '@/lib/utils'
-import Image from 'next/image'
 import { toast } from 'react-hot-toast'
 import { AlertModal } from '@/components/modals/AlertModal'
-import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import {
@@ -45,26 +35,26 @@ import {
 
 export const revalidate = 0
 
-export type FixtureType = GetFixtures[0] & {
-  torneo_public_image_url: string
-}
-
 interface FixtureFormProps {
   torneoId: string
   faseNro: number
-  initialData: FixtureType | undefined
+  initialData: Fixtures | undefined
   locations: Locations[]
+  getFixtures: () => void
+  setFixtureSelected: (value: any) => void
+  setOpenFixtureForm: (bool: boolean) => void
 }
 
 const FixtureForm = ({
   torneoId,
   faseNro,
   initialData,
-  locations
+  locations,
+  getFixtures,
+  setFixtureSelected,
+  setOpenFixtureForm
 }: FixtureFormProps) => {
   const router = useRouter()
-  const params = useParams()
-  console.log({ initialData })
 
   const { supabase } = useSupabase()
   const [loading, setLoading] = useState(false)
@@ -105,7 +95,7 @@ const FixtureForm = ({
             name: name.toLowerCase(),
             location_id
           })
-          .eq('id', params.fixtureId)
+          .eq('id', initialData.id)
 
         if (error) {
           console.log(error)
@@ -128,8 +118,11 @@ const FixtureForm = ({
       }
 
       router.refresh()
-      router.push('/exas')
+      getFixtures()
+      setFixtureSelected(undefined)
+      setOpenFixtureForm(false)
       toast.success(toastMessage)
+      form.reset()
     } catch (error) {
       toast.error('Hubo un error')
     } finally {
@@ -144,23 +137,33 @@ const FixtureForm = ({
       const { error } = await supabase
         .from('fixtures')
         .delete()
-        .eq('id', params.fixtureId)
+        .eq('id', initialData?.id)
 
       if (error) {
         console.log(error)
         setLoading(false)
         return toast.error(`No se pudo borrar`)
       }
+      getFixtures()
+      setFixtureSelected(undefined)
+      setOpenFixtureForm(false)
+      setOpen(false)
       router.refresh()
-      router.push('/exas')
       toast.success('Borrado con éxito')
+      form.reset()
     } catch (error) {
       toast.error('Hubo un error')
     } finally {
       setLoading(false)
-      setOpen(false)
     }
   }
+
+  useEffect(() => {
+    if (initialData) {
+      form.setValue('name', initialData.name)
+      form.setValue('location_id', initialData.location_id)
+    }
+  }, [initialData])
 
   return (
     <>
@@ -173,7 +176,7 @@ const FixtureForm = ({
       <Form {...form}>
         <form
           onSubmit={form.handleSubmit(onSubmit)}
-          className='flex flex-col w-full max-w-xs rounded bg-white py-3 px-4 shadow gap-5'>
+          className='flex flex-col w-full max-w-xs rounded bg-white py-3 px-4 gap-5'>
           <div className='flex gap-2'>
             <span className='bg-gradient-to-r from-emerald-300 to-emerald-700 rounded-full p-2 flex items-center justify-center'>
               <Swords

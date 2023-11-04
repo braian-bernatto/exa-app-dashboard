@@ -454,21 +454,21 @@ export interface Database {
       }
       torneo_fase: {
         Row: {
-          fase_id: number | null
+          fase_id: number
           fase_nro: number
-          tipo_partido_id: number | null
+          tipo_partido_id: number
           torneo_id: string
         }
         Insert: {
-          fase_id?: number | null
+          fase_id: number
           fase_nro?: number
-          tipo_partido_id?: number | null
+          tipo_partido_id: number
           torneo_id: string
         }
         Update: {
-          fase_id?: number | null
+          fase_id?: number
           fase_nro?: number
-          tipo_partido_id?: number | null
+          tipo_partido_id?: number
           torneo_id?: string
         }
         Relationships: [
