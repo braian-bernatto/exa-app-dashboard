@@ -1,13 +1,20 @@
 import { createClient } from '@/utils/supabaseServer'
-import getTorneos from '@/actions/getTorneos'
 import getLocations from '@/actions/getLocations'
 import FixtureGenerarForm from './components/FixtureGenerarForm'
+import getTeamsByTorneo from '@/actions/getTeamsByTorneo'
+import { shuffle } from '@/utils/shuffle'
 
 export const revalidate = 0
 
-const FixutreGenerar = async () => {
+const FixutreGenerar = async ({
+  params
+}: {
+  params: {
+    exaId: string
+    torneoId: string
+  }
+}) => {
   const supabase = createClient()
-  const torneos = await getTorneos()
   const locations = await getLocations()
 
   const { data: fases } = await supabase
@@ -20,10 +27,13 @@ const FixutreGenerar = async () => {
     .select()
     .order('id', { ascending: true })
 
+  const teams = await getTeamsByTorneo(params.torneoId)
+  const shuffledTeams = shuffle(teams)
+
   return (
     <div className='flex flex-col gap-5 items-center'>
       <FixtureGenerarForm
-        torneos={torneos}
+        teams={shuffledTeams}
         fases={fases || []}
         tiposPartido={tipos_partido || []}
         locations={locations}

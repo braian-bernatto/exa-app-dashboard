@@ -1,6 +1,6 @@
 'use client'
 import { useSupabase } from '@/providers/SupabaseProvider'
-import { Fases, Locations, Teams, TiposPartido, Torneos } from '@/types'
+import { Fases, Locations, Teams, TiposPartido } from '@/types'
 import { useEffect, useState } from 'react'
 import { useForm } from 'react-hook-form'
 import * as z from 'zod'
@@ -49,14 +49,14 @@ import {
 export const revalidate = 0
 
 interface FixtureGenerarFormProps {
-  torneos: Torneos[]
+  teams: Teams[]
   fases: Fases[] | []
   tiposPartido: TiposPartido[] | []
   locations: Locations[]
 }
 
 const FixtureGenerarForm = ({
-  torneos,
+  teams,
   fases,
   tiposPartido,
   locations
@@ -70,7 +70,6 @@ const FixtureGenerarForm = ({
   const [faseNro, setFaseNro] = useState<number | null>()
   const [faseSelected, setFaseSelected] = useState('')
   const [tipoPartidoSelected, setTipoPartidoSelected] = useState('')
-  const [teams, setTeams] = useState<Teams[] | []>([])
   const [fixtures, setFixtures] = useState<any>()
 
   const title = 'Generar Fixture'
@@ -104,12 +103,6 @@ const FixtureGenerarForm = ({
       location_id: undefined
     }
   })
-
-  async function getTorneoTeams(torneoId: string) {
-    const teams = await getTeamsByTorneoClient(torneoId)
-    const shuffledTeams = shuffle(teams)
-    setTeams(shuffledTeams || [])
-  }
 
   async function generateTorneoFaseNro(torneoId: string) {
     const { data, count } = await supabase
@@ -255,77 +248,6 @@ const FixtureGenerarForm = ({
                 {title}
               </h1>
             </div>
-            {/* torneo */}
-            <FormField
-              control={form.control}
-              name='torneo_id'
-              render={({ field }) => (
-                <FormItem className='rounded bg-white'>
-                  <FormLabel>Torneo</FormLabel>
-                  <Popover>
-                    <PopoverTrigger asChild>
-                      <FormControl>
-                        <Button
-                          variant='outline'
-                          role='combobox'
-                          className={cn(
-                            'w-full justify-between',
-                            !field.value && 'text-muted-foreground'
-                          )}>
-                          {field.value
-                            ? torneos.find(torneo => torneo.id === field.value)
-                                ?.name
-                            : 'Elige un torneo'}
-                          <ChevronsUpDown className='ml-2 h-4 w-4 shrink-0 opacity-50' />
-                        </Button>
-                      </FormControl>
-                    </PopoverTrigger>
-                    <PopoverContent className='max-w-[300px] p-0 sm:max-h-[500px] max-h-[300px] overflow-y-auto'>
-                      <Command>
-                        <CommandInput placeholder='Buscador de torneos...' />
-                        <CommandEmpty>No hay coincidencias.</CommandEmpty>
-                        <CommandGroup>
-                          {torneos.map(torneo => (
-                            <CommandItem
-                              value={torneo.name!}
-                              key={torneo.id}
-                              onSelect={() => {
-                                form.setValue('torneo_id', torneo.id)
-                                generateTorneoFaseNro(torneo.id)
-                                getTorneoTeams(torneo.id)
-                              }}>
-                              <>
-                                <Check
-                                  className={cn(
-                                    'mr-2 h-4 w-4',
-                                    torneo.id === field.value
-                                      ? 'opacity-100'
-                                      : 'opacity-0'
-                                  )}
-                                />
-                                {torneo.image_url?.length ? (
-                                  <Image
-                                    src={torneo.image_url}
-                                    width={30}
-                                    height={30}
-                                    alt='torneo logo'
-                                    className='mr-2'
-                                  />
-                                ) : (
-                                  <Shield className='mr-2' size={30} />
-                                )}
-                                {torneo.name}
-                              </>
-                            </CommandItem>
-                          ))}
-                        </CommandGroup>
-                      </Command>
-                    </PopoverContent>
-                  </Popover>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
 
             {/* fases */}
             <FormField

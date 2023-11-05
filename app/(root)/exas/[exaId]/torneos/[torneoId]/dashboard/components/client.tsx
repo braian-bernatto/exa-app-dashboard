@@ -82,181 +82,183 @@ const TorneoClient = ({
   }, [faseSelected])
 
   return (
-    <div className='flex flex-wrap gap-10 sm:gap-20 w-full justify-center'>
-      {/* teams */}
-      {teams.length > 0 && (
-        <div className='flex flex-col gap-2 sm:w-[230px]'>
-          <h2 className='w-full text-center px-2 rounded shadow bg-white'>
-            Equipos
-          </h2>
-          <div className='grid grid-cols-4 sm:grid-cols-3 gap-5'>
-            {teams.map(team => (
-              <div
-                key={team.id}
-                className='flex-1 flex flex-col jutify-center items-center'>
-                <span className='w-10 h-10 relative'>
-                  {team.image_url && (
-                    <Image
-                      src={team.image_url}
-                      fill
-                      className='object-contain'
-                      alt='team logo'
-                    />
-                  )}
-                </span>
-                <h2 className='text-xs capitalize text-center text-muted-foreground'>
-                  {team.name}
-                </h2>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
-
-      {/* fases */}
-      <FormModal isOpen={openFaseForm} onClose={() => setOpenFaseForm(false)}>
-        <FaseForm
-          faseNro={
-            torneoFases.length > 0
-              ? torneoFases[torneoFases.length - 1].fase_nro + 1
-              : 1
-          }
-          torneoId={id}
-          fases={fases}
-          tiposPartido={tiposPartido}
-          getFases={getFases}
-          setFaseSelected={setFaseSelected}
-          setOpenFaseForm={setOpenFaseForm}
-        />
-      </FormModal>
-
-      <div className='flex flex-col gap-2 w-full sm:w-[190px] relative'>
-        <h2 className='w-full text-center px-2 rounded shadow bg-white relative'>
-          Fases
-          <button
-            className='rounded-full bg-white shadow-md p-1 absolute top-[50%] translate-y-[-50%] -right-2 sm:-right-4'
-            onClick={() => {
-              setOpenFaseForm(!openFaseForm)
-            }}>
-            <Plus />
-          </button>
-        </h2>
-        <div className='flex sm:flex-col flex-wrap sm:flex-nowrap gap-5 max-h-[300px] overflow-y-auto overflow-x-visible'>
-          {fasesList.length > 0 &&
-            fasesList.map(fase => (
-              <article
-                key={fase.fase_nro}
-                onClick={() => setFaseSelected(fase.fase_nro)}
-                className={`w-[130px] scale-90 sm:scale-100 sm:w-[150px] flex items-center gap-2 sm:gap-5 text-xs relative cursor-pointer rounded-md p-3 px-4 bg-white text-center border transition hover:opacity-90 ${
-                  faseSelected === fase.fase_nro
-                    ? 'bg-slate-800 text-white'
-                    : 'hover:bg-slate-100'
-                }`}>
-                <span
-                  className={`absolute top-[50%] translate-y-[-50%] -right-5 border bg-white rounded-full overflow-hidden ${
-                    faseSelected === fase.fase_nro ? 'text-black' : ''
-                  }`}>
-                  <FaseActions
-                    data={fase}
-                    setFormOpen={setOpenFixtureForm}
-                    getFases={getFases}
-                    setFaseSelected={setFaseSelected}
-                  />
-                </span>
-                <h2 className='capitalize text-center text-xl rounded-full'>
-                  {fase.fase_nro}
-                </h2>
-                <ul className='flex flex-1 flex-col gap-1 justify-center uppercase text-[8px]'>
-                  <li className='px-2 rounded shadow border'>
-                    {fase.fases!.name}
-                  </li>
-                  <li className='px-2 rounded shadow border'>
-                    {fase.tipo_partido!.name}
-                  </li>
-                </ul>
-              </article>
-            ))}
-        </div>
-      </div>
-
-      {/* fixtures */}
-      {faseSelected && (
-        <FormModal
-          isOpen={openFixtureForm}
-          onClose={() => setOpenFixtureForm(false)}>
-          <FixtureForm
-            faseNro={faseSelected}
+    <div className='flex flex-wrap gap-20 w-full justify-evenly'>
+      <article className='h-full flex flex-wrap gap-10'>
+        {/* fases */}
+        <FormModal isOpen={openFaseForm} onClose={() => setOpenFaseForm(false)}>
+          <FaseForm
+            faseNro={
+              torneoFases.length > 0
+                ? torneoFases[torneoFases.length - 1].fase_nro + 1
+                : 1
+            }
             torneoId={id}
-            initialData={fixtureSelected}
-            locations={locations}
-            getFixtures={getFixtures}
-            setFixtureSelected={setFixtureSelected}
-            setOpenFixtureForm={setOpenFixtureForm}
+            fases={fases}
+            tiposPartido={tiposPartido}
+            getFases={getFases}
+            setFaseSelected={setFaseSelected}
+            setOpenFaseForm={setOpenFaseForm}
           />
         </FormModal>
-      )}
-
-      <div className='flex flex-col gap-2 w-full sm:w-[190px] relative'>
-        <h2 className='w-full text-center px-2 rounded shadow bg-white relative'>
-          Fixtures
-          <button
-            className='rounded-full bg-white shadow-md p-1 absolute top-[50%] translate-y-[-50%] -right-2 sm:-right-4'
-            onClick={() => {
-              setFixtureSelected(undefined)
-              setOpenFixtureForm(!openFixtureForm)
-            }}>
-            <Plus />
-          </button>
-        </h2>
-        <div className='flex sm:flex-col flex-wrap sm:flex-nowrap gap-5 max-h-[300px] overflow-y-auto overflow-x-visible'>
-          {fixtures.length > 0 &&
-            fixtures.map(fixture => (
-              <article
-                key={fixture.id}
-                onClick={() => {
-                  setFixtureSelected(fixture)
-                  getFixtureDetails(fixture.id)
-                }}
-                className={`w-[130px] scale-90 sm:scale-100 sm:w-[150px] flex flex-col items-center cursor-pointer gap-1 text-xs relative rounded-md p-3 px-4 bg-white text-center border transition hover:opacity-90 ${
-                  fixtureSelected && fixtureSelected.id === fixture.id
-                    ? 'bg-slate-800 text-white'
-                    : 'hover:bg-slate-100'
-                }`}>
-                <span
-                  className={`absolute top-[50%] translate-y-[-50%] -right-5 border bg-white rounded-full overflow-hidden ${
-                    fixtureSelected && fixtureSelected.id === fixture.id
-                      ? 'text-black'
-                      : ''
+        <div className='flex flex-col gap-2 w-full sm:w-[190px] relative'>
+          <h2 className='w-full text-center px-2 rounded shadow bg-white relative'>
+            Fases
+            <button
+              className='rounded-full bg-white shadow-md p-1 absolute top-[50%] translate-y-[-50%] -right-2 sm:-right-4'
+              onClick={() => {
+                setOpenFaseForm(!openFaseForm)
+              }}>
+              <Plus />
+            </button>
+          </h2>
+          <div className='flex sm:flex-col flex-wrap sm:flex-nowrap gap-5 sm:max-h-[70vh] overflow-y-auto overflow-x-visible'>
+            {fasesList.length > 0 &&
+              fasesList.map(fase => (
+                <article
+                  key={fase.fase_nro}
+                  onClick={() => setFaseSelected(fase.fase_nro)}
+                  className={`w-[130px] scale-90 sm:scale-100 sm:w-[150px] flex items-center gap-2 sm:gap-5 text-xs relative cursor-pointer rounded-md p-3 px-4 bg-white text-center border transition hover:opacity-90 ${
+                    faseSelected === fase.fase_nro
+                      ? 'bg-slate-800 text-white'
+                      : 'hover:bg-slate-100'
                   }`}>
-                  <FixtureActions
-                    data={fixture}
-                    setFormOpen={setOpenFixtureForm}
-                    getFixtures={getFixtures}
-                    setFixtureSelected={setFixtureSelected}
-                  />
-                </span>
-                <h2 className='capitalize text-center text-md rounded-full'>
-                  {fixture.name}
-                </h2>
-                <ul className='flex flex-1 flex-col gap-1 justify-center uppercase text-[8px]'>
-                  <li className='px-2 rounded shadow border'>
-                    {fixture.locations
-                      ? fixture.locations.name
-                      : 'Local no definido'}
-                  </li>
-                </ul>
-              </article>
-            ))}
+                  <span
+                    className={`absolute top-[50%] translate-y-[-50%] -right-5 border bg-white rounded-full overflow-hidden ${
+                      faseSelected === fase.fase_nro ? 'text-black' : ''
+                    }`}>
+                    <FaseActions
+                      data={fase}
+                      setFormOpen={setOpenFixtureForm}
+                      getFases={getFases}
+                      setFaseSelected={setFaseSelected}
+                    />
+                  </span>
+                  <h2 className='capitalize text-center text-xl rounded-full'>
+                    {fase.fase_nro}
+                  </h2>
+                  <ul className='flex flex-1 flex-col gap-1 justify-center uppercase text-[8px]'>
+                    <li className='px-2 rounded shadow border'>
+                      {fase.fases!.name}
+                    </li>
+                    <li className='px-2 rounded shadow border'>
+                      {fase.tipo_partido!.name}
+                    </li>
+                  </ul>
+                </article>
+              ))}
+          </div>
         </div>
-      </div>
 
-      {/* fixtureClient */}
-      {faseSelected && fixtureSelected && (
-        <FixtureDetailsClient
-          id={fixtureSelected.id}
-          fixtureDetails={fixtureDetails}
-        />
-      )}
+        {/* fixtures */}
+        {faseSelected && (
+          <FormModal
+            isOpen={openFixtureForm}
+            onClose={() => setOpenFixtureForm(false)}>
+            <FixtureForm
+              faseNro={faseSelected}
+              torneoId={id}
+              initialData={fixtureSelected}
+              locations={locations}
+              getFixtures={getFixtures}
+              setFixtureSelected={setFixtureSelected}
+              setOpenFixtureForm={setOpenFixtureForm}
+            />
+          </FormModal>
+        )}
+        <div className='flex flex-col gap-2 w-full sm:w-[190px] relative'>
+          <h2 className='w-full text-center px-2 rounded shadow bg-white relative'>
+            Fixtures
+            <button
+              className='rounded-full bg-white shadow-md p-1 absolute top-[50%] translate-y-[-50%] -right-2 sm:-right-4'
+              onClick={() => {
+                setFixtureSelected(undefined)
+                setOpenFixtureForm(!openFixtureForm)
+              }}>
+              <Plus />
+            </button>
+          </h2>
+          <div className='flex sm:flex-col flex-wrap sm:flex-nowrap gap-5 sm:max-h-[70vh] overflow-y-auto overflow-x-visible'>
+            {fixtures.length > 0 &&
+              fixtures.map(fixture => (
+                <article
+                  key={fixture.id}
+                  onClick={() => {
+                    setFixtureSelected(fixture)
+                    getFixtureDetails(fixture.id)
+                  }}
+                  className={`w-[130px] scale-90 sm:scale-100 sm:w-[150px] flex flex-col items-center cursor-pointer gap-1 text-xs relative rounded-md p-3 px-4 bg-white text-center border transition hover:opacity-90 ${
+                    fixtureSelected && fixtureSelected.id === fixture.id
+                      ? 'bg-slate-800 text-white'
+                      : 'hover:bg-slate-100'
+                  }`}>
+                  <span
+                    className={`absolute top-[50%] translate-y-[-50%] -right-5 border bg-white rounded-full overflow-hidden ${
+                      fixtureSelected && fixtureSelected.id === fixture.id
+                        ? 'text-black'
+                        : ''
+                    }`}>
+                    <FixtureActions
+                      data={fixture}
+                      setFormOpen={setOpenFixtureForm}
+                      getFixtures={getFixtures}
+                      setFixtureSelected={setFixtureSelected}
+                    />
+                  </span>
+                  <h2 className='capitalize text-center text-md rounded-full'>
+                    {fixture.name}
+                  </h2>
+                  <ul className='flex flex-1 flex-col gap-1 justify-center uppercase text-[8px]'>
+                    <li className='px-2 rounded shadow border'>
+                      {fixture.locations
+                        ? fixture.locations.name
+                        : 'Local no definido'}
+                    </li>
+                  </ul>
+                </article>
+              ))}
+          </div>
+        </div>
+      </article>
+
+      <article className='flex-1 h-full flex flex-col gap-10'>
+        {/* teams */}
+        {teams.length > 0 && (
+          <div className='flex flex-col gap-2 sm:w-[450px]'>
+            <h2 className='text-center px-2 rounded shadow bg-white'>
+              Equipos
+            </h2>
+            <div className='grid grid-cols-4 sm:grid-cols-5 gap-5'>
+              {teams.map(team => (
+                <div
+                  key={team.id}
+                  className='flex-1 flex flex-col jutify-center items-center'>
+                  <span className='w-10 h-10 relative'>
+                    {team.image_url && (
+                      <Image
+                        src={team.image_url}
+                        fill
+                        className='object-contain'
+                        alt='team logo'
+                      />
+                    )}
+                  </span>
+                  <h2 className='text-xs capitalize text-center text-muted-foreground'>
+                    {team.name}
+                  </h2>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* fixtureClient */}
+        {faseSelected && fixtureSelected && (
+          <FixtureDetailsClient
+            id={fixtureSelected.id}
+            fixtureDetails={fixtureDetails}
+          />
+        )}
+      </article>
     </div>
   )
 }

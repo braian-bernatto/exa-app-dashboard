@@ -22,9 +22,9 @@ const FixtureDetailsClient = ({
   const router = useRouter()
 
   return (
-    <div className='flex flex-wrap justify-center gap-5 w-full'>
+    <div className='flex flex-wrap gap-5 w-full relative sm:max-w-none max-w-[300px] overflow-hidden'>
       {fixtureDetails && (
-        <article className='flex flex-col gap-5 w-full md:w-auto'>
+        <article className='flex flex-col gap-5 w-full'>
           <Separator />
           <span className='flex flex-wrap gap-2'>
             <Button onClick={() => router.push(`fixtures/generar`)}>
