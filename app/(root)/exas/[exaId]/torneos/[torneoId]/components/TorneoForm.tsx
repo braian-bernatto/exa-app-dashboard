@@ -18,7 +18,7 @@ import uniqid from 'uniqid'
 import { toast } from 'react-hot-toast'
 import { useSupabase } from '@/providers/SupabaseProvider'
 import { useParams, useRouter } from 'next/navigation'
-import { Exas, Fases, Teams, Torneos } from '@/types'
+import { Teams, Torneos } from '@/types'
 import { AlertModal } from '@/components/modals/AlertModal'
 import PreviewImageUrl from '@/components/PreviewImageUrl'
 import {
@@ -77,17 +77,16 @@ type TorneoType = Torneos & {
 
 interface TorneoFormProps {
   initialData: TorneoType | undefined
-  exas: Exas[]
+  teams: Teams[]
 }
 
-const TorneoForm = ({ initialData, exas }: TorneoFormProps) => {
+const TorneoForm = ({ initialData, teams }: TorneoFormProps) => {
   const router = useRouter()
   const params = useParams()
 
   const { supabase } = useSupabase()
   const [loading, setLoading] = useState(false)
   const [open, setOpen] = useState(false)
-  const [teamsList, setTeamsList] = useState<Teams[]>([])
 
   const title = initialData ? 'Editar Torneo' : 'Agregar Torneo'
   const toastMessage = initialData ? 'Torneo modificado' : 'Torneo agregado'
@@ -104,33 +103,6 @@ const TorneoForm = ({ initialData, exas }: TorneoFormProps) => {
       points_defeat: 0
     }
   })
-
-  const getTeams = async (id: number) => {
-    try {
-      const { data, error } = await supabase.rpc('get_teams_by_exa_id', {
-        exa_id: id
-      })
-
-      if (error) {
-        console.log(error)
-      }
-
-      const dataWithImage = data?.map(data => {
-        if (data.image_url?.length) {
-          const { data: imageData } = supabase.storage
-            .from('teams')
-            .getPublicUrl(data.image_url!)
-          return { ...data, image_url: imageData.publicUrl }
-        }
-        return data
-      })
-
-      setTeamsList((dataWithImage as any) || [])
-    } catch (error) {
-      console.log(error)
-      return toast.error('No pudieron obtener equipos del Exa seleccionado')
-    }
-  }
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     try {
@@ -273,7 +245,7 @@ const TorneoForm = ({ initialData, exas }: TorneoFormProps) => {
       }
 
       router.refresh()
-      router.push(`/exas/${initialData?.exa_id}/torneos`)
+      router.push(`/exas/${params.exaId}/torneos`)
       toast.success(toastMessage)
     } catch (error) {
       toast.error('Hubo un error')
@@ -307,12 +279,6 @@ const TorneoForm = ({ initialData, exas }: TorneoFormProps) => {
       setOpen(false)
     }
   }
-
-  useEffect(() => {
-    if (initialData) {
-      getTeams(initialData.exa_id)
-    }
-  }, [])
 
   return (
     <>
@@ -363,78 +329,7 @@ const TorneoForm = ({ initialData, exas }: TorneoFormProps) => {
               </FormItem>
             )}
           />
-          {/* Exa */}
-          <FormField
-            control={form.control}
-            name='exa_id'
-            render={({ field }) => (
-              <FormItem className='rounded bg-white'>
-                <FormLabel>Exa</FormLabel>
-                <Popover>
-                  <PopoverTrigger asChild>
-                    <FormControl>
-                      <Button
-                        disabled={initialData ? true : false}
-                        variant='outline'
-                        role='combobox'
-                        className={cn(
-                          'w-full justify-between uppercase',
-                          !field.value && 'text-muted-foreground'
-                        )}>
-                        {field.value && exas
-                          ? exas.find(exa => exa.id === field.value)?.name
-                          : 'Elige un exa'}
-                        <ChevronsUpDown className='ml-2 h-4 w-4 shrink-0 opacity-50' />
-                      </Button>
-                    </FormControl>
-                  </PopoverTrigger>
-                  <PopoverContent className='max-w-[300px] p-0 sm:max-h-[500px] max-h-[300px] overflow-y-auto'>
-                    <Command>
-                      <CommandInput placeholder='Buscador de equipos...' />
-                      <CommandEmpty>No hay coincidencias.</CommandEmpty>
-                      <CommandGroup>
-                        {exas &&
-                          exas.map(exa => (
-                            <CommandItem
-                              value={exa.name!}
-                              key={exa.id}
-                              className='uppercase'
-                              onSelect={() => {
-                                form.setValue('exa_id', exa.id)
-                                getTeams(exa.id)
-                              }}>
-                              <>
-                                <Check
-                                  className={cn(
-                                    'mr-2 h-4 w-4',
-                                    exa.id === field.value
-                                      ? 'opacity-100'
-                                      : 'opacity-0'
-                                  )}
-                                />
-                                {exa.image_url?.length ? (
-                                  <Image
-                                    src={exa.image_url}
-                                    width={30}
-                                    height={30}
-                                    alt='exa logo'
-                                    className='mr-2'
-                                  />
-                                ) : (
-                                  <Shield className='mr-2' size={30} />
-                                )}
-                                {exa.name}
-                              </>
-                            </CommandItem>
-                          ))}
-                      </CommandGroup>
-                    </Command>
-                  </PopoverContent>
-                </Popover>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+
           {/* Teams */}
           <FormField
             control={form.control}
@@ -447,7 +342,7 @@ const TorneoForm = ({ initialData, exas }: TorneoFormProps) => {
                     Selecciona los equipos a formar parte del torneo
                   </FormDescription>
                 </div>
-                {teamsList.map(item => (
+                {teams.map(item => (
                   <FormField
                     key={item.id}
                     control={form.control}
@@ -484,6 +379,7 @@ const TorneoForm = ({ initialData, exas }: TorneoFormProps) => {
               </FormItem>
             )}
           />
+
           {/* Logo */}
           <FormField
             control={form.control}

@@ -26,7 +26,7 @@ const ExaClient = ({ data }: ExaClientProps) => {
         </Button>
       </div>
       <Separator />
-      <div className='w-full flex justify-center gap-10'>
+      <div className='w-full flex flex-wrap justify-center gap-10'>
         {data && data.map(exa => <Exa key={exa.id} data={exa} />)}
       </div>
     </>

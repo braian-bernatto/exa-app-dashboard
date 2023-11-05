@@ -20,9 +20,10 @@ interface ActionProps {
   data: any
   setFormOpen: (bool: boolean) => void
   getFases: () => void
+  setFaseSelected: (fase: any) => void
 }
 
-const FaseActions = ({ data, getFases }: ActionProps) => {
+const FaseActions = ({ data, getFases, setFaseSelected }: ActionProps) => {
   const { supabase } = useSupabase()
   const router = useRouter()
 
@@ -48,6 +49,7 @@ const FaseActions = ({ data, getFases }: ActionProps) => {
       router.refresh()
       getFases()
       toast.success('Borrado con éxito')
+      setFaseSelected(undefined)
     } catch (error) {
       toast.error('Hubo un error')
     } finally {

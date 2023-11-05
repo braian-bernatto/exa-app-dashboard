@@ -17,9 +17,9 @@ import MainNav from './MainNav'
 const Navbar = () => {
   const { user, signOut } = useAuth()
   return (
-    <div className='w-full border-b border-neutral-100'>
+    <div className='w-full border-b border-neutral-100 fixed top-0 left-0 px-8 xl:px-0 bg-white z-50 overflow-hidden'>
       {/* Container */}
-      <div className='flex items-center justify-between w-full py-6 mx-auto max-w-7xl'>
+      <div className='flex items-center justify-between w-full py-4 mx-auto max-w-7xl'>
         {/* Logo */}
         <Link href={'/'}>
           <div className='flex gap-2 items-center'>
@@ -67,8 +67,7 @@ const Navbar = () => {
               <LifeBuoy className='w-4 h-4 mr-2' />
               <a
                 href='https://wa.me/595983709234?text=Hola,%20tengo%20una%20consulta%20sobre%20ExaApp%E2%9A%BD'
-                target='_blank'
-              >
+                target='_blank'>
                 Soporte
               </a>
             </DropdownMenuItem>

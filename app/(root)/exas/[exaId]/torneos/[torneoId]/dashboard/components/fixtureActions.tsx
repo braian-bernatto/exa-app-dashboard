@@ -20,9 +20,15 @@ interface ActionProps {
   data: any
   setFormOpen: (bool: boolean) => void
   getFixtures: () => void
+  setFixtureSelected: (fixture: any) => void
 }
 
-const FixtureActions = ({ data, setFormOpen, getFixtures }: ActionProps) => {
+const FixtureActions = ({
+  data,
+  setFormOpen,
+  getFixtures,
+  setFixtureSelected
+}: ActionProps) => {
   const { supabase } = useSupabase()
   const router = useRouter()
 
@@ -46,6 +52,7 @@ const FixtureActions = ({ data, setFormOpen, getFixtures }: ActionProps) => {
       router.refresh()
       getFixtures()
       toast.success('Borrado con éxito')
+      setFixtureSelected(undefined)
     } catch (error) {
       toast.error('Hubo un error')
     } finally {

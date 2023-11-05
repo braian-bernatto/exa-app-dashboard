@@ -1,6 +1,5 @@
 'use client'
 import Image from 'next/image'
-import { Button } from '@/components/ui/button'
 import { useEffect, useState } from 'react'
 import { createClient } from '@/utils/supabaseBrowser'
 import FixtureDetailsClient from './fixtureClient'
@@ -83,14 +82,14 @@ const TorneoClient = ({
   }, [faseSelected])
 
   return (
-    <div className='flex flex-wrap gap-20 w-full'>
+    <div className='flex flex-wrap gap-10 sm:gap-20 w-full justify-center'>
       {/* teams */}
       {teams.length > 0 && (
-        <div className='flex flex-col gap-2 w-[150px]'>
+        <div className='flex flex-col gap-2 sm:w-[230px]'>
           <h2 className='w-full text-center px-2 rounded shadow bg-white'>
             Equipos
           </h2>
-          <div className='grid grid-cols-2 gap-5'>
+          <div className='grid grid-cols-4 sm:grid-cols-3 gap-5'>
             {teams.map(team => (
               <div
                 key={team.id}
@@ -115,7 +114,6 @@ const TorneoClient = ({
       )}
 
       {/* fases */}
-
       <FormModal isOpen={openFaseForm} onClose={() => setOpenFaseForm(false)}>
         <FaseForm
           faseNro={
@@ -132,55 +130,54 @@ const TorneoClient = ({
         />
       </FormModal>
 
-      {fasesList.length > 0 && (
-        <div className='flex flex-col gap-2 w-[150px]'>
-          <h2 className='w-full text-center px-2 rounded shadow bg-white relative'>
-            Fases
-            <button
-              className='rounded-full bg-white shadow-md p-1 absolute top-[50%] translate-y-[-50%] -right-4'
-              onClick={() => {
-                setOpenFaseForm(!openFaseForm)
-              }}>
-              <Plus />
-            </button>
-          </h2>
-          <div className='flex flex-col gap-5'>
-            {fasesList.length > 0 &&
-              fasesList.map(fase => (
-                <article
-                  key={fase.fase_nro}
-                  onClick={() => setFaseSelected(fase.fase_nro)}
-                  className={`flex items-center h-full gap-5 text-xs relative cursor-pointer rounded-md p-3 px-4 bg-white text-center border transition hover:opacity-90 ${
-                    faseSelected === fase.fase_nro
-                      ? 'bg-slate-800 text-white'
-                      : 'hover:bg-slate-100'
+      <div className='flex flex-col gap-2 w-full sm:w-[190px] relative'>
+        <h2 className='w-full text-center px-2 rounded shadow bg-white relative'>
+          Fases
+          <button
+            className='rounded-full bg-white shadow-md p-1 absolute top-[50%] translate-y-[-50%] -right-2 sm:-right-4'
+            onClick={() => {
+              setOpenFaseForm(!openFaseForm)
+            }}>
+            <Plus />
+          </button>
+        </h2>
+        <div className='flex sm:flex-col flex-wrap gap-5 max-h-[500px] overflow-y-auto overflow-x-visible'>
+          {fasesList.length > 0 &&
+            fasesList.map(fase => (
+              <article
+                key={fase.fase_nro}
+                onClick={() => setFaseSelected(fase.fase_nro)}
+                className={`w-[130px] scale-90 sm:scale-100 sm:w-[150px] flex items-center gap-2 sm:gap-5 text-xs relative cursor-pointer rounded-md p-3 px-4 bg-white text-center border transition hover:opacity-90 ${
+                  faseSelected === fase.fase_nro
+                    ? 'bg-slate-800 text-white'
+                    : 'hover:bg-slate-100'
+                }`}>
+                <span
+                  className={`absolute top-[50%] translate-y-[-50%] -right-5 border bg-white rounded-full overflow-hidden ${
+                    faseSelected === fase.fase_nro ? 'text-black' : ''
                   }`}>
-                  <span
-                    className={`absolute top-[50%] translate-y-[-50%] -right-5 border bg-white rounded-full overflow-hidden ${
-                      faseSelected === fase.fase_nro ? 'text-black' : ''
-                    }`}>
-                    <FaseActions
-                      data={fase}
-                      setFormOpen={setOpenFixtureForm}
-                      getFases={getFases}
-                    />
-                  </span>
-                  <h2 className='capitalize text-center text-xl rounded-full'>
-                    {fase.fase_nro}
-                  </h2>
-                  <ul className='flex flex-1 flex-col gap-1 justify-center uppercase text-[8px]'>
-                    <li className='px-2 rounded shadow border'>
-                      {fase.fases!.name}
-                    </li>
-                    <li className='px-2 rounded shadow border'>
-                      {fase.tipo_partido!.name}
-                    </li>
-                  </ul>
-                </article>
-              ))}
-          </div>
+                  <FaseActions
+                    data={fase}
+                    setFormOpen={setOpenFixtureForm}
+                    getFases={getFases}
+                    setFaseSelected={setFaseSelected}
+                  />
+                </span>
+                <h2 className='capitalize text-center text-xl rounded-full'>
+                  {fase.fase_nro}
+                </h2>
+                <ul className='flex flex-1 flex-col gap-1 justify-center uppercase text-[8px]'>
+                  <li className='px-2 rounded shadow border'>
+                    {fase.fases!.name}
+                  </li>
+                  <li className='px-2 rounded shadow border'>
+                    {fase.tipo_partido!.name}
+                  </li>
+                </ul>
+              </article>
+            ))}
         </div>
-      )}
+      </div>
 
       {/* fixtures */}
       {faseSelected && (
@@ -199,60 +196,59 @@ const TorneoClient = ({
         </FormModal>
       )}
 
-      {fixtures.length > 0 && (
-        <div className='flex flex-col gap-2 w-[150px] relative'>
-          <h2 className='w-full text-center px-2 rounded shadow bg-white relative'>
-            Fixtures
-            <button
-              className='rounded-full bg-white shadow-md p-1 absolute top-[50%] translate-y-[-50%] -right-4'
-              onClick={() => {
-                setFixtureSelected(undefined)
-                setOpenFixtureForm(!openFixtureForm)
-              }}>
-              <Plus />
-            </button>
-          </h2>
-          <div className='flex flex-col gap-5'>
-            {fixtures.length > 0 &&
-              fixtures.map(fixture => (
-                <article
-                  key={fixture.id}
-                  onClick={() => {
-                    setFixtureSelected(fixture)
-                    getFixtureDetails(fixture.id)
-                  }}
-                  className={`flex flex-col h-full cursor-pointer gap-1 text-xs relative rounded-md p-3 px-4 bg-white text-center border transition hover:opacity-90 ${
+      <div className='flex flex-col gap-2 w-full sm:w-[190px] relative'>
+        <h2 className='w-full text-center px-2 rounded shadow bg-white relative'>
+          Fixtures
+          <button
+            className='rounded-full bg-white shadow-md p-1 absolute top-[50%] translate-y-[-50%] -right-2 sm:-right-4'
+            onClick={() => {
+              setFixtureSelected(undefined)
+              setOpenFixtureForm(!openFixtureForm)
+            }}>
+            <Plus />
+          </button>
+        </h2>
+        <div className='flex sm:flex-col flex-wrap gap-5 max-h-[500px] overflow-y-auto overflow-x-visible'>
+          {fixtures.length > 0 &&
+            fixtures.map(fixture => (
+              <article
+                key={fixture.id}
+                onClick={() => {
+                  setFixtureSelected(fixture)
+                  getFixtureDetails(fixture.id)
+                }}
+                className={`w-[130px] scale-90 sm:scale-100 sm:w-[150px] flex flex-col items-center cursor-pointer gap-1 text-xs relative rounded-md p-3 px-4 bg-white text-center border transition hover:opacity-90 ${
+                  fixtureSelected && fixtureSelected.id === fixture.id
+                    ? 'bg-slate-800 text-white'
+                    : 'hover:bg-slate-100'
+                }`}>
+                <span
+                  className={`absolute top-[50%] translate-y-[-50%] -right-5 border bg-white rounded-full overflow-hidden ${
                     fixtureSelected && fixtureSelected.id === fixture.id
-                      ? 'bg-slate-800 text-white'
-                      : 'hover:bg-slate-100'
+                      ? 'text-black'
+                      : ''
                   }`}>
-                  <span
-                    className={`absolute top-[50%] translate-y-[-50%] -right-5 border bg-white rounded-full overflow-hidden ${
-                      fixtureSelected && fixtureSelected.id === fixture.id
-                        ? 'text-black'
-                        : ''
-                    }`}>
-                    <FixtureActions
-                      data={fixture}
-                      setFormOpen={setOpenFixtureForm}
-                      getFixtures={getFixtures}
-                    />
-                  </span>
-                  <h2 className='capitalize text-center text-md rounded-full'>
-                    {fixture.name}
-                  </h2>
-                  <ul className='flex flex-1 flex-col gap-1 justify-center uppercase text-[8px]'>
-                    <li className='px-2 rounded shadow border'>
-                      {fixture.locations
-                        ? fixture.locations.name
-                        : 'Local no definido'}
-                    </li>
-                  </ul>
-                </article>
-              ))}
-          </div>
+                  <FixtureActions
+                    data={fixture}
+                    setFormOpen={setOpenFixtureForm}
+                    getFixtures={getFixtures}
+                    setFixtureSelected={setFixtureSelected}
+                  />
+                </span>
+                <h2 className='capitalize text-center text-md rounded-full'>
+                  {fixture.name}
+                </h2>
+                <ul className='flex flex-1 flex-col gap-1 justify-center uppercase text-[8px]'>
+                  <li className='px-2 rounded shadow border'>
+                    {fixture.locations
+                      ? fixture.locations.name
+                      : 'Local no definido'}
+                  </li>
+                </ul>
+              </article>
+            ))}
         </div>
-      )}
+      </div>
 
       {/* fixtureClient */}
       {faseSelected && fixtureSelected && (
