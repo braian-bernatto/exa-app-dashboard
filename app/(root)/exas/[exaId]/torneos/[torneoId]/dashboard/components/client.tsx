@@ -141,7 +141,7 @@ const TorneoClient = ({
             <Plus />
           </button>
         </h2>
-        <div className='flex sm:flex-col flex-wrap gap-5 max-h-[500px] overflow-y-auto overflow-x-visible'>
+        <div className='flex sm:flex-col flex-wrap sm:flex-nowrap gap-5 max-h-[300px] overflow-y-auto overflow-x-visible'>
           {fasesList.length > 0 &&
             fasesList.map(fase => (
               <article
@@ -208,7 +208,7 @@ const TorneoClient = ({
             <Plus />
           </button>
         </h2>
-        <div className='flex sm:flex-col flex-wrap gap-5 max-h-[500px] overflow-y-auto overflow-x-visible'>
+        <div className='flex sm:flex-col flex-wrap sm:flex-nowrap gap-5 max-h-[300px] overflow-y-auto overflow-x-visible'>
           {fixtures.length > 0 &&
             fixtures.map(fixture => (
               <article
