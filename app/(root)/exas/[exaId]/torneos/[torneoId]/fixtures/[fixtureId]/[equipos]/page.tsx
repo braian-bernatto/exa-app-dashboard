@@ -1,7 +1,7 @@
-import FixtureTeamsForm from '@/app/(root)/fixtures/[fixtureId]/[equipos]/components/FixtureTeamsForm'
 import { createClient } from '@/utils/supabaseServer'
 import getPlayersByExa from '@/actions/getPlayersByExa'
 import getTeamsByTorneo from '@/actions/getTeamsByTorneo'
+import FixtureTeamsForm from './components/FixtureTeamsForm'
 
 export const revalidate = 0
 
@@ -23,7 +23,7 @@ const FixutrePage = async ({
 
   if (error) {
     console.log(error)
-    return <p>Hubo un error en el servidor</p>
+    return <p>Hubo un error en el servidor tembo</p>
   }
 
   const teams = await getTeamsByTorneo(fixture.torneo_id)

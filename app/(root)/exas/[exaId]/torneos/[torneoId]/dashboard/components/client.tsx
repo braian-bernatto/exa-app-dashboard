@@ -152,10 +152,13 @@ const TorneoClient = ({
                   onClick={() => setFaseSelected(fase.fase_nro)}
                   className={`flex items-center h-full gap-5 text-xs relative cursor-pointer rounded-md p-3 px-4 bg-white text-center border transition hover:opacity-90 ${
                     faseSelected === fase.fase_nro
-                      ? 'bg-slate-900 text-white'
+                      ? 'bg-slate-800 text-white'
                       : 'hover:bg-slate-100'
                   }`}>
-                  <span className='absolute top-[50%] translate-y-[-50%] -right-7 border bg-white rounded-full overflow-hidden'>
+                  <span
+                    className={`absolute top-[50%] translate-y-[-50%] -right-5 border bg-white rounded-full overflow-hidden ${
+                      faseSelected === fase.fase_nro ? 'text-black' : ''
+                    }`}>
                     <FaseActions
                       data={fase}
                       setFormOpen={setOpenFixtureForm}
@@ -220,10 +223,15 @@ const TorneoClient = ({
                   }}
                   className={`flex flex-col h-full cursor-pointer gap-1 text-xs relative rounded-md p-3 px-4 bg-white text-center border transition hover:opacity-90 ${
                     fixtureSelected && fixtureSelected.id === fixture.id
-                      ? 'bg-slate-900 text-white'
+                      ? 'bg-slate-800 text-white'
                       : 'hover:bg-slate-100'
                   }`}>
-                  <span className='absolute top-0 right-0'>
+                  <span
+                    className={`absolute top-[50%] translate-y-[-50%] -right-5 border bg-white rounded-full overflow-hidden ${
+                      fixtureSelected && fixtureSelected.id === fixture.id
+                        ? 'text-black'
+                        : ''
+                    }`}>
                     <FixtureActions
                       data={fixture}
                       setFormOpen={setOpenFixtureForm}
@@ -247,7 +255,12 @@ const TorneoClient = ({
       )}
 
       {/* fixtureClient */}
-      {faseSelected && <FixtureDetailsClient fixtureDetails={fixtureDetails} />}
+      {faseSelected && fixtureSelected && (
+        <FixtureDetailsClient
+          id={fixtureSelected.id}
+          fixtureDetails={fixtureDetails}
+        />
+      )}
     </div>
   )
 }

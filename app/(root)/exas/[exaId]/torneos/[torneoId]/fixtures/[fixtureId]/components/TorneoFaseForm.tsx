@@ -1,6 +1,6 @@
 'use client'
 import { useSupabase } from '@/providers/SupabaseProvider'
-import { Fases, Locations, TiposPartido, TorneoFase, Torneos } from '@/types'
+import { Fases, TiposPartido, TorneoFase, Torneos } from '@/types'
 import { useEffect, useState } from 'react'
 import { useForm } from 'react-hook-form'
 import * as z from 'zod'
@@ -23,25 +23,27 @@ import {
   Swords,
   Trash
 } from 'lucide-react'
-import { Input } from '../../../../../components/ui/input'
-import { Button } from '../../../../../components/ui/button'
+
+import { cn } from '@/lib/utils'
+
+import Image from 'next/image'
+import { toast } from 'react-hot-toast'
+import { AlertModal } from '@/components/modals/AlertModal'
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
 import {
   Popover,
   PopoverContent,
   PopoverTrigger
-} from '../../../../../components/ui/popover'
-import { cn } from '@/lib/utils'
+} from '@/components/ui/popover'
 import {
   Command,
   CommandEmpty,
   CommandGroup,
   CommandInput,
   CommandItem
-} from '../../../../../components/ui/command'
-import Image from 'next/image'
-import { toast } from 'react-hot-toast'
-import { AlertModal } from '@/components/modals/AlertModal'
-import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
+} from '@/components/ui/command'
 
 export const revalidate = 0
 
@@ -116,55 +118,55 @@ const TorneoFaseForm = ({
       }
 
       // fixture
-      if (initialData) {
-        const { error } = await supabase
-          .from('fixtures')
-          .update({})
-          .eq('id', params.fixtureId)
+      // if (initialData) {
+      //   const { error } = await supabase
+      //     .from('fixtures')
+      //     .update({})
+      //     .eq('id', params.fixtureId)
 
-        if (error) {
-          console.log(error)
-          setLoading(false)
-          return toast.error(`No se pudo ${action}`)
-        }
+      //   if (error) {
+      //     console.log(error)
+      //     setLoading(false)
+      //     return toast.error(`No se pudo ${action}`)
+      //   }
 
-        const { error: torneoFaseError } = await supabase
-          .from('torneo_fase')
-          .update({ tipo_partido_id })
-          .eq('torneo_id', torneo_id)
-          .eq('fase_id', fase_id)
+      //   const { error: torneoFaseError } = await supabase
+      //     .from('torneo_fase')
+      //     .update({ tipo_partido_id })
+      //     .eq('torneo_id', torneo_id)
+      //     .eq('fase_id', fase_id)
 
-        if (torneoFaseError) {
-          console.log(torneoFaseError)
-          setLoading(false)
-          return toast.error(`No se pudo ${action} tipo partido`)
-        }
-      } else {
-        const { error } = await supabase.from('fixtures').insert({
-          name: name.toLowerCase(),
-          torneo_id,
-          fase_id,
-          location_id
-        })
+      //   if (torneoFaseError) {
+      //     console.log(torneoFaseError)
+      //     setLoading(false)
+      //     return toast.error(`No se pudo ${action} tipo partido`)
+      //   }
+      // } else {
+      //   // const { error } = await supabase.from('fixtures').insert({
+      //   //   name: name.toLowerCase(),
+      //   //   torneo_id,
+      //   //   fase_id,
+      //   //   location_id
+      //   // })
 
-        if (error) {
-          console.log(error)
-          setLoading(false)
-          return toast.error(`No se pudo ${action}`)
-        }
+      //   if (error) {
+      //     console.log(error)
+      //     setLoading(false)
+      //     return toast.error(`No se pudo ${action}`)
+      //   }
 
-        const { error: torneoFaseError } = await supabase
-          .from('torneo_fase')
-          .update({ tipo_partido_id })
-          .eq('torneo_id', torneo_id)
-          .eq('fase_id', fase_id)
+      //   const { error: torneoFaseError } = await supabase
+      //     .from('torneo_fase')
+      //     .update({ tipo_partido_id })
+      //     .eq('torneo_id', torneo_id)
+      //     .eq('fase_id', fase_id)
 
-        if (torneoFaseError) {
-          console.log(torneoFaseError)
-          setLoading(false)
-          return toast.error(`No se pudo ${action} tipo partido`)
-        }
-      }
+      //   if (torneoFaseError) {
+      //     console.log(torneoFaseError)
+      //     setLoading(false)
+      //     return toast.error(`No se pudo ${action} tipo partido`)
+      //   }
+      // }
 
       router.refresh()
       router.push('/fixtures')

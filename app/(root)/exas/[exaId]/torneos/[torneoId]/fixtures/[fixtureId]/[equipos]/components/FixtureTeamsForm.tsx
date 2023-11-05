@@ -25,34 +25,37 @@ import {
   Swords,
   Trash
 } from 'lucide-react'
-import { Input } from '../../../../../../components/ui/input'
-import { Button } from '../../../../../../components/ui/button'
+
+import { cn } from '@/lib/utils'
+
+import { format, set, subDays } from 'date-fns'
+import { es } from 'date-fns/esm/locale'
+
+import Image from 'next/image'
+import { DataTable } from './DataTable'
+import { toast } from 'react-hot-toast'
+import { AlertModal } from '@/components/modals/AlertModal'
+import Spinner from '@/components/Spinner'
+import { Switch } from '@/components/ui/switch'
+import { Label } from '@/components/ui/label'
+import { Button } from '@/components/ui/button'
 import {
   Popover,
   PopoverContent,
   PopoverTrigger
-} from '../../../../../../components/ui/popover'
-import { cn } from '@/lib/utils'
-import { Calendar } from '../../../../../../components/ui/calendar'
-import { format, set, subDays } from 'date-fns'
-import { es } from 'date-fns/esm/locale'
+} from '@/components/ui/popover'
 import {
   Command,
   CommandEmpty,
   CommandGroup,
   CommandInput,
   CommandItem
-} from '../../../../../../components/ui/command'
-import Image from 'next/image'
-import { DataTable } from './DataTable'
-import { Columns } from '@/app/(root)/fixtures/[fixtureId]/[equipos]/components/Columns'
-import { Separator } from '../../../../../../components/ui/separator'
-import { Toggle } from '../../../../../../components/ui/toggle'
-import { toast } from 'react-hot-toast'
-import { AlertModal } from '@/components/modals/AlertModal'
-import Spinner from '@/components/Spinner'
-import { Switch } from '@/components/ui/switch'
-import { Label } from '@/components/ui/label'
+} from '@/components/ui/command'
+import { Input } from '@/components/ui/input'
+import { Calendar } from '@/components/ui/calendar'
+import { Separator } from '@/components/ui/separator'
+import { Toggle } from '@/components/ui/toggle'
+import { Columns } from './Columns'
 
 interface FixtureTeamsFormProps {
   initialData:

@@ -2,8 +2,8 @@
 
 import { Button } from '@/components/ui/button'
 import { Separator } from '@/components/ui/separator'
-import { Plus } from 'lucide-react'
-import { useParams, useRouter } from 'next/navigation'
+import { Plus, Shuffle } from 'lucide-react'
+import { useRouter } from 'next/navigation'
 import { DataTable } from '@/components/ui/data-table'
 import { columns } from './columns'
 import { GetFixturesTeams } from '@/types'
@@ -11,28 +11,29 @@ import { GetFixturesTeams } from '@/types'
 export const revalidate = 0
 
 interface FixtureDetailsClientProps {
+  id: string
   fixtureDetails: GetFixturesTeams
 }
 
 const FixtureDetailsClient = ({
+  id,
   fixtureDetails
 }: FixtureDetailsClientProps) => {
   const router = useRouter()
-  const params = useParams()
 
   return (
     <div className='flex flex-wrap justify-center gap-5 w-full'>
       {fixtureDetails && (
         <article className='flex flex-col gap-5 w-full md:w-auto'>
           <Separator />
-          <div className='flex items-center justify-end'>
-            <Button
-              onClick={() =>
-                router.push(`/fixtures/${params.fixtureId}/agregar`)
-              }>
+          <span className='flex flex-wrap gap-2'>
+            <Button onClick={() => router.push(`fixtures/generar`)}>
+              <Shuffle className='mr-2 h-4 w-4' /> Generar
+            </Button>
+            <Button onClick={() => router.push(`fixtures/${id}/agregar`)}>
               <Plus className='mr-2 h-4 w-4' /> Agregar Versus
             </Button>
-          </div>
+          </span>
           <DataTable
             columns={columns}
             data={fixtureDetails || []}

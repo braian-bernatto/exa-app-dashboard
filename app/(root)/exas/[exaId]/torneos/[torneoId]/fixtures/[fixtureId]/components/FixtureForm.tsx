@@ -23,25 +23,26 @@ import {
   Swords,
   Trash
 } from 'lucide-react'
-import { Input } from '../../../../../components/ui/input'
-import { Button } from '../../../../../components/ui/button'
+import { cn } from '@/lib/utils'
+
+import Image from 'next/image'
+import { toast } from 'react-hot-toast'
+import { AlertModal } from '@/components/modals/AlertModal'
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
 import {
   Popover,
   PopoverContent,
   PopoverTrigger
-} from '../../../../../components/ui/popover'
-import { cn } from '@/lib/utils'
+} from '@/components/ui/popover'
 import {
   Command,
   CommandEmpty,
   CommandGroup,
   CommandInput,
   CommandItem
-} from '../../../../../components/ui/command'
-import Image from 'next/image'
-import { toast } from 'react-hot-toast'
-import { AlertModal } from '@/components/modals/AlertModal'
-import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
+} from '@/components/ui/command'
 
 export const revalidate = 0
 

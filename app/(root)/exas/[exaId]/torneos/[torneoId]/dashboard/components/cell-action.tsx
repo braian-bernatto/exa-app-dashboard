@@ -1,4 +1,4 @@
-import { Copy, Edit, MoreHorizontal, Trash } from 'lucide-react'
+import { Edit, MoreHorizontal, Trash } from 'lucide-react'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -24,11 +24,6 @@ const CellAction = ({ data }: CellActionProps) => {
   const [open, setOpen] = useState(false)
   const { supabase } = useSupabase()
   const router = useRouter()
-
-  const onCopy = () => {
-    navigator.clipboard.writeText(data.fixture_id.toString())
-    toast.success('ID copiado en el portapapeles')
-  }
 
   const onDelete = async () => {
     try {
@@ -73,14 +68,10 @@ const CellAction = ({ data }: CellActionProps) => {
         <DropdownMenuContent align='end'>
           <DropdownMenuLabel>Acciones</DropdownMenuLabel>
           <DropdownMenuSeparator />
-          <DropdownMenuItem onClick={onCopy}>
-            <Copy className='mr-2 h-4 w-4' />
-            Copiar ID
-          </DropdownMenuItem>
           <DropdownMenuItem
             onClick={() =>
               router.push(
-                `/fixtures/${data.fixture_id}/${data.team_local}-vs-${data.team_visit}`
+                `fixtures/${data.fixture_id}/${data.team_local}-vs-${data.team_visit}`
               )
             }>
             <Edit className='mr-2 h-4 w-4' /> Editar

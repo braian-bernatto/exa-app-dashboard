@@ -23,20 +23,8 @@ import {
   Swords,
   Trash
 } from 'lucide-react'
-import { Button } from '../../../../../components/ui/button'
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger
-} from '../../../../../components/ui/popover'
 import { cn } from '@/lib/utils'
-import {
-  Command,
-  CommandEmpty,
-  CommandGroup,
-  CommandInput,
-  CommandItem
-} from '../../../../../components/ui/command'
+
 import Image from 'next/image'
 import { toast } from 'react-hot-toast'
 import { AlertModal } from '@/components/modals/AlertModal'
@@ -44,6 +32,19 @@ import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
 import getTeamsByTorneoClient from '@/actions/getTeamsByTorneoClient'
 import { shuffle } from '@/utils/shuffle'
 import { generarFixtureTodosContraTodos } from '@/utils/generateFixture'
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger
+} from '@/components/ui/popover'
+import { Button } from '@/components/ui/button'
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem
+} from '@/components/ui/command'
 
 export const revalidate = 0
 
