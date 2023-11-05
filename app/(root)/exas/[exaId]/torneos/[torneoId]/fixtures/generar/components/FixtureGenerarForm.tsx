@@ -29,8 +29,6 @@ import Image from 'next/image'
 import { toast } from 'react-hot-toast'
 import { AlertModal } from '@/components/modals/AlertModal'
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
-import getTeamsByTorneoClient from '@/actions/getTeamsByTorneoClient'
-import { shuffle } from '@/utils/shuffle'
 import { generarFixtureTodosContraTodos } from '@/utils/generateFixture'
 import {
   Popover,
@@ -411,7 +409,7 @@ const FixtureGenerarForm = ({
 
           {/* fixtures puntos */}
           {faseSelected === 'puntos' && fixtures && (
-            <article className='flex-1 flex flex-wrap  w-[280px] max-h-[800px] items-center justify-center overflow-y-auto sm:p-2 sm:pb-7'>
+            <article className='flex-1 flex flex-wrap w-[280px] max-h-[800px] items-center justify-center overflow-y-auto sm:p-2 sm:pb-7'>
               {fixtures.ida.map((teams: any, index: number) => (
                 <div
                   key={`ida-${index}`}
