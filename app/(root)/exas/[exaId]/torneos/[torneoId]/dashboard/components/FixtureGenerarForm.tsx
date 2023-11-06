@@ -14,7 +14,7 @@ import {
   FormMessage
 } from '@/components/ui/form'
 import { useParams, useRouter } from 'next/navigation'
-import { Check, ChevronsUpDownIcon, MapPin, Swords } from 'lucide-react'
+import { Check, ChevronsUpDownIcon, MapPin, Swords, X } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
 import Image from 'next/image'
@@ -45,13 +45,15 @@ interface FixtureGenerarFormProps {
   fases: Fases[] | []
   tiposPartido: TiposPartido[] | []
   locations: Locations[]
+  setOpenFixtureGenerarForm: (bool: boolean) => void
 }
 
 const FixtureGenerarForm = ({
   teams,
   fases,
   tiposPartido,
-  locations
+  locations,
+  setOpenFixtureGenerarForm
 }: FixtureGenerarFormProps) => {
   const router = useRouter()
   const params = useParams()
@@ -240,7 +242,7 @@ const FixtureGenerarForm = ({
       <Form {...form}>
         <form
           onSubmit={form.handleSubmit(onSubmit)}
-          className='flex flex-wrap rounded bg-white py-3 px-4 shadow gap-10 z-40 w-full border'>
+          className='flex flex-wrap rounded bg-white py-3 px-4 shadow gap-10 z-40 w-full border relative'>
           {/* select */}
           <article className='w-[280px] flex flex-col gap-5 sm:border-r p-2 sm:pr-7'>
             <div className='flex gap-2'>
@@ -682,11 +684,21 @@ const FixtureGenerarForm = ({
           )}
 
           {/* boton */}
-          <div className='sm:col-span-2 w-full flex justify-center'>
+          <div className='sm:col-span-2 w-full flex justify-center gap-5 sm:gap-10'>
+            <Button
+              type='button'
+              variant={'ghost'}
+              disabled={loading}
+              className='flex-1'
+              onClick={() => {
+                setOpenFixtureGenerarForm(false)
+              }}>
+              Cancelar
+            </Button>
             <Button
               type='submit'
               variant={'default'}
-              className='w-full'
+              className='flex-1'
               disabled={loading}>
               {action}
             </Button>

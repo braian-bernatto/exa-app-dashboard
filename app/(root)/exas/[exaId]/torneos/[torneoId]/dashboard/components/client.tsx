@@ -288,7 +288,7 @@ const TorneoClient = ({
         {openFixtureGenerarForm && (
           <div className={`fixed top-0 left-0 w-full h-full z-50 p-5`}>
             <div className='absolute z-20 top-0 left-0 w-full h-full bg-white opacity-95'></div>
-            <div className='flex flex-col gap-5 items-center z-40 w-full h-full sm:max-w-[1200px] mx-auto overflow-y-auto'>
+            <div className='flex flex-col gap-5 items-center z-40 w-full h-full sm:max-w-[1200px] mx-auto overflow-y-auto xl:justify-center'>
               <button
                 className='rounded-full bg-white shadow-md p-1 absolute z-50 border top-[10px] sm:top-[50px] right-[10px] sm:right-[100px]'
                 onClick={() => {
@@ -301,6 +301,7 @@ const TorneoClient = ({
                 fases={fases || []}
                 tiposPartido={tiposPartido || []}
                 locations={locations}
+                setOpenFixtureGenerarForm={setOpenFixtureGenerarForm}
               />
             </div>
           </div>
