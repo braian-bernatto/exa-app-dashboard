@@ -14,6 +14,7 @@ import FaseActions from './faseActions'
 import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
 import { useRouter } from 'next/navigation'
+import { useStore } from '@/hooks/store'
 
 export const revalidate = 0
 
@@ -123,6 +124,12 @@ const TorneoClient = ({
                   onClick={() => {
                     setFaseSelected(fase.fase_nro)
                     setFixtureSelected(undefined)
+
+                    // Guardo en zustand para usar en generar fixture
+                    useStore.setState({
+                      fase: fase.fase_id,
+                      tipoPartido: fase.tipo_partido_id
+                    })
                   }}
                   className={cn`w-[130px] scale-90 sm:scale-100 sm:w-[150px] flex items-center gap-2 sm:gap-5 text-xs relative cursor-pointer rounded-md p-3 px-4 bg-white text-center border transition hover:opacity-90 ${
                     faseSelected === fase.fase_nro

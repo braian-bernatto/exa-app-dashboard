@@ -43,6 +43,7 @@ import {
   CommandInput,
   CommandItem
 } from '@/components/ui/command'
+import { useStore } from '@/hooks/store'
 
 export const revalidate = 0
 
@@ -65,6 +66,12 @@ const FixtureGenerarForm = ({
   const { supabase } = useSupabase()
   const [loading, setLoading] = useState(false)
   const [open, setOpen] = useState(false)
+  const [faseId, setFaseId] = useState<number | undefined>(
+    useStore.getState().fase
+  )
+  const [tipoPartidoId, setTipoPartidoId] = useState(
+    useStore.getState().tipoPartido
+  )
   const [faseNro, setFaseNro] = useState<number | null>()
   const [faseSelected, setFaseSelected] = useState('')
   const [tipoPartidoSelected, setTipoPartidoSelected] = useState('')
@@ -96,8 +103,8 @@ const FixtureGenerarForm = ({
     defaultValues: {
       name: '',
       torneo_id: undefined,
-      fase_id: undefined,
-      tipo_partido_id: undefined,
+      fase_id: faseId,
+      tipo_partido_id: tipoPartidoId,
       location_id: undefined
     }
   })
@@ -211,14 +218,15 @@ const FixtureGenerarForm = ({
   }
 
   useEffect(() => {
-    if (faseSelected === 'puntos' && teams.length > 0 && tipoPartidoSelected) {
-      const fixtures = generarFixtureTodosContraTodos(
-        teams,
-        tipoPartidoSelected
-      )
-      setFixtures(fixtures)
-    }
-  }, [teams, faseSelected, tipoPartidoSelected])
+    const fase = fases.find(tipo => tipo.id === useStore.getState().fase).name
+    const tipoPartido = tiposPartido.find(
+      tipo => tipo.id === useStore.getState().tipoPartido
+    ).name
+    const fixtures = generarFixtureTodosContraTodos(teams, tipoPartido)
+    setFaseSelected(fase)
+    setTipoPartidoSelected(tipoPartido)
+    setFixtures(fixtures)
+  }, [])
 
   return (
     <>
@@ -236,11 +244,7 @@ const FixtureGenerarForm = ({
           <article className='w-[280px] flex flex-col gap-5 sm:border-r p-2 sm:pr-7'>
             <div className='flex gap-2'>
               <span className='bg-gradient-to-r from-emerald-300 to-emerald-700 rounded-full p-2 flex items-center justify-center'>
-                <Swords
-                  className='text-white'
-                  size={30}
-                  onClick={() => console.log(form.getValues())}
-                />
+                <Swords className='text-white' size={30} />
               </span>
               <h1 className='text-xl font-semibold flex items-center gap-2'>
                 {title}
@@ -256,6 +260,7 @@ const FixtureGenerarForm = ({
                   <FormLabel>Fase</FormLabel>
                   <FormControl>
                     <RadioGroup
+                      // disabled={true}
                       onValueChange={field.onChange}
                       defaultValue={`${field.value}`}
                       className='flex flex-col space-y-1'>
@@ -292,6 +297,7 @@ const FixtureGenerarForm = ({
                   <FormLabel>Tipo Partido</FormLabel>
                   <FormControl>
                     <RadioGroup
+                      // disabled={true}
                       onValueChange={field.onChange}
                       defaultValue={`${field.value}`}
                       className='flex flex-col space-y-1'>
