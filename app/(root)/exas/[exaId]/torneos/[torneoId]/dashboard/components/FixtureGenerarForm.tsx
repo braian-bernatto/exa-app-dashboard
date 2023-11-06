@@ -244,8 +244,8 @@ const FixtureGenerarForm = ({
           onSubmit={form.handleSubmit(onSubmit)}
           className='flex flex-wrap rounded bg-white py-3 px-4 shadow gap-10 z-40 w-full border relative'>
           {/* select */}
-          <article className='w-[280px] flex flex-col gap-5 sm:border-r p-2 sm:pr-7'>
-            <div className='flex gap-2'>
+          <article className='w-full sm:w-[280px] flex flex-col gap-5 sm:border-r p-2 sm:pr-7'>
+            <div className='flex gap-2 items-center'>
               <span className='bg-gradient-to-r from-emerald-300 to-emerald-700 rounded-full p-2 flex items-center justify-center'>
                 <Swords className='text-white' size={30} />
               </span>
@@ -254,79 +254,81 @@ const FixtureGenerarForm = ({
               </h1>
             </div>
 
-            {/* fases */}
-            <FormField
-              control={form.control}
-              name='fase_id'
-              render={({ field }) => (
-                <FormItem className='space-y-3'>
-                  <FormLabel>Fase</FormLabel>
-                  <FormControl>
-                    <RadioGroup
-                      disabled={true}
-                      onValueChange={field.onChange}
-                      defaultValue={`${field.value}`}
-                      className='flex flex-col space-y-1'>
-                      {fases.map(fase => (
-                        <FormItem
-                          key={fase.id}
-                          className='flex items-center space-x-3 space-y-0'>
-                          <FormControl>
-                            <RadioGroupItem
-                              onClick={() => {
-                                setFaseSelected(fase.name)
-                              }}
-                              value={fase.id.toString()}
-                            />
-                          </FormControl>
-                          <FormLabel className='font-normal'>
-                            {fase.name}
-                          </FormLabel>
-                        </FormItem>
-                      ))}
-                    </RadioGroup>
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+            <div className='w-full flex-wrap flex gap-5'>
+              {/* fases */}
+              <FormField
+                control={form.control}
+                name='fase_id'
+                render={({ field }) => (
+                  <FormItem className='space-y-3'>
+                    <FormLabel>Fase</FormLabel>
+                    <FormControl>
+                      <RadioGroup
+                        disabled={true}
+                        onValueChange={field.onChange}
+                        defaultValue={`${field.value}`}
+                        className='flex flex-col space-y-1'>
+                        {fases.map(fase => (
+                          <FormItem
+                            key={fase.id}
+                            className='flex items-center space-x-3 space-y-0'>
+                            <FormControl>
+                              <RadioGroupItem
+                                onClick={() => {
+                                  setFaseSelected(fase.name)
+                                }}
+                                value={fase.id.toString()}
+                              />
+                            </FormControl>
+                            <FormLabel className='font-normal'>
+                              {fase.name}
+                            </FormLabel>
+                          </FormItem>
+                        ))}
+                      </RadioGroup>
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
 
-            {/* tipo partido */}
-            <FormField
-              control={form.control}
-              name='tipo_partido_id'
-              render={({ field }) => (
-                <FormItem className='space-y-3'>
-                  <FormLabel>Tipo Partido</FormLabel>
-                  <FormControl>
-                    <RadioGroup
-                      disabled={true}
-                      onValueChange={field.onChange}
-                      defaultValue={`${field.value}`}
-                      className='flex flex-col space-y-1'>
-                      {tiposPartido.map(tipo => (
-                        <FormItem
-                          key={tipo.id}
-                          className='flex items-center space-x-3 space-y-0'>
-                          <FormControl>
-                            <RadioGroupItem
-                              onClick={() => {
-                                setTipoPartidoSelected(tipo.name)
-                              }}
-                              value={tipo.id.toString()}
-                            />
-                          </FormControl>
-                          <FormLabel className='font-normal'>
-                            {tipo.name}
-                          </FormLabel>
-                        </FormItem>
-                      ))}
-                    </RadioGroup>
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+              {/* tipo partido */}
+              <FormField
+                control={form.control}
+                name='tipo_partido_id'
+                render={({ field }) => (
+                  <FormItem className='space-y-3'>
+                    <FormLabel>Tipo Partido</FormLabel>
+                    <FormControl>
+                      <RadioGroup
+                        disabled={true}
+                        onValueChange={field.onChange}
+                        defaultValue={`${field.value}`}
+                        className='flex flex-col space-y-1'>
+                        {tiposPartido.map(tipo => (
+                          <FormItem
+                            key={tipo.id}
+                            className='flex items-center space-x-3 space-y-0'>
+                            <FormControl>
+                              <RadioGroupItem
+                                onClick={() => {
+                                  setTipoPartidoSelected(tipo.name)
+                                }}
+                                value={tipo.id.toString()}
+                              />
+                            </FormControl>
+                            <FormLabel className='font-normal'>
+                              {tipo.name}
+                            </FormLabel>
+                          </FormItem>
+                        ))}
+                      </RadioGroup>
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
 
             {/* Location */}
             <FormField
