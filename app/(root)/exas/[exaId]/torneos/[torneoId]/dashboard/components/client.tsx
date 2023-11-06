@@ -238,7 +238,9 @@ const TorneoClient = ({
                 </article>
               ))
             ) : (
-              <Button onClick={() => setOpenFixtureGenerarForm(true)}>
+              <Button
+                className='w-full'
+                onClick={() => setOpenFixtureGenerarForm(true)}>
                 <Shuffle className='mr-2 h-4 w-4' /> Generar
               </Button>
             )}
