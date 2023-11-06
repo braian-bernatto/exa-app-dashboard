@@ -19,7 +19,7 @@ const Navbar = () => {
   return (
     <div className='w-full border-b border-neutral-100 fixed top-0 left-0 px-8 xl:px-0 bg-white z-50 overflow-hidden'>
       {/* Container */}
-      <div className='flex items-center justify-between w-full py-4 mx-auto max-w-7xl'>
+      <div className='flex items-center justify-between w-full py-2 mx-auto max-w-7xl'>
         {/* Logo */}
         <Link href={'/'}>
           <div className='flex gap-2 items-center'>
