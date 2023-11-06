@@ -242,7 +242,7 @@ const FixtureGenerarForm = ({
       <Form {...form}>
         <form
           onSubmit={form.handleSubmit(onSubmit)}
-          className='flex flex-wrap rounded bg-white py-3 px-4 shadow gap-10 z-40 w-full border relative'>
+          className='flex flex-wrap rounded py-3 px-4 gap-10 z-40 w-full'>
           {/* select */}
           <article className='w-full sm:w-[280px] flex flex-col gap-5 sm:border-r p-2 sm:pr-7'>
             <div className='flex gap-2 items-center'>
