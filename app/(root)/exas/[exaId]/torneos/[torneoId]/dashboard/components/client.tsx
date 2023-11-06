@@ -5,13 +5,15 @@ import { createClient } from '@/utils/supabaseBrowser'
 import FixtureDetailsClient from './fixtureClient'
 import { Fases, Fixtures, Locations, TiposPartido } from '@/types'
 import FixtureForm from './FixtureForm'
-import { Plus } from 'lucide-react'
+import { Plus, Shuffle } from 'lucide-react'
 import { FormModal } from '@/components/modals/FormModal'
 import FixtureActions from './fixtureActions'
 import FaseForm from './FaseForm'
 import { getTorneoFasesClient } from '@/actions/getTorneoFasesClient'
 import FaseActions from './faseActions'
 import { cn } from '@/lib/utils'
+import { Button } from '@/components/ui/button'
+import { useRouter } from 'next/navigation'
 
 export const revalidate = 0
 
@@ -32,6 +34,7 @@ const TorneoClient = ({
   fases,
   tiposPartido
 }: TorneoClientProps) => {
+  const router = useRouter()
   const supabase = createClient()
   const [faseSelected, setFaseSelected] = useState()
   const [fasesList, setFasesList] = useState<any[]>(torneoFases)
@@ -117,7 +120,10 @@ const TorneoClient = ({
               fasesList.map(fase => (
                 <article
                   key={fase.fase_nro}
-                  onClick={() => setFaseSelected(fase.fase_nro)}
+                  onClick={() => {
+                    setFaseSelected(fase.fase_nro)
+                    setFixtureSelected(undefined)
+                  }}
                   className={cn`w-[130px] scale-90 sm:scale-100 sm:w-[150px] flex items-center gap-2 sm:gap-5 text-xs relative cursor-pointer rounded-md p-3 px-4 bg-white text-center border transition hover:opacity-90 ${
                     faseSelected === fase.fase_nro
                       ? 'bg-slate-800 text-white'
@@ -179,7 +185,7 @@ const TorneoClient = ({
             </button>
           </h2>
           <div className='flex sm:flex-col flex-wrap sm:flex-nowrap gap-5 sm:max-h-[70vh] overflow-y-auto overflow-x-visible'>
-            {fixtures.length > 0 &&
+            {fixtures.length > 0 ? (
               fixtures.map(fixture => (
                 <article
                   key={fixture.id}
@@ -216,7 +222,12 @@ const TorneoClient = ({
                     </li>
                   </ul>
                 </article>
-              ))}
+              ))
+            ) : (
+              <Button onClick={() => router.push(`fixtures/generar`)}>
+                <Shuffle className='mr-2 h-4 w-4' /> Generar
+              </Button>
+            )}
           </div>
         </div>
       </article>

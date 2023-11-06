@@ -2,7 +2,7 @@
 
 import { Button } from '@/components/ui/button'
 import { Separator } from '@/components/ui/separator'
-import { Plus, Shuffle } from 'lucide-react'
+import { Plus } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import { DataTable } from '@/components/ui/data-table'
 import { columns } from './columns'
@@ -27,9 +27,6 @@ const FixtureDetailsClient = ({
         <article className='flex flex-col gap-5 w-full'>
           <Separator />
           <span className='flex flex-wrap gap-2'>
-            <Button onClick={() => router.push(`fixtures/generar`)}>
-              <Shuffle className='mr-2 h-4 w-4' /> Generar
-            </Button>
             <Button onClick={() => router.push(`fixtures/${id}/agregar`)}>
               <Plus className='mr-2 h-4 w-4' /> Agregar Versus
             </Button>
