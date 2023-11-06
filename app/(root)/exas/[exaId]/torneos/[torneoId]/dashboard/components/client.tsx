@@ -11,6 +11,7 @@ import FixtureActions from './fixtureActions'
 import FaseForm from './FaseForm'
 import { getTorneoFasesClient } from '@/actions/getTorneoFasesClient'
 import FaseActions from './faseActions'
+import { cn } from '@/lib/utils'
 
 export const revalidate = 0
 
@@ -117,7 +118,7 @@ const TorneoClient = ({
                 <article
                   key={fase.fase_nro}
                   onClick={() => setFaseSelected(fase.fase_nro)}
-                  className={`w-[130px] scale-90 sm:scale-100 sm:w-[150px] flex items-center gap-2 sm:gap-5 text-xs relative cursor-pointer rounded-md p-3 px-4 bg-white text-center border transition hover:opacity-90 ${
+                  className={cn`w-[130px] scale-90 sm:scale-100 sm:w-[150px] flex items-center gap-2 sm:gap-5 text-xs relative cursor-pointer rounded-md p-3 px-4 bg-white text-center border transition hover:opacity-90 ${
                     faseSelected === fase.fase_nro
                       ? 'bg-slate-800 text-white'
                       : 'hover:bg-slate-100'
@@ -186,7 +187,7 @@ const TorneoClient = ({
                     setFixtureSelected(fixture)
                     getFixtureDetails(fixture.id)
                   }}
-                  className={`w-[130px] scale-90 sm:scale-100 sm:w-[150px] flex flex-col items-center cursor-pointer gap-1 text-xs relative rounded-md p-3 px-4 bg-white text-center border transition hover:opacity-90 ${
+                  className={cn`w-[130px] scale-90 sm:scale-100 sm:w-[150px] flex flex-col items-center cursor-pointer gap-1 text-xs relative rounded-md p-3 px-4 bg-white text-center border transition hover:opacity-90 ${
                     fixtureSelected && fixtureSelected.id === fixture.id
                       ? 'bg-slate-800 text-white'
                       : 'hover:bg-slate-100'
