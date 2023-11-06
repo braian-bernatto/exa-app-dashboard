@@ -27,7 +27,7 @@ export const FormModal: React.FC<FormModalProps> = ({
 
   return (
     <Modal title='' description='' isOpen={isOpen} onClose={onClose}>
-      <div className='flex justify-center items-center'>{children}</div>
+      <div className='flex justify-center items-center w-full'>{children}</div>
     </Modal>
   )
 }

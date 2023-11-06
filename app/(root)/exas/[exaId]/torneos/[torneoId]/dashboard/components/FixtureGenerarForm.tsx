@@ -56,7 +56,7 @@ const FixtureGenerarForm = ({
   const router = useRouter()
   const params = useParams()
 
-  const shuffledTeams = shuffle(teams)
+  const shuffledTeams = shuffle([...teams])
 
   const { supabase } = useSupabase()
   const [loading, setLoading] = useState(false)
@@ -213,11 +213,11 @@ const FixtureGenerarForm = ({
   }
 
   useEffect(() => {
+    console.log('entro en use')
     const fase = fases.find(tipo => tipo.id === useStore.getState().fase)?.name
     const tipoPartido = tiposPartido.find(
       tipo => tipo.id === useStore.getState().tipoPartido
     )?.name
-
     if (fase && tipoPartido) {
       const fixtures = generarFixtureTodosContraTodos(
         shuffledTeams,
@@ -240,7 +240,7 @@ const FixtureGenerarForm = ({
       <Form {...form}>
         <form
           onSubmit={form.handleSubmit(onSubmit)}
-          className='flex flex-wrap rounded bg-white py-3 px-4 shadow gap-10 z-40 border w-full sm:max-w-[900px]'>
+          className='flex flex-wrap rounded bg-white py-3 px-4 shadow gap-10 z-40 border w-full'>
           {/* select */}
           <article className='w-[280px] flex flex-col gap-5 sm:border-r p-2 sm:pr-7'>
             <div className='flex gap-2'>
@@ -416,7 +416,7 @@ const FixtureGenerarForm = ({
 
           {/* fixtures puntos */}
           {faseSelected === 'puntos' && fixtures && (
-            <article className='flex-1 flex flex-wrap w-[280px] max-h-[800px] items-center justify-center overflow-y-auto sm:p-2 sm:pb-7'>
+            <article className='flex-1 flex flex-wrap min-w-[280px] max-h-[800px] items-center justify-center overflow-y-auto sm:p-2 sm:pb-7'>
               {fixtures.ida.map((teams: any, index: number) => (
                 <div
                   key={`ida-${index}`}
@@ -548,7 +548,7 @@ const FixtureGenerarForm = ({
 
           {/* fixtures eliminatorias */}
           {faseSelected === 'eliminatorias' && fixtures && (
-            <article className='flex-1 flex flex-wrap  w-[280px] max-h-[800px] items-center justify-center overflow-y-auto sm:p-2 sm:pb-7'>
+            <article className='flex-1 flex flex-wrap  min-w-[280px] max-h-[800px] items-center justify-center overflow-y-auto sm:p-2 sm:pb-7'>
               {fixtures.ida.map((teams: any, index: number) => (
                 <div
                   key={`ida-${index}`}

@@ -5,7 +5,7 @@ import { createClient } from '@/utils/supabaseBrowser'
 import FixtureDetailsClient from './fixtureClient'
 import { Fases, Fixtures, Locations, TiposPartido } from '@/types'
 import FixtureForm from './FixtureForm'
-import { Plus, Shuffle } from 'lucide-react'
+import { Plus, Shuffle, X } from 'lucide-react'
 import { FormModal } from '@/components/modals/FormModal'
 import FixtureActions from './fixtureActions'
 import FaseForm from './FaseForm'
@@ -15,6 +15,7 @@ import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
 import { useRouter } from 'next/navigation'
 import { useStore } from '@/hooks/store'
+import FixtureGenerarForm from './FixtureGenerarForm'
 
 export const revalidate = 0
 
@@ -37,6 +38,7 @@ const TorneoClient = ({
 }: TorneoClientProps) => {
   const router = useRouter()
   const supabase = createClient()
+
   const [faseSelected, setFaseSelected] = useState()
   const [fasesList, setFasesList] = useState<any[]>(torneoFases)
   const [fixtures, setFixtures] = useState<any[]>([])
@@ -44,6 +46,7 @@ const TorneoClient = ({
   const [fixtureSelected, setFixtureSelected] = useState<Fixtures>()
   const [openFaseForm, setOpenFaseForm] = useState(false)
   const [openFixtureForm, setOpenFixtureForm] = useState(false)
+  const [openFixtureGenerarForm, setOpenFixtureGenerarForm] = useState(false)
 
   const getFixtures = async () => {
     const { data, error } = await supabase
@@ -77,6 +80,10 @@ const TorneoClient = ({
   useEffect(() => {
     if (torneoFases.length > 0) {
       setFaseSelected(torneoFases[0].fase_nro)
+      useStore.setState({
+        fase: torneoFases[0].fase_id,
+        tipoPartido: torneoFases[0].tipo_partido_id
+      })
     }
   }, [])
 
@@ -231,7 +238,7 @@ const TorneoClient = ({
                 </article>
               ))
             ) : (
-              <Button onClick={() => router.push(`fixtures/generar`)}>
+              <Button onClick={() => setOpenFixtureGenerarForm(true)}>
                 <Shuffle className='mr-2 h-4 w-4' /> Generar
               </Button>
             )}
@@ -276,6 +283,27 @@ const TorneoClient = ({
             id={fixtureSelected.id}
             fixtureDetails={fixtureDetails}
           />
+        )}
+
+        {openFixtureGenerarForm && (
+          <div className={`fixed top-0 left-0 w-full h-full z-50 p-5`}>
+            <div className='absolute z-20 top-0 left-0 w-full h-full bg-white opacity-95'></div>
+            <div className='flex flex-col gap-5 items-center z-40 w-full h-full sm:max-w-[1200px] mx-auto overflow-y-auto'>
+              <button
+                className='rounded-full bg-white shadow-md p-1 absolute z-50 top-[50px] right-[100px]'
+                onClick={() => {
+                  setOpenFixtureGenerarForm(false)
+                }}>
+                <X />
+              </button>
+              <FixtureGenerarForm
+                teams={teams}
+                fases={fases || []}
+                tiposPartido={tiposPartido || []}
+                locations={locations}
+              />
+            </div>
+          </div>
         )}
       </article>
     </div>
