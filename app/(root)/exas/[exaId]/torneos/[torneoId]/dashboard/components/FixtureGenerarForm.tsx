@@ -14,7 +14,7 @@ import {
   FormMessage
 } from '@/components/ui/form'
 import { useParams, useRouter } from 'next/navigation'
-import { Check, ChevronsUpDownIcon, MapPin, Swords, X } from 'lucide-react'
+import { Check, ChevronsUpDownIcon, MapPin, Swords } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
 import Image from 'next/image'
@@ -37,6 +37,14 @@ import {
 } from '@/components/ui/command'
 import { useStore } from '@/hooks/store'
 import { shuffle } from '@/utils/shuffle'
+import { DndContext, closestCenter } from '@dnd-kit/core'
+import {
+  SortableContext,
+  verticalListSortingStrategy,
+  horizontalListSortingStrategy,
+  arrayMove
+} from '@dnd-kit/sortable'
+import Team from './team'
 
 export const revalidate = 0
 
@@ -58,7 +66,8 @@ const FixtureGenerarForm = ({
   const router = useRouter()
   const params = useParams()
 
-  const shuffledTeams = shuffle([...teams])
+  const shufleResult = shuffle([...teams])
+  const [shuffledTeams, setShuffledTeams] = useState(shufleResult)
 
   const { supabase } = useSupabase()
   const [loading, setLoading] = useState(false)
@@ -214,8 +223,15 @@ const FixtureGenerarForm = ({
     }
   }
 
+  const handleDrag = (event: any) => {
+    const { active, over } = event
+    const oldIndex = shuffledTeams.findIndex(team => team.id === active.id)
+    const newIndex = shuffledTeams.findIndex(team => team.id === over.id)
+
+    setShuffledTeams([...arrayMove(shuffledTeams, oldIndex, newIndex)])
+  }
+
   useEffect(() => {
-    console.log('entro en use')
     const fase = fases.find(tipo => tipo.id === useStore.getState().fase)?.name
     const tipoPartido = tiposPartido.find(
       tipo => tipo.id === useStore.getState().tipoPartido
@@ -229,7 +245,7 @@ const FixtureGenerarForm = ({
       setTipoPartidoSelected(tipoPartido)
       setFixtures(fixtures)
     }
-  }, [])
+  }, [shuffledTeams])
 
   return (
     <>
@@ -393,27 +409,19 @@ const FixtureGenerarForm = ({
             {shuffledTeams.length > 0 && (
               <div className='flex flex-col gap-2'>
                 <FormLabel>Equipos</FormLabel>
-                <div className='grid grid-cols-3 gap-5'>
-                  {shuffledTeams.map(team => (
-                    <div
-                      key={team.id}
-                      className='flex-1 flex flex-col jutify-center items-center'>
-                      <span className='w-10 h-10 relative'>
-                        {team.image_url && (
-                          <Image
-                            src={team.image_url}
-                            fill
-                            className='object-contain'
-                            alt='team logo'
-                          />
-                        )}
-                      </span>
-                      <h2 className='text-xs capitalize text-center text-muted-foreground'>
-                        {team.name}
-                      </h2>
-                    </div>
-                  ))}
-                </div>
+                <DndContext
+                  collisionDetection={closestCenter}
+                  onDragEnd={handleDrag}>
+                  <ol className='flex flex-col gap-2 p-2'>
+                    <SortableContext
+                      items={shuffledTeams}
+                      strategy={verticalListSortingStrategy}>
+                      {shuffledTeams.map(team => (
+                        <Team key={team.id} team={team} />
+                      ))}
+                    </SortableContext>
+                  </ol>
+                </DndContext>
               </div>
             )}
           </article>
