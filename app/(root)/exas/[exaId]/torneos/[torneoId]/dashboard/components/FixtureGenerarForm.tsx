@@ -41,7 +41,6 @@ import { DndContext, closestCenter } from '@dnd-kit/core'
 import {
   SortableContext,
   verticalListSortingStrategy,
-  horizontalListSortingStrategy,
   arrayMove
 } from '@dnd-kit/sortable'
 import Team from './team'
