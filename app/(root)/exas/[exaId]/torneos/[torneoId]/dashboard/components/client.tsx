@@ -299,7 +299,7 @@ const TorneoClient = ({
                   }}>
                   <X />
                 </button>
-                <div className='flex flex-col h-[95vh] overflow-auto p-4'>
+                <div className='flex flex-col h-[90vh] overflow-auto p-4'>
                   <FixtureGenerarForm
                     teams={teams}
                     fases={fases || []}
