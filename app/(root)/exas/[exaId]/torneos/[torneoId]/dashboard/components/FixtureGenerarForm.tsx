@@ -67,6 +67,13 @@ const FixtureGenerarForm = ({
   const router = useRouter()
   const params = useParams()
 
+  const faseName = fases.find(
+    tipo => tipo.id === useStore.getState().fase
+  )?.name
+  const tipoPartidoName = tiposPartido.find(
+    tipo => tipo.id === useStore.getState().tipoPartido
+  )?.name
+
   const shufleResult = shuffle([...teams])
   const [shuffledTeams, setShuffledTeams] = useState(shufleResult)
 
@@ -76,13 +83,10 @@ const FixtureGenerarForm = ({
   const [faseId, setFaseId] = useState<number | undefined>(
     useStore.getState().fase
   )
-  const [faseName, setFaseName] = useState('')
   const [tipoPartidoId, setTipoPartidoId] = useState(
     useStore.getState().tipoPartido
   )
   const [faseNro, setFaseNro] = useState<number | null>()
-  const [faseSelected, setFaseSelected] = useState('')
-  const [tipoPartidoSelected, setTipoPartidoSelected] = useState('')
   const [fixtures, setFixtures] = useState<any>()
   const [TeamsQuantity, setTeamsQuantity] = useState<number>()
 
@@ -235,21 +239,20 @@ const FixtureGenerarForm = ({
   }
 
   useEffect(() => {
-    const fase = fases.find(tipo => tipo.id === useStore.getState().fase)?.name
-    const tipoPartido = tiposPartido.find(
-      tipo => tipo.id === useStore.getState().tipoPartido
-    )?.name
-    if (fase && tipoPartido) {
+    if (faseName && tipoPartidoName) {
       const fixtures = generarFixtureTodosContraTodos(
-        shuffledTeams,
-        tipoPartido
+        shuffledTeams.slice(0, TeamsQuantity),
+        tipoPartidoName
       )
-      setFaseSelected(fase)
-      setFaseName(fase)
-      setTipoPartidoSelected(tipoPartido)
       setFixtures(fixtures)
     }
-  }, [shuffledTeams])
+  }, [shuffledTeams, TeamsQuantity])
+
+  useEffect(() => {
+    if (faseName === 'eliminatorias') {
+      setTeamsQuantity(TeamsNumber[0])
+    }
+  }, [])
 
   return (
     <>
@@ -293,12 +296,7 @@ const FixtureGenerarForm = ({
                             key={fase.id}
                             className='flex items-center space-x-3 space-y-0'>
                             <FormControl>
-                              <RadioGroupItem
-                                onClick={() => {
-                                  setFaseSelected(fase.name)
-                                }}
-                                value={fase.id.toString()}
-                              />
+                              <RadioGroupItem value={fase.id.toString()} />
                             </FormControl>
                             <FormLabel className='font-normal'>
                               {fase.name}
@@ -330,12 +328,7 @@ const FixtureGenerarForm = ({
                             key={tipo.id}
                             className='flex items-center space-x-3 space-y-0'>
                             <FormControl>
-                              <RadioGroupItem
-                                onClick={() => {
-                                  setTipoPartidoSelected(tipo.name)
-                                }}
-                                value={tipo.id.toString()}
-                              />
+                              <RadioGroupItem value={tipo.id.toString()} />
                             </FormControl>
                             <FormLabel className='font-normal'>
                               {tipo.name}
@@ -356,7 +349,7 @@ const FixtureGenerarForm = ({
                 <FormLabel>Cantidad de Equipos</FormLabel>
                 <FormControl>
                   <RadioGroup
-                    defaultValue={`${TeamsQuantity}`}
+                    defaultValue={`${TeamsNumber[0]}`}
                     className='flex flex-col space-y-1'>
                     {TeamsNumber.filter(number => number <= teams.length).map(
                       cantidad => (
@@ -466,7 +459,7 @@ const FixtureGenerarForm = ({
           </article>
 
           {/* fixtures puntos */}
-          {faseSelected === 'puntos' && fixtures && (
+          {faseName === 'puntos' && fixtures && (
             <article className='flex-1 flex flex-wrap min-w-[280px] max-h-[800px] items-center justify-center overflow-y-auto sm:p-2 sm:pb-7'>
               {fixtures.ida.map((teams: any, index: number) => (
                 <div
@@ -598,7 +591,7 @@ const FixtureGenerarForm = ({
           )}
 
           {/* fixtures eliminatorias */}
-          {faseSelected === 'eliminatorias' && fixtures && (
+          {faseName === 'eliminatorias' && fixtures && (
             <article className='flex-1 flex flex-wrap  min-w-[280px] max-h-[800px] items-center justify-center overflow-y-auto sm:p-2 sm:pb-7'>
               {fixtures.ida.map((teams: any, index: number) => (
                 <div

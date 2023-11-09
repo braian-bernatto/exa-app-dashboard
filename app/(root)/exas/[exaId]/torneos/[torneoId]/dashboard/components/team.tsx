@@ -27,7 +27,7 @@ const Team = ({ team, pass }: TeamProps) => {
       {...attributes}
       {...listeners}
       className={`flex-1 flex gap-4 items-center shadow rounded p-1 justify-between px-3 ${
-        pass ? 'grayscale line-through' : ''
+        pass ? 'grayscale line-through opacity-50' : ''
       }`}>
       <span className='flex gap-4 items-center'>
         <div className='w-10 h-10 relative'>
