@@ -76,6 +76,7 @@ const FixtureGenerarForm = ({
   const [faseId, setFaseId] = useState<number | undefined>(
     useStore.getState().fase
   )
+  const [faseName, setFaseName] = useState('')
   const [tipoPartidoId, setTipoPartidoId] = useState(
     useStore.getState().tipoPartido
   )
@@ -83,7 +84,7 @@ const FixtureGenerarForm = ({
   const [faseSelected, setFaseSelected] = useState('')
   const [tipoPartidoSelected, setTipoPartidoSelected] = useState('')
   const [fixtures, setFixtures] = useState<any>()
-  const [TeamsQuantity, setTeamsQuantity] = useState<number>(TeamsNumber[0])
+  const [TeamsQuantity, setTeamsQuantity] = useState<number>()
 
   const title = 'Generar Fixture'
   const toastMessage = 'Fixture generado'
@@ -244,6 +245,7 @@ const FixtureGenerarForm = ({
         tipoPartido
       )
       setFaseSelected(fase)
+      setFaseName(fase)
       setTipoPartidoSelected(tipoPartido)
       setFixtures(fixtures)
     }
@@ -349,34 +351,35 @@ const FixtureGenerarForm = ({
             </div>
 
             {/* cantidad de equipos */}
-            <FormItem className='space-y-3'>
-              <FormLabel>Cantidad de Equipos</FormLabel>
-              <FormControl>
-                <RadioGroup
-                  onValueChange={e => setTeamsQuantity(+e)}
-                  defaultValue={`${TeamsQuantity}`}
-                  className='flex flex-col space-y-1'>
-                  {TeamsNumber.filter(number => number <= TeamsQuantity).map(
-                    cantidad => (
-                      <FormItem
-                        key={cantidad}
-                        className='flex items-center space-x-3 space-y-0'>
-                        <FormControl>
-                          <RadioGroupItem
-                            onClick={() => {
-                              setTeamsQuantity(cantidad)
-                            }}
-                            value={cantidad.toString()}
-                          />
-                        </FormControl>
-                        <FormLabel className='font-normal'>{`${cantidad} Equipos`}</FormLabel>
-                      </FormItem>
-                    )
-                  )}
-                </RadioGroup>
-              </FormControl>
-              <FormMessage />
-            </FormItem>
+            {faseName === 'eliminatorias' && (
+              <FormItem className='space-y-3'>
+                <FormLabel>Cantidad de Equipos</FormLabel>
+                <FormControl>
+                  <RadioGroup
+                    defaultValue={`${TeamsQuantity}`}
+                    className='flex flex-col space-y-1'>
+                    {TeamsNumber.filter(number => number <= teams.length).map(
+                      cantidad => (
+                        <FormItem
+                          key={cantidad}
+                          className='flex items-center space-x-3 space-y-0'>
+                          <FormControl>
+                            <RadioGroupItem
+                              onClick={() => {
+                                setTeamsQuantity(cantidad)
+                              }}
+                              value={cantidad.toString()}
+                            />
+                          </FormControl>
+                          <FormLabel className='font-normal'>{`${cantidad} Equipos`}</FormLabel>
+                        </FormItem>
+                      )
+                    )}
+                  </RadioGroup>
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
 
             {/* Location */}
             <FormField
@@ -452,7 +455,7 @@ const FixtureGenerarForm = ({
                         <Team
                           key={team.id}
                           team={team}
-                          pass={index >= TeamsQuantity}
+                          pass={TeamsQuantity ? index >= TeamsQuantity : false}
                         />
                       ))}
                     </SortableContext>
