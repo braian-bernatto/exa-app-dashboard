@@ -287,7 +287,7 @@ const TorneoClient = ({
           />
         )}
 
-        {openFixtureGenerarForm && (
+        {!openFixtureGenerarForm && (
           <div className={`fixed top-0 left-0 w-full h-full z-50 p-5`}>
             <div className='absolute z-20 top-0 left-0 w-full h-full bg-white opacity-95'></div>
             <div className='flex gap-5 items-center w-full h-full max-w-7xl justify-center mx-auto'>

@@ -8,9 +8,10 @@ import { GripVertical } from 'lucide-react'
 
 interface TeamProps {
   team: Teams
+  pass: boolean
 }
 
-const Team = ({ team }: TeamProps) => {
+const Team = ({ team, pass }: TeamProps) => {
   const { attributes, listeners, setNodeRef, transform, transition } =
     useSortable({ id: team.id })
 
@@ -25,7 +26,9 @@ const Team = ({ team }: TeamProps) => {
       ref={setNodeRef}
       {...attributes}
       {...listeners}
-      className='flex-1 flex gap-4 items-center shadow rounded p-1 justify-between px-3'>
+      className={`flex-1 flex gap-4 items-center shadow rounded p-1 justify-between px-3 ${
+        pass ? 'grayscale line-through' : ''
+      }`}>
       <span className='flex gap-4 items-center'>
         <div className='w-10 h-10 relative'>
           {team.image_url && (
