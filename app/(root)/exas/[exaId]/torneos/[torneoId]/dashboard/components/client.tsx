@@ -317,7 +317,8 @@ const TorneoClient = ({
           <div className='grid grid-cols-7'>
             <div className='text-center flex flex-col gap-5'>
               <h2 className='text-muted-foreground text-xs px-2 rounded shadow'>
-                Octavos
+                <strong>8</strong>
+                <sup>vos</sup>
               </h2>
               <div className='flex flex-col gap-8'>
                 <div className='grid grid-cols-1 grid-rows-2 gap-3 place-items-center relative'>
@@ -400,7 +401,8 @@ const TorneoClient = ({
             </div>
             <div className='text-center flex flex-col gap-5 z-20'>
               <h2 className='text-muted-foreground text-xs px-2 rounded shadow'>
-                Cuartos
+                <strong>4</strong>
+                <sup>tos</sup>
               </h2>
               <div className='grid grid-cols-1 grid-rows-4 h-full gap-8'>
                 <div className='row-span-2 flex flex-col gap-3 relative'>
@@ -483,7 +485,7 @@ const TorneoClient = ({
             </div>
 
             <div className='text-center flex flex-col gap-5 z-30'>
-              <h2 className='text-muted-foreground text-xs px-2 rounded shadow'>
+              <h2 className='text-muted-foreground text-xs px-2 rounded shadow font-semibold'>
                 Final
               </h2>
               <div className='grid grid-cols-1 h-full gap-8'>
@@ -543,7 +545,8 @@ const TorneoClient = ({
 
             <div className='text-center flex flex-col gap-5 z-20'>
               <h2 className='text-muted-foreground text-xs px-2 rounded shadow'>
-                Cuartos
+                <strong>4</strong>
+                <sup>tos</sup>
               </h2>
               <div className='grid grid-cols-1 grid-rows-4 h-full gap-8'>
                 <div className='row-span-2 flex flex-col gap-3 relative'>
@@ -597,7 +600,8 @@ const TorneoClient = ({
 
             <div className='text-center flex flex-col gap-5'>
               <h2 className='text-muted-foreground text-xs px-2 rounded shadow'>
-                Octavos
+                <strong>8</strong>
+                <sup>vos</sup>
               </h2>
               <div className='flex flex-col gap-8'>
                 <div className='grid grid-cols-1 grid-rows-2 gap-3 place-items-center relative'>
