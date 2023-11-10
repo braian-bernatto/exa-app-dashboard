@@ -61,6 +61,27 @@ if(tipoPartido === 'ida y vuelta'){
 
 export const generarFixtureEliminacion = (equipos: any[], tipoPartido: string )=>{
 
+  const totalEquipos = equipos.length
+  const equipoPar = isEven(totalEquipos)
+  const totalPartidos = totalEquipos / 2
 
+  // if(!equipoPar) return []
+  
+  // ida
+  const partidos = []
+  const teamsCopy = equipos.slice()
 
+  for(let i = 0; i < totalPartidos; i++){
+    let versus = {local:teamsCopy[0], visitante: teamsCopy[1]}
+    partidos.push(versus)
+    teamsCopy.shift()
+    teamsCopy.shift()
+  }
+
+  // vuelta
+  let partidosVuelta = <any>[]
+  if(tipoPartido === 'ida y vuelta'){
+    partidosVuelta = partidos.map(par=>({local: par.visitante, visitante: par.local}))    
+  }
+  return {ida: partidos, vuelta: partidosVuelta}
 }
