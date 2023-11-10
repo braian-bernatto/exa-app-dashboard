@@ -263,7 +263,6 @@ const FixtureGenerarForm = ({
           shuffledTeams.slice(0, TeamsQuantity || TeamsNumber[0]),
           tipoPartidoName
         )
-        console.log({ fixtures })
         setFixtures(fixtures)
       }
     }
@@ -607,110 +606,14 @@ const FixtureGenerarForm = ({
 
           {/* fixtures eliminatorias */}
           {faseName === 'eliminatorias' && fixtures && (
-            <article className='flex-1 flex flex-wrap min-w-[280px] max-h-[800px] items-center justify-center overflow-y-auto sm:p-2 sm:pb-7'>
-              <div className='flex flex-col gap-2 justify-center border-b p-5 py-7 sm:py-10 w-[280px]'>
-                <h2 className='text-center font-semibold text-muted-foreground shadow-xl'>
-                  {TeamsQuantity === 16 && 'Octavos'}
-                  {TeamsQuantity === 8 && 'Cuartos'}
-                  {TeamsQuantity === 4 && 'Semifinal'}
-                </h2>
-                {fixtures.ida.map((team: any) => (
-                  <div
-                    key={`${team.local.id}-${team.visitante.id}`}
-                    className='grid grid-cols-3 justify-center items-center shadow-lg rounded p-2'>
-                    {/* local */}
-                    <div className='flex flex-col items-center justify-center'>
-                      <span className='w-10 h-10 relative'>
-                        {team.local.image_url && (
-                          <Image
-                            src={team.local.image_url}
-                            fill
-                            className='object-contain'
-                            alt='team logo'
-                          />
-                        )}
-                      </span>
-                      <h2 className='text-xs capitalize text-center text-muted-foreground'>
-                        {team.local.name}
-                      </h2>
-                    </div>
-                    <p className='px-2 shadow rounded text-center'>vs</p>
-                    {/* visitante */}
-                    <div className='flex flex-col items-center'>
-                      <span className='w-10 h-10 relative'>
-                        {team.visitante.image_url && (
-                          <Image
-                            src={team.visitante.image_url}
-                            fill
-                            className='object-contain'
-                            alt='team logo'
-                          />
-                        )}
-                      </span>
-                      <h2 className='text-xs capitalize text-center text-muted-foreground'>
-                        {team.visitante.name}
-                      </h2>
-                    </div>
-                  </div>
-                ))}
-              </div>
-
-              {/* vuelta */}
-              {fixtures.vuelta.length > 0 && (
-                <div className='flex flex-col gap-2 justify-center border-b p-5 py-7 sm:py-10 w-[280px] relative'>
-                  <h2 className='text-center font-semibold text-muted-foreground shadow-xl relative'>
-                    {TeamsQuantity === 16 && 'Octavos'}
-                    {TeamsQuantity === 8 && 'Cuartos'}
-                    {TeamsQuantity === 4 && 'Semifinal'}
-                    <span className='rounded shadow px-2 absolute top-0 right-0 text-xs border border-emerald-600 animate animate-pulse'>
-                      vuelta
-                    </span>
-                  </h2>
-                  {fixtures.vuelta &&
-                    fixtures.vuelta.map((team: any, index: number) => (
-                      <div
-                        key={`${team.local.id}-${team.visitante.id}`}
-                        className='grid grid-cols-3 justify-center items-center shadow-lg rounded p-2'>
-                        {/* local */}
-                        <div className='flex flex-col items-center justify-center'>
-                          <span className='w-10 h-10 relative'>
-                            {team.local.image_url && (
-                              <Image
-                                src={team.local.image_url}
-                                fill
-                                className='object-contain'
-                                alt='team logo'
-                              />
-                            )}
-                          </span>
-                          <h2 className='text-xs capitalize text-center text-muted-foreground'>
-                            {team.local.name}
-                          </h2>
-                        </div>
-                        <p className='px-2 shadow rounded text-center'>vs</p>
-                        {/* visitante */}
-                        <div className='flex flex-col items-center'>
-                          <span className='w-10 h-10 relative'>
-                            {team.visitante.image_url && (
-                              <Image
-                                src={team.visitante.image_url}
-                                fill
-                                className='object-contain'
-                                alt='team logo'
-                              />
-                            )}
-                          </span>
-                          <h2 className='text-xs capitalize text-center text-muted-foreground'>
-                            {team.visitante.name}
-                          </h2>
-                        </div>
-                      </div>
-                    ))}
-                </div>
-              )}
-
+            <article className='flex-1 flex flex-wrap min-w-[280px] max-h-[800px] items-center justify-center overflow-y-auto sm:p-2 sm:pb-10'>
               {/* llaves */}
-              <Llaves teams={[...teams.slice(0, 8), ...teams.slice(0, 8)]} />
+              <Llaves
+                teams={[
+                  ...shuffledTeams.slice(0, TeamsQuantity),
+                  ...shuffledTeams.slice(0, TeamsQuantity).reverse()
+                ]}
+              />
             </article>
           )}
 

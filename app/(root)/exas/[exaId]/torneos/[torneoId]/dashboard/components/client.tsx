@@ -79,10 +79,10 @@ const TorneoClient = ({
 
   useEffect(() => {
     if (torneoFases.length > 0) {
-      setFaseSelected(torneoFases[0].fase_nro)
+      setFaseSelected(torneoFases[5].fase_nro)
       useStore.setState({
-        fase: torneoFases[0].fase_id,
-        tipoPartido: torneoFases[0].tipo_partido_id
+        fase: torneoFases[5].fase_id,
+        tipoPartido: torneoFases[5].tipo_partido_id
       })
     }
   }, [])
@@ -312,9 +312,6 @@ const TorneoClient = ({
             </div>
           </div>
         )}
-
-        {/* llaves */}
-        <Llaves teams={[...teams.slice(0, 8), ...teams.slice(0, 8)]} />
       </article>
     </div>
   )
