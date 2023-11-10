@@ -12,7 +12,7 @@ const Llaves = ({ teams }: LlavesProps) => {
   const semis = teams.length === 4
 
   return (
-    <div className='shadow-xl p-5 bg-white rounded m-auto h-full'>
+    <div className='shadow-xl p-5 bg-white rounded m-auto h-auto'>
       <div
         className={`grid gap-2 ${
           octavos ? 'grid-cols-7' : cuartos ? 'grid-cols-5' : 'grid-cols-3'

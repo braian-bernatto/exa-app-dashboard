@@ -47,6 +47,7 @@ import {
   arrayMove
 } from '@dnd-kit/sortable'
 import Team from './team'
+import Llaves from './llaves'
 
 export const revalidate = 0
 
@@ -709,7 +710,7 @@ const FixtureGenerarForm = ({
               )}
 
               {/* llaves */}
-              <div className='w-full border border-pink-800'></div>
+              <Llaves teams={[...teams.slice(0, 8), ...teams.slice(0, 8)]} />
             </article>
           )}
 
