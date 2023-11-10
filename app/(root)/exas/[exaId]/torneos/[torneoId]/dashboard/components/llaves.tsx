@@ -112,7 +112,7 @@ const Llaves = ({ teams }: LlavesProps) => {
             </h2>
             <div className='grid grid-cols-1 grid-rows-4 h-full gap-8'>
               <div className='row-span-2 flex flex-col gap-3 relative'>
-                <span className='absolute right-0 top-[50%] w-7 h-[70%] border-r rounded-r border-y border-pink-800 translate-y-[-50%]'></span>
+                <span className='absolute right-0 top-[50%] w-7 h-[67%] border-r rounded-r border-y border-pink-800 translate-y-[-50%]'></span>
                 <div className='flex items-center justify-center h-full'>
                   <span className='w-12 h-12 bg-white shrink-0 border rounded shadow relative row-span-2'>
                     <Image
@@ -135,7 +135,7 @@ const Llaves = ({ teams }: LlavesProps) => {
                 </div>
               </div>
               <div className='row-span-2 flex flex-col gap-3 relative'>
-                <span className='absolute right-0 top-[50%] w-7 h-[70%] border-r rounded-r border-y border-pink-800 translate-y-[-50%]'></span>
+                <span className='absolute right-0 top-[50%] w-7 h-[67%] border-r rounded-r border-y border-pink-800 translate-y-[-50%]'></span>
                 <div className='flex items-center justify-center h-full'>
                   <span className='w-12 h-12 bg-white shrink-0 border rounded shadow relative row-span-2'>
                     <Image
@@ -167,7 +167,7 @@ const Llaves = ({ teams }: LlavesProps) => {
           </h2>
           <div className='grid grid-cols-1 grid-rows-2 h-full gap-8'>
             <div className='row-span-2 flex flex-col gap-3 relative'>
-              <span className='absolute right-0 top-[50%] w-7 h-[60%] border-r rounded-r border-y border-pink-800 translate-y-[-50%]'></span>
+              <span className='absolute right-0 top-[50%] w-7 h-[58%] border-r rounded-r border-y border-pink-800 translate-y-[-50%]'></span>
               <div className='flex items-center justify-center h-full'>
                 <span className='w-12 h-12 bg-white shrink-0 border rounded shadow relative row-span-2'>
                   <Image
@@ -226,7 +226,7 @@ const Llaves = ({ teams }: LlavesProps) => {
           </h2>
           <div className='grid grid-cols-1 grid-rows-2 h-full gap-8'>
             <div className='row-span-2 flex flex-col gap-3 relative'>
-              <span className='absolute left-0 top-[50%] w-7 h-[60%] border-l rounded-l border-y border-pink-800 translate-y-[-50%]'></span>
+              <span className='absolute left-0 top-[50%] w-7 h-[58%] border-l rounded-l border-y border-pink-800 translate-y-[-50%]'></span>
               <div className='flex items-center justify-center h-full'>
                 <span className='w-12 h-12 bg-white shrink-0 border rounded shadow row-span-2 relative'>
                   <Image
@@ -259,7 +259,7 @@ const Llaves = ({ teams }: LlavesProps) => {
             </h2>
             <div className='grid grid-cols-1 grid-rows-4 h-full gap-8 w-full'>
               <div className='row-span-2 flex flex-col gap-3 relative'>
-                <span className='absolute left-0 top-[50%] w-7 h-[70%] border-l rounded-l border-y border-pink-800 translate-y-[-50%]'></span>
+                <span className='absolute left-0 top-[50%] w-7 h-[67%] border-l rounded-l border-y border-pink-800 translate-y-[-50%]'></span>
                 <div className='flex items-center justify-center h-full'>
                   <span className='w-12 h-12 bg-white shrink-0 border rounded shadow row-span-2 relative'>
                     <Image
@@ -282,7 +282,7 @@ const Llaves = ({ teams }: LlavesProps) => {
                 </div>
               </div>
               <div className='row-span-2 flex flex-col gap-3 relative'>
-                <span className='absolute left-0 top-[50%] w-7 h-[70%] border-l rounded-l border-y border-pink-800 translate-y-[-50%]'></span>
+                <span className='absolute left-0 top-[50%] w-7 h-[67%] border-l rounded-l border-y border-pink-800 translate-y-[-50%]'></span>
                 <div className='flex items-center justify-center h-full'>
                   <span className='w-12 h-12 bg-white shrink-0 border rounded shadow row-span-2 relative'>
                     <Image
