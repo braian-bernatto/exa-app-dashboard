@@ -608,12 +608,7 @@ const FixtureGenerarForm = ({
           {faseName === 'eliminatorias' && fixtures && (
             <article className='flex-1 flex flex-wrap min-w-[280px] max-h-[800px] items-center justify-center overflow-y-auto sm:p-2 sm:pb-10'>
               {/* llaves */}
-              <Llaves
-                teams={[
-                  ...shuffledTeams.slice(0, TeamsQuantity),
-                  ...shuffledTeams.slice(0, TeamsQuantity).reverse()
-                ]}
-              />
+              <Llaves teams={[...shuffledTeams.slice(0, TeamsQuantity)]} />
             </article>
           )}
 
