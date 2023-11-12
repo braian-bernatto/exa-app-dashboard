@@ -263,6 +263,7 @@ const FixtureGenerarForm = ({
           shuffledTeams.slice(0, TeamsQuantity || TeamsNumber[0]),
           tipoPartidoName
         )
+        console.log({ fixtures })
         setFixtures(fixtures)
       }
     }

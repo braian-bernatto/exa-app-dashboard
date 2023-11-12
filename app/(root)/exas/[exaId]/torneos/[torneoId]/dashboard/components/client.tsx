@@ -79,10 +79,10 @@ const TorneoClient = ({
 
   useEffect(() => {
     if (torneoFases.length > 0) {
-      setFaseSelected(torneoFases[5].fase_nro)
+      setFaseSelected(torneoFases[0].fase_nro)
       useStore.setState({
-        fase: torneoFases[5].fase_id,
-        tipoPartido: torneoFases[5].tipo_partido_id
+        fase: torneoFases[0].fase_id,
+        tipoPartido: torneoFases[0].tipo_partido_id
       })
     }
   }, [])
@@ -97,7 +97,11 @@ const TorneoClient = ({
     <div className='flex flex-wrap gap-20 w-full justify-evenly'>
       <article className='h-full flex flex-wrap gap-10'>
         {/* fases */}
-        <FormModal isOpen={openFaseForm} onClose={() => setOpenFaseForm(false)}>
+        <FormModal
+          isOpen={openFaseForm}
+          onClose={() => {
+            setOpenFaseForm(false)
+          }}>
           <FaseForm
             faseNro={
               torneoFases.length > 0
@@ -174,7 +178,9 @@ const TorneoClient = ({
         {faseSelected && (
           <FormModal
             isOpen={openFixtureForm}
-            onClose={() => setOpenFixtureForm(false)}>
+            onClose={() => {
+              setOpenFixtureForm(false)
+            }}>
             <FixtureForm
               faseNro={faseSelected}
               torneoId={id}

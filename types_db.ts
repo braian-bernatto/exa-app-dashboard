@@ -208,6 +208,7 @@ export interface Database {
         Row: {
           fase_nro: number | null
           id: string
+          isVuelta: boolean | null
           location_id: number | null
           name: string
           order: number
@@ -216,6 +217,7 @@ export interface Database {
         Insert: {
           fase_nro?: number | null
           id?: string
+          isVuelta?: boolean | null
           location_id?: number | null
           name: string
           order?: number
@@ -224,6 +226,7 @@ export interface Database {
         Update: {
           fase_nro?: number | null
           id?: string
+          isVuelta?: boolean | null
           location_id?: number | null
           name?: string
           order?: number
@@ -646,11 +649,11 @@ export interface Database {
         }
         Returns: {
           fixture_id: string
-          torneo_id: string
-          fase_id: number
           name: string
           location_id: number
           fixture_order: number
+          torneo_id: string
+          fase_nro: number
           exa_id: number
           exa_name: string
           torneo: string

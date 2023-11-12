@@ -13,7 +13,7 @@ import {
   FormLabel,
   FormMessage
 } from '@/components/ui/form'
-import { useParams, useRouter } from 'next/navigation'
+import { useRouter } from 'next/navigation'
 import { Check, ChevronsUpDownIcon, MapPin, Swords, Trash } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { toast } from 'react-hot-toast'
@@ -116,16 +116,14 @@ const FixtureForm = ({
           return toast.error(`No se pudo ${action}`)
         }
       }
-
-      router.refresh()
       getFixtures()
       setFixtureSelected(undefined)
       setOpenFixtureForm(false)
       toast.success(toastMessage)
-      form.reset()
     } catch (error) {
       toast.error('Hubo un error')
     } finally {
+      setTimeout(() => (document.body.style.pointerEvents = ''), 500)
       setLoading(false)
     }
   }
@@ -154,6 +152,7 @@ const FixtureForm = ({
     } catch (error) {
       toast.error('Hubo un error')
     } finally {
+      setTimeout(() => (document.body.style.pointerEvents = ''), 500)
       setLoading(false)
     }
   }
