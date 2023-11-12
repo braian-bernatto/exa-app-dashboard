@@ -123,7 +123,6 @@ const FixtureForm = ({
     } catch (error) {
       toast.error('Hubo un error')
     } finally {
-      setTimeout(() => (document.body.style.pointerEvents = ''), 500)
       setLoading(false)
     }
   }
@@ -152,7 +151,6 @@ const FixtureForm = ({
     } catch (error) {
       toast.error('Hubo un error')
     } finally {
-      setTimeout(() => (document.body.style.pointerEvents = ''), 500)
       setLoading(false)
     }
   }

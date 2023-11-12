@@ -56,7 +56,6 @@ const FixtureActions = ({
     } catch (error) {
       toast.error('Hubo un error')
     } finally {
-      setTimeout(() => (document.body.style.pointerEvents = ''), 500)
       setLoading(false)
       setFormOpen(false)
       setOpen(false)

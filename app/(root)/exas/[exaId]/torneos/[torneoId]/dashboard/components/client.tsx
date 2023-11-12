@@ -13,10 +13,8 @@ import { getTorneoFasesClient } from '@/actions/getTorneoFasesClient'
 import FaseActions from './faseActions'
 import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
-import { useRouter } from 'next/navigation'
 import { useStore } from '@/hooks/store'
 import FixtureGenerarForm from './FixtureGenerarForm'
-import Llaves from './llaves'
 
 export const revalidate = 0
 
@@ -53,7 +51,7 @@ const TorneoClient = ({
       .from('fixtures')
       .select('*, locations(id, name)')
       .eq('torneo_id', id)
-      .eq('fase_nro', faseSelected)
+      .eq('fase_nro', faseSelected || '')
       .order('order', { ascending: true })
 
     if (data) {
