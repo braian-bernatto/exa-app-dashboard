@@ -831,9 +831,22 @@ const FixtureTeamsForm = ({
                           initialFocus
                           locale={es}
                         />
-                        <div className='flex justify-center items-center pb-4 px-20'>
+                        <div className='flex flex-col gap-4 pb-4 pt-2 relative items-center justify-center'>
+                          {/* Switch Calendar */}
+                          <div className='flex items-center justify-center space-x-2'>
+                            <Switch
+                              id='enable-all-dates'
+                              checked={allowPreviousDates}
+                              onCheckedChange={() =>
+                                setAllowPreviousDates(!allowPreviousDates)
+                              }
+                            />
+                            <Label htmlFor='enable-all-dates'>
+                              Habilitar Fechas Anteriores
+                            </Label>
+                          </div>
                           <Input
-                            className='shadow-md text-xl font-semibold'
+                            className='shadow-md text-xl font-semibold w-auto'
                             type='time'
                             defaultValue={
                               field.value
@@ -912,19 +925,6 @@ const FixtureTeamsForm = ({
                   </FormItem>
                 )}
               />
-            </div>
-            {/* Switch Calendar */}
-            <div className='flex items-center justify-center space-x-2'>
-              <Switch
-                id='enable-all-dates'
-                checked={allowPreviousDates}
-                onCheckedChange={() =>
-                  setAllowPreviousDates(!allowPreviousDates)
-                }
-              />
-              <Label htmlFor='enable-all-dates'>
-                Habilitar Fechas Anteriores
-              </Label>
             </div>
           </div>
 
