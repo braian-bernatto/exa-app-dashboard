@@ -99,11 +99,6 @@ const FixtureGenerarForm = ({
   const action = 'Guardar'
 
   const formSchema = z.object({
-    name: z.string().min(1, { message: 'Obligatorio' }),
-    torneo_id: z.coerce.string({
-      required_error: 'Obligatorio',
-      invalid_type_error: 'Obligatorio'
-    }),
     fase_id: z.coerce.number({
       required_error: 'Obligatorio',
       invalid_type_error: 'Obligatorio'
@@ -118,8 +113,6 @@ const FixtureGenerarForm = ({
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      name: '',
-      torneo_id: undefined,
       fase_id: faseId,
       tipo_partido_id: tipoPartidoId,
       location_id: undefined
@@ -136,71 +129,53 @@ const FixtureGenerarForm = ({
   }
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
-    const { name, torneo_id, fase_id, location_id, tipo_partido_id } = values
+    const { fase_id, location_id, tipo_partido_id } = values
 
+    const torneo_id = params.torneoId
+
+    const formattedFixture = fixtures.map((fixture: any) => ({
+      ...fixture,
+      fixtures: {}
+    }))
+
+    console.log({ fixtures, values, torneo_id })
     try {
       setLoading(true)
 
-      if (!name || !torneo_id || !faseNro) {
+      if (!torneo_id || !fase_id || !tipo_partido_id) {
         return toast.error('Faltan cargar datos')
       }
 
       // fixture
-      if (true) {
-        const { error } = await supabase
-          .from('fixtures')
-          .update({
-            name: name.toLowerCase(),
-            location_id
-          })
-          .eq('id', params.fixtureId)
 
-        if (error) {
-          console.log(error)
-          setLoading(false)
-          return toast.error(`No se pudo ${action}`)
-        }
+      // const { error } = await supabase
+      //   .from('fixtures')
+      //   .update({
+      //     name: name.toLowerCase(),
+      //     location_id
+      //   })
+      //   .eq('id', params.fixtureId)
 
-        const { error: torneoFaseError } = await supabase
-          .from('torneo_fase')
-          .update({ tipo_partido_id })
-          .eq('torneo_id', torneo_id)
-          .eq('fase_id', fase_id)
+      // if (error) {
+      //   console.log(error)
+      //   setLoading(false)
+      //   return toast.error(`No se pudo ${action}`)
+      // }
 
-        if (torneoFaseError) {
-          console.log(torneoFaseError)
-          setLoading(false)
-          return toast.error(`No se pudo ${action} tipo partido`)
-        }
-      } else {
-        const { error } = await supabase.from('fixtures').insert({
-          name: name.toLowerCase(),
-          torneo_id,
-          fase_id,
-          location_id
-        })
+      // const { error: torneoFaseError } = await supabase
+      //   .from('torneo_fase')
+      //   .update({ tipo_partido_id })
+      //   .eq('torneo_id', torneo_id)
+      //   .eq('fase_id', fase_id)
 
-        if (error) {
-          console.log(error)
-          setLoading(false)
-          return toast.error(`No se pudo ${action}`)
-        }
+      // if (torneoFaseError) {
+      //   console.log(torneoFaseError)
+      //   setLoading(false)
+      //   return toast.error(`No se pudo ${action} tipo partido`)
+      // }
 
-        const { error: torneoFaseError } = await supabase
-          .from('torneo_fase')
-          .update({ tipo_partido_id })
-          .eq('torneo_id', torneo_id)
-          .eq('fase_id', fase_id)
-
-        if (torneoFaseError) {
-          console.log(torneoFaseError)
-          setLoading(false)
-          return toast.error(`No se pudo ${action} tipo partido`)
-        }
-      }
-
-      router.refresh()
-      router.push('/fixtures')
+      // router.refresh()
+      // router.push('/fixtures')
       toast.success(toastMessage)
     } catch (error) {
       toast.error('Hubo un error')
@@ -263,7 +238,6 @@ const FixtureGenerarForm = ({
           shuffledTeams.slice(0, TeamsQuantity || TeamsNumber[0]),
           tipoPartidoName
         )
-        console.log({ fixtures })
         setFixtures(fixtures)
       }
     }
