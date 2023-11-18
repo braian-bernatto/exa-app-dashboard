@@ -15,7 +15,6 @@ export type Locations = Database['public']['Tables']['locations']['Row']
 export type Fixtures = Database['public']['Tables']['fixtures']['Row']
 export type FixturePlayers = Database['public']['Tables']['fixture_players']['Row']
 export type FixtureTeams = Database['public']['Tables']['fixture_teams']['Row']
-export type GetFixtures = Database['public']['Functions']['get_fixtures']['Returns']
 export type GetFixturesTeams = Database['public']['Functions']['get_fixture_teams_by_fixture_id']['Returns']
 export type GetFixturesPlayers = Database['public']['Functions']['get_fixture_players_by_fixture_id']['Returns']
 

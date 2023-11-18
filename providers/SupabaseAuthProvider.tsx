@@ -37,7 +37,7 @@ const SupabaseAuthProvider = ({
     const { data: user, error } = await supabase
       .from('profiles')
       .select('*')
-      .eq('id', serverSession?.user?.id)
+      .eq('id', serverSession?.user?.id!)
       .single()
 
     if (error) {
