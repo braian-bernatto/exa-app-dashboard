@@ -56,6 +56,7 @@ interface FixtureGenerarFormProps {
   fases: Fases[] | []
   tiposPartido: TiposPartido[] | []
   locations: Locations[]
+  getFixtures: () => void
   setOpenFixtureGenerarForm: (bool: boolean) => void
 }
 
@@ -66,6 +67,7 @@ const FixtureGenerarForm = ({
   fases,
   tiposPartido,
   locations,
+  getFixtures,
   setOpenFixtureGenerarForm
 }: FixtureGenerarFormProps) => {
   const router = useRouter()
@@ -132,7 +134,7 @@ const FixtureGenerarForm = ({
   }
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
-    const { fase_id, location_id, tipo_partido_id } = values
+    const { fase_id, tipo_partido_id } = values
 
     const torneo_id = params.torneoId
 
@@ -141,43 +143,16 @@ const FixtureGenerarForm = ({
       torneo_id,
       fase_nro: faseNro,
       fase_name: faseName,
-      ida: fixtures.ida.map((fix: any, index: number) =>
+      tipo_partido_name: tipoPartidoName,
+      ida: fixtures.ida.map((fix: any) =>
         faseName === 'puntos'
-          ? {
-              name: `Fecha ${index + 1}`,
-              ...fix.filter((fix2: any) => fix2.local !== 'Descansa')
-            }
-          : {
-              name: `${
-                fixtures.ida.length * 2 === 16
-                  ? 'Octavos'
-                  : fixtures.ida.length * 2 === 8
-                  ? 'Cuartos'
-                  : fixtures.ida.length * 2 === 4
-                  ? 'Semifinal'
-                  : ''
-              }`,
-              ...fix
-            }
+          ? fix.filter((fix2: any) => fix2.local !== 'Descansa')
+          : fix
       ),
-      vuelta: fixtures.vuelta.map((fix: any, index: number) =>
+      vuelta: fixtures.vuelta.map((fix: any) =>
         faseName === 'puntos'
-          ? {
-              name: `Fecha ${fixtures.ida.length + index + 1}`,
-              ...fix.filter((fix2: any) => fix2.visitante !== 'Descansa')
-            }
-          : {
-              name: `${
-                fixtures.ida.length * 2 === 16
-                  ? 'Octavos'
-                  : fixtures.ida.length * 2 === 8
-                  ? 'Cuartos'
-                  : fixtures.ida.length * 2 === 4
-                  ? 'Semifinal'
-                  : ''
-              }`,
-              ...fix
-            }
+          ? fix.filter((fix2: any) => fix2.visitante !== 'Descansa')
+          : fix
       )
     }
 
@@ -189,36 +164,19 @@ const FixtureGenerarForm = ({
         return toast.error('Faltan cargar datos')
       }
 
-      // fixture
+      const { error } = await supabase.rpc('insert_generated_fixtures', {
+        data: formattedFixture
+      })
 
-      // const { error } = await supabase
-      //   .from('fixtures')
-      //   .update({
-      //     name: name.toLowerCase(),
-      //     location_id
-      //   })
-      //   .eq('id', params.fixtureId)
+      if (error) {
+        setLoading(false)
+        console.log(error)
+        return toast.error('No se pudo generar Fixture')
+      }
 
-      // if (error) {
-      //   console.log(error)
-      //   setLoading(false)
-      //   return toast.error(`No se pudo ${action}`)
-      // }
-
-      // const { error: torneoFaseError } = await supabase
-      //   .from('torneo_fase')
-      //   .update({ tipo_partido_id })
-      //   .eq('torneo_id', torneo_id)
-      //   .eq('fase_id', fase_id)
-
-      // if (torneoFaseError) {
-      //   console.log(torneoFaseError)
-      //   setLoading(false)
-      //   return toast.error(`No se pudo ${action} tipo partido`)
-      // }
-
-      // router.refresh()
-      // router.push('/fixtures')
+      router.refresh()
+      getFixtures()
+      setOpenFixtureGenerarForm(false)
       toast.success(toastMessage)
     } catch (error) {
       toast.error('Hubo un error')

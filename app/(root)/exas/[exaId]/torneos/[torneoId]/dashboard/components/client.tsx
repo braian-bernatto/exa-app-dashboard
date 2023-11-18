@@ -218,6 +218,11 @@ const TorneoClient = ({
                       ? 'bg-slate-800 text-white'
                       : 'hover:bg-slate-100'
                   }`}>
+                  {fixture.is_vuelta && (
+                    <span className='text-xs text-muted-foreground absolute top-0 px-1 rounded-br left-0 shadow'>
+                      vuelta
+                    </span>
+                  )}
                   <span
                     className={`absolute top-[50%] translate-y-[-50%] -right-5 border bg-white rounded-full overflow-hidden ${
                       fixtureSelected && fixtureSelected.id === fixture.id
@@ -311,6 +316,7 @@ const TorneoClient = ({
                     fases={fases || []}
                     tiposPartido={tiposPartido || []}
                     locations={locations}
+                    getFixtures={getFixtures}
                     setOpenFixtureGenerarForm={setOpenFixtureGenerarForm}
                   />
                 </div>

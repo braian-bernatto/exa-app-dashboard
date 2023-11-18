@@ -208,7 +208,7 @@ export interface Database {
         Row: {
           fase_nro: number | null
           id: string
-          isVuelta: boolean | null
+          is_vuelta: boolean | null
           location_id: number | null
           name: string
           order: number
@@ -217,7 +217,7 @@ export interface Database {
         Insert: {
           fase_nro?: number | null
           id?: string
-          isVuelta?: boolean | null
+          is_vuelta?: boolean | null
           location_id?: number | null
           name: string
           order?: number
@@ -226,7 +226,7 @@ export interface Database {
         Update: {
           fase_nro?: number | null
           id?: string
-          isVuelta?: boolean | null
+          is_vuelta?: boolean | null
           location_id?: number | null
           name?: string
           order?: number
@@ -654,6 +654,7 @@ export interface Database {
           fixture_order: number
           torneo_id: string
           fase_nro: number
+          is_vuelta: boolean
           exa_id: number
           exa_name: string
           torneo: string
@@ -721,15 +722,19 @@ export interface Database {
           team_visit_goals: number
         }[]
       }
-      get_fixtures: {
-        Args: Record<PropertyKey, never>
+      get_fixtures_by_torneo: {
+        Args: {
+          torneo: string
+          fase_nro: number
+        }
         Returns: {
           fixture_id: string
-          torneo_id: string
-          fase_id: number
           name: string
           location_id: number
           fixture_order: number
+          torneo_id: string
+          fase_nro: number
+          is_vuelta: boolean
           exa_id: number
           exa_name: string
           torneo: string
@@ -832,6 +837,12 @@ export interface Database {
           rating: number
           country_iso2: string
         }[]
+      }
+      insert_generated_fixtures: {
+        Args: {
+          data: Json
+        }
+        Returns: undefined
       }
     }
     Enums: {

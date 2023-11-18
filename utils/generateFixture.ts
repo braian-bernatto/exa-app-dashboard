@@ -70,18 +70,22 @@ export const generarFixtureEliminacion = (equipos: any[], tipoPartido: string )=
   // ida
   const partidos = []
   const teamsCopy = equipos.slice()
-
+  const partidosLlave = []
+  
   for(let i = 0; i < totalPartidos; i++){
     let versus = {local:teamsCopy[0], visitante: teamsCopy[1]}
-    partidos.push(versus)
+    partidosLlave.push(versus)
     teamsCopy.shift()
     teamsCopy.shift()
   }
+ partidos.push(partidosLlave)
 
   // vuelta
   let partidosVuelta = <any>[]
   if(tipoPartido === 'ida y vuelta'){
-    partidosVuelta = partidos.map(par=>({local: par.visitante, visitante: par.local}))    
+    partidosVuelta = partidos.map(partido =>
+      partido.map(par=>({local: par.visitante ,visitante: par.local}))
+    )  
   }
   return {ida: partidos, vuelta: partidosVuelta}
 }
