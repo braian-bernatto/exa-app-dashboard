@@ -32,6 +32,8 @@ import {
   CommandInput,
   CommandItem
 } from '@/components/ui/command'
+import { Switch } from '@/components/ui/switch'
+import { Label } from '@/components/ui/label'
 
 export const revalidate = 0
 
@@ -66,19 +68,21 @@ const FixtureForm = ({
 
   const formSchema = z.object({
     name: z.string().min(1, { message: 'Obligatorio' }),
-    location_id: z.number().nullable().optional()
+    location_id: z.number().nullable().optional(),
+    is_vuelta: z.boolean().nullable().default(false)
   })
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: initialData || {
       name: '',
-      location_id: undefined
+      location_id: undefined,
+      is_vuelta: false
     }
   })
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
-    const { name, location_id } = values
+    const { name, location_id, is_vuelta } = values
 
     try {
       setLoading(true)
@@ -93,7 +97,8 @@ const FixtureForm = ({
           .from('fixtures')
           .update({
             name: name.toLowerCase(),
-            location_id
+            location_id,
+            is_vuelta
           })
           .eq('id', initialData.id)
 
@@ -107,7 +112,8 @@ const FixtureForm = ({
           name: name.toLowerCase(),
           torneo_id: torneoId,
           fase_nro: faseNro,
-          location_id
+          location_id,
+          is_vuelta
         })
 
         if (error) {
@@ -206,6 +212,27 @@ const FixtureForm = ({
                 <FormLabel>Nombre</FormLabel>
                 <FormControl>
                   <Input {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          {/* Vuelta */}
+          <FormField
+            control={form.control}
+            name='is_vuelta'
+            render={({ field }) => (
+              <FormItem className='rounded bg-white'>
+                <FormControl>
+                  <div className='flex items-center space-x-2'>
+                    <Switch
+                      id='is-vuelta'
+                      checked={field.value || false}
+                      onCheckedChange={field.onChange}
+                    />
+                    <Label htmlFor='is-vuelta'>Partido Vuelta</Label>
+                  </div>
                 </FormControl>
                 <FormMessage />
               </FormItem>
