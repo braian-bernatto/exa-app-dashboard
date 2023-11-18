@@ -1,5 +1,5 @@
 import { FixtureDetailsColumn } from './columns'
-import { LocateFixed } from 'lucide-react'
+import { LocateFixed, LocateOff } from 'lucide-react'
 
 interface CellCanchaProps {
   data: FixtureDetailsColumn
@@ -8,8 +8,14 @@ interface CellCanchaProps {
 const CellCancha = ({ data }: CellCanchaProps) => {
   return (
     <span className='flex gap-2 items-center'>
-      {data.cancha_nro}
-      <LocateFixed width={18} className='text-muted-foreground' />
+      {data.cancha_nro ? (
+        <>
+          {data.cancha_nro}
+          <LocateFixed width={18} className='text-muted-foreground' />
+        </>
+      ) : (
+        <LocateOff width={18} className='text-muted-foreground' />
+      )}
     </span>
   )
 }

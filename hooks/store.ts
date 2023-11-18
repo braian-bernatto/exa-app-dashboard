@@ -1,11 +1,13 @@
 import { create } from "zustand";
 
 interface Storetype{
-    fase: number
+    faseId: number
+    faseNro: number
     tipoPartido: number
 }
 
 export const useStore = create<Storetype>((set)=>({
-    fase: 0,
+    faseId: 0,
+    faseNro: 0,
     tipoPartido: 0,    
 }))

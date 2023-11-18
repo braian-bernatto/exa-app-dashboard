@@ -106,7 +106,7 @@ const FixtureTeamsForm = ({
   const toastMessage = initialData ? 'Versus modificado' : 'Versus agregado'
   const action = initialData ? 'Modificar' : 'Agregar'
 
-  if (initialData) {
+  if (initialData && initialData.date) {
     initialData = {
       ...initialData,
       date: new Date(initialData.date)

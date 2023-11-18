@@ -72,7 +72,7 @@ const FixtureGenerarForm = ({
   const params = useParams()
 
   const faseName = fases.find(
-    tipo => tipo.id === useStore.getState().fase
+    tipo => tipo.id === useStore.getState().faseId
   )?.name
   const tipoPartidoName = tiposPartido.find(
     tipo => tipo.id === useStore.getState().tipoPartido
@@ -85,12 +85,15 @@ const FixtureGenerarForm = ({
   const [loading, setLoading] = useState(false)
   const [open, setOpen] = useState(false)
   const [faseId, setFaseId] = useState<number | undefined>(
-    useStore.getState().fase
+    useStore.getState().faseId
   )
   const [tipoPartidoId, setTipoPartidoId] = useState(
     useStore.getState().tipoPartido
   )
-  const [faseNro, setFaseNro] = useState<number | null>()
+
+  const [faseNro, setFaseNro] = useState<number | null>(
+    useStore.getState().faseNro
+  )
   const [fixtures, setFixtures] = useState<any>()
   const [TeamsQuantity, setTeamsQuantity] = useState<number>()
 
@@ -133,12 +136,52 @@ const FixtureGenerarForm = ({
 
     const torneo_id = params.torneoId
 
-    const formattedFixture = fixtures.map((fixture: any) => ({
-      ...fixture,
-      fixtures: {}
-    }))
+    const formattedFixture = {
+      ...values,
+      torneo_id,
+      fase_nro: faseNro,
+      fase_name: faseName,
+      ida: fixtures.ida.map((fix: any, index: number) =>
+        faseName === 'puntos'
+          ? {
+              name: `Fecha ${index + 1}`,
+              ...fix.filter((fix2: any) => fix2.local !== 'Descansa')
+            }
+          : {
+              name: `${
+                fixtures.ida.length * 2 === 16
+                  ? 'Octavos'
+                  : fixtures.ida.length * 2 === 8
+                  ? 'Cuartos'
+                  : fixtures.ida.length * 2 === 4
+                  ? 'Semifinal'
+                  : ''
+              }`,
+              ...fix
+            }
+      ),
+      vuelta: fixtures.vuelta.map((fix: any, index: number) =>
+        faseName === 'puntos'
+          ? {
+              name: `Fecha ${fixtures.ida.length + index + 1}`,
+              ...fix.filter((fix2: any) => fix2.visitante !== 'Descansa')
+            }
+          : {
+              name: `${
+                fixtures.ida.length * 2 === 16
+                  ? 'Octavos'
+                  : fixtures.ida.length * 2 === 8
+                  ? 'Cuartos'
+                  : fixtures.ida.length * 2 === 4
+                  ? 'Semifinal'
+                  : ''
+              }`,
+              ...fix
+            }
+      )
+    }
 
-    console.log({ fixtures, values, torneo_id })
+    console.log({ formattedFixture })
     try {
       setLoading(true)
 

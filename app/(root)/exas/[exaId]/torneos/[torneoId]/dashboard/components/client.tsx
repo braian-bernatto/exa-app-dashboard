@@ -79,7 +79,8 @@ const TorneoClient = ({
     if (torneoFases.length > 0) {
       setFaseSelected(torneoFases[0].fase_nro)
       useStore.setState({
-        fase: torneoFases[0].fase_id,
+        faseId: torneoFases[0].fase_id,
+        faseNro: torneoFases[0].fase_nro,
         tipoPartido: torneoFases[0].tipo_partido_id
       })
     }
@@ -136,7 +137,8 @@ const TorneoClient = ({
 
                     // Guardo en zustand para usar en generar fixture
                     useStore.setState({
-                      fase: fase.fase_id,
+                      faseId: fase.fase_id,
+                      faseNro: fase.fase_nro,
                       tipoPartido: fase.tipo_partido_id
                     })
                   }}

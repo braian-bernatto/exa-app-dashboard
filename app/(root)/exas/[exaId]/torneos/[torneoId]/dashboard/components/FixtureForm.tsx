@@ -134,7 +134,7 @@ const FixtureForm = ({
       const { error } = await supabase
         .from('fixtures')
         .delete()
-        .eq('id', initialData?.id)
+        .eq('id', initialData?.id!)
 
       if (error) {
         console.log(error)
