@@ -219,7 +219,13 @@ const TorneoClient = ({
                       : 'hover:bg-slate-100'
                   }`}>
                   {fixture.is_vuelta && (
-                    <span className='text-xs text-muted-foreground absolute top-0 px-1 rounded-br left-0 shadow'>
+                    <span
+                      className={`text-xs text-muted-foreground absolute top-0 px-1 rounded-tl rounded-br left-0 shadow
+                    ${
+                      fixtureSelected && fixtureSelected.id === fixture.id
+                        ? 'bg-slate-800 text-white border-b border-r'
+                        : 'hover:bg-slate-100'
+                    }`}>
                       vuelta
                     </span>
                   )}
