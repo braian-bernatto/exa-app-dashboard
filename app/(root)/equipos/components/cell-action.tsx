@@ -67,7 +67,7 @@ const CellAction = ({ data }: CellActionProps) => {
             <MoreHorizontal className='h-4 w-4' />
           </Button>
         </DropdownMenuTrigger>
-        <DropdownMenuContent align='end'>
+        <DropdownMenuContent align='start'>
           <DropdownMenuLabel>Acciones</DropdownMenuLabel>
           <DropdownMenuSeparator />
           <DropdownMenuItem onClick={onCopy}>

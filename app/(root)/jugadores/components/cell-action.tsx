@@ -71,7 +71,7 @@ const CellAction = ({ data }: CellActionProps) => {
             <MoreHorizontal className='h-4 w-4' />
           </Button>
         </DropdownMenuTrigger>
-        <DropdownMenuContent align='end'>
+        <DropdownMenuContent align='start'>
           <DropdownMenuLabel>Acciones</DropdownMenuLabel>
           <DropdownMenuSeparator />
           <DropdownMenuItem onClick={onCopy}>
@@ -79,8 +79,7 @@ const CellAction = ({ data }: CellActionProps) => {
             Copiar ID
           </DropdownMenuItem>
           <DropdownMenuItem
-            onClick={() => router.push(`/jugadores/${data.id}`)}
-          >
+            onClick={() => router.push(`/jugadores/${data.id}`)}>
             <Edit className='mr-2 h-4 w-4' /> Editar
           </DropdownMenuItem>
           <DropdownMenuItem onClick={() => setOpen(true)}>
